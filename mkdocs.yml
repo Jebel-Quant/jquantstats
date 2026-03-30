@@ -22,19 +22,6 @@ extra:
 
 plugins:
   - search
-  - mkdocstrings:
-      handlers:
-        python:
-          paths:
-            - src
-          options:
-            docstring_style: google
-            show_source: false
-            show_root_heading: true
-            show_root_full_path: false
-            heading_level: 2
-            members_order: source
-            show_signature_annotations: true
 
 markdown_extensions:
   - pymdownx.highlight
@@ -51,7 +38,6 @@ nav:
   - Marimo Notebooks: notebooks.md
   - Reports: reports.md
   - Cost Models: cost_models.md
-  - API Reference: api.md
   - Docs:
     - Migration Guide: MIGRATION.md
     - API Stability: STABILITY.md
