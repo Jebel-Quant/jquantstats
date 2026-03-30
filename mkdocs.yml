@@ -35,6 +35,7 @@ markdown_extensions:
 
 nav:
   - Home: index.md
+  - API Reference: api_reference.md
   - Marimo Notebooks: notebooks.md
   - Reports: reports.md
   - Cost Models: cost_models.md

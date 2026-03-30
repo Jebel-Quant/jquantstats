@@ -16,6 +16,17 @@ include .rhiza/rhiza.mk
 post-validate::
 	@$(MAKE) typecheck
 
+## pdoc: generate standalone API reference into _book/api
+.PHONY: pdoc
+pdoc: install ## generate pdoc API reference
+	@printf "${BLUE}[INFO] Generating pdoc API reference...${RESET}\n"
+	@${UVX_BIN} pdoc src/jquantstats -o $(BOOK_OUTPUT)/api
+	@printf "${GREEN}[OK] pdoc output → $(BOOK_OUTPUT)/api${RESET}\n"
+
+## hook into book to run pdoc after mkdocs builds _book/
+book:: ## include pdoc API reference in the book
+	@$(MAKE) pdoc
+
 ## Custom targets
 
 ##@ Quality
