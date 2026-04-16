@@ -44,6 +44,19 @@ theme:
 
 plugins:
   - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths:
+            - src
+          options:
+            docstring_style: google
+            show_source: false
+            show_root_heading: true
+            show_root_full_path: false
+            heading_level: 2
+            members_order: source
+            show_signature_annotations: true
 
 markdown_extensions:
   - md_in_html
@@ -62,6 +75,10 @@ markdown_extensions:
 
 extra_javascript:
   - https://unpkg.com/mermaid@11.4.0/dist/mermaid.esm.min.mjs
+
+extra:
+  version:
+    provider: mike
 
 # nav is overwritten completely in mkdocs.yml
 nav:
