@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+      <url>
+        <loc>https://jebel-quant.github.io/jquantstats/</loc>
+      </url>
+      <url>
+        <loc>https://jebel-quant.github.io/jquantstats/getting_started/</loc>
+      </url>
+      <url>
+        <loc>https://jebel-quant.github.io/jquantstats/cost_models/</loc>
+      </url>
+      <url>
+        <loc>https://jebel-quant.github.io/jquantstats/MIGRATION/</loc>
+      </url>
+      <url>
+        <loc>https://jebel-quant.github.io/jquantstats/api/</loc>
+      </url>
+      <url>
+        <loc>https://jebel-quant.github.io/jquantstats/STABILITY/</loc>
+      </url>
+      <url>
+        <loc>https://jebel-quant.github.io/jquantstats/notebooks/</loc>
+      </url>
+      <url>
+        <loc>https://jebel-quant.github.io/jquantstats/reports/</loc>
+      </url>
+</urlset>
