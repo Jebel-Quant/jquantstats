@@ -1,0 +1,4185 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Quantitative financial analysis tools for Python">
+      
+      
+      
+        <link rel="canonical" href="https://jebel-quant.github.io/jquantstats/dev/api/">
+      
+      
+        <link rel="prev" href="../cost_models/">
+      
+      
+        <link rel="next" href="../MIGRATION/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/rhiza-logo.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>API Reference - jquantstats</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#api-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="jquantstats" class="md-header__button md-logo" aria-label="jquantstats" data-md-component="logo">
+      
+  <img src="../assets/rhiza-logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            jquantstats
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              API Reference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/jebel-quant/jquantstats" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jebel-quant/jquantstats
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../getting_started/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Getting Started
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../notebooks/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Marimo Notebooks
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../reports/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Reports
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../cost_models/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Cost Models
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+  
+    
+  
+  API Reference
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../MIGRATION/" class="md-tabs__link">
+          
+  
+  
+  Docs
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="jquantstats" class="md-nav__button md-logo" aria-label="jquantstats" data-md-component="logo">
+      
+  <img src="../assets/rhiza-logo.svg" alt="logo">
+
+    </a>
+    jquantstats
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/jebel-quant/jquantstats" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jebel-quant/jquantstats
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../notebooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Marimo Notebooks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cost_models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cost Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#jquantstats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        jquantstats
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="jquantstats">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#jquantstats.CostModel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CostModel
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#jquantstats.Data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#jquantstats.Portfolio" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Portfolio
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Docs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../MIGRATION/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../STABILITY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Stability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#jquantstats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        jquantstats
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="jquantstats">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#jquantstats.CostModel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CostModel
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#jquantstats.Data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#jquantstats.Portfolio" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Portfolio
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="api-reference">API Reference<a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h1>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="jquantstats" class="doc doc-heading">
+            <code>jquantstats</code>
+
+
+<a href="#jquantstats" class="headerlink" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents first">
+
+        <p>jQuantStats: Portfolio analytics for quants.</p>
+<h4 id="jquantstats--two-entry-points">Two entry points<a class="headerlink" href="#jquantstats--two-entry-points" title="Permanent link">&para;</a></h4>
+<p><strong>Entry point 1 — prices + positions (recommended for active portfolios):</strong></p>
+<p>Use :class:<code>~jquantstats.portfolio.Portfolio</code> when you have price series and
+position sizes.  Portfolio compiles the NAV curve from raw inputs and exposes
+the full analytics suite via <code>.stats</code>, <code>.plots</code>, and <code>.report</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">jquantstats</span><span class="w"> </span><span class="kn">import</span> <span class="n">Portfolio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">polars</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
+
+<span class="n">pf</span> <span class="o">=</span> <span class="n">Portfolio</span><span class="o">.</span><span class="n">from_cash_position</span><span class="p">(</span>
+    <span class="n">prices</span><span class="o">=</span><span class="n">prices_df</span><span class="p">,</span>
+    <span class="n">cash_position</span><span class="o">=</span><span class="n">positions_df</span><span class="p">,</span>
+    <span class="n">aum</span><span class="o">=</span><span class="mi">1_000_000</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">pf</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sharpe</span><span class="p">()</span>
+<span class="n">pf</span><span class="o">.</span><span class="n">plots</span><span class="o">.</span><span class="n">snapshot</span><span class="p">()</span>
+</code></pre></div>
+<p><strong>Entry point 2 — returns series (for arbitrary return streams):</strong></p>
+<p>Use :class:<code>~jquantstats.data.Data</code> when you already have a returns series
+(e.g. downloaded from a data vendor) and want benchmark comparison or
+factor analytics.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">jquantstats</span><span class="w"> </span><span class="kn">import</span> <span class="n">Data</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">polars</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">Data</span><span class="o">.</span><span class="n">from_returns</span><span class="p">(</span><span class="n">returns</span><span class="o">=</span><span class="n">returns_df</span><span class="p">,</span> <span class="n">benchmark</span><span class="o">=</span><span class="n">bench_df</span><span class="p">)</span>
+<span class="n">data</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sharpe</span><span class="p">()</span>
+<span class="n">data</span><span class="o">.</span><span class="n">plots</span><span class="o">.</span><span class="n">snapshot</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Performance&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>The two APIs are layered: <code>portfolio.data</code> returns a :class:<code>~jquantstats.data.Data</code>
+object so you can always drop into the returns-series API from a Portfolio.</p>
+<p>For more information, visit the <code>jQuantStats Documentation &lt;https://jebel-quant.github.io/jquantstats/book&gt;</code>_.</p>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="jquantstats.CostModel" class="doc doc-heading">
+            <code>CostModel</code>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+<a href="#jquantstats.CostModel" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>Unified representation of a portfolio transaction-cost model.</p>
+<p>Eliminates the implicit "pick one" contract between the two independent
+cost parameters (<code>cost_per_unit</code> and <code>cost_bps</code>) on
+:class:<code>~jquantstats.portfolio.Portfolio</code>.  A <code>CostModel</code>
+instance encapsulates one model at a time and can be passed to any
+Portfolio factory method instead of specifying the raw float parameters.</p>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="jquantstats.CostModel.cost_per_unit">cost_per_unit</span></code></td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>One-way cost per unit of position change (Model A).
+Defaults to 0.0.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="jquantstats.CostModel.cost_bps">cost_bps</span></code></td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>One-way cost in basis points of AUM turnover (Model B).
+Defaults to 0.0.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>cost_per_unit</code> or <code>cost_bps</code> is negative, or if
+both are non-zero (which would silently double-count costs).</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">CostModel</span><span class="o">.</span><span class="n">per_unit</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
+<span class="go">CostModel(cost_per_unit=0.01, cost_bps=0.0)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">CostModel</span><span class="o">.</span><span class="n">turnover_bps</span><span class="p">(</span><span class="mf">5.0</span><span class="p">)</span>
+<span class="go">CostModel(cost_per_unit=0.0, cost_bps=5.0)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">CostModel</span><span class="o">.</span><span class="n">zero</span><span class="p">()</span>
+<span class="go">CostModel(cost_per_unit=0.0, cost_bps=0.0)</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="jquantstats.CostModel.per_unit" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">per_unit</span><span class="p">(</span><span class="n">cost</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CostModel</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+<a href="#jquantstats.CostModel.per_unit" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Create a Model A (position-delta) cost model.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>cost</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>One-way cost per unit of position change.  Must be
+non-negative.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>A</code></td>            <td>
+                  <code><a class="autorefs autorefs-internal" title="CostModel
+
+
+  
+      dataclass
+   (jquantstats._cost_model.CostModel)" href="#jquantstats.CostModel">CostModel</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>class:<code>CostModel</code> with <code>cost_per_unit=cost</code> and</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td></td>            <td>
+                  <code><a class="autorefs autorefs-internal" title="CostModel
+
+
+  
+      dataclass
+   (jquantstats._cost_model.CostModel)" href="#jquantstats.CostModel">CostModel</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p><code>cost_bps=0.0</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">CostModel</span><span class="o">.</span><span class="n">per_unit</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
+<span class="go">CostModel(cost_per_unit=0.01, cost_bps=0.0)</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="jquantstats.CostModel.turnover_bps" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">turnover_bps</span><span class="p">(</span><span class="n">bps</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CostModel</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+<a href="#jquantstats.CostModel.turnover_bps" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Create a Model B (turnover-bps) cost model.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>bps</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>One-way cost in basis points of AUM turnover.  Must be
+non-negative.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>A</code></td>            <td>
+                  <code><a class="autorefs autorefs-internal" title="CostModel
+
+
+  
+      dataclass
+   (jquantstats._cost_model.CostModel)" href="#jquantstats.CostModel">CostModel</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>class:<code>CostModel</code> with <code>cost_per_unit=0.0</code> and</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td></td>            <td>
+                  <code><a class="autorefs autorefs-internal" title="CostModel
+
+
+  
+      dataclass
+   (jquantstats._cost_model.CostModel)" href="#jquantstats.CostModel">CostModel</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p><code>cost_bps=bps</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">CostModel</span><span class="o">.</span><span class="n">turnover_bps</span><span class="p">(</span><span class="mf">5.0</span><span class="p">)</span>
+<span class="go">CostModel(cost_per_unit=0.0, cost_bps=5.0)</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="jquantstats.CostModel.zero" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">zero</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">CostModel</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+<a href="#jquantstats.CostModel.zero" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Create a zero-cost model (no transaction costs).</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>A</code></td>            <td>
+                  <code><a class="autorefs autorefs-internal" title="CostModel
+
+
+  
+      dataclass
+   (jquantstats._cost_model.CostModel)" href="#jquantstats.CostModel">CostModel</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>class:<code>CostModel</code> with both parameters set to 0.0.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">CostModel</span><span class="o">.</span><span class="n">zero</span><span class="p">()</span>
+<span class="go">CostModel(cost_per_unit=0.0, cost_bps=0.0)</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="jquantstats.Data" class="doc doc-heading">
+            <code>Data</code>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+<a href="#jquantstats.Data" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>A container for financial returns data and an optional benchmark.</p>
+<p>This class provides methods for analyzing and manipulating financial returns data,
+including converting returns to prices, calculating drawdowns, and resampling data
+to different time periods. It also provides access to statistical metrics through
+the stats property and visualization through the plots property.</p>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="jquantstats.Data.returns">returns</span></code></td>
+            <td>
+                  <code><span title="polars.DataFrame">DataFrame</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>DataFrame containing returns data with assets as columns.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="jquantstats.Data.benchmark">benchmark</span></code></td>
+            <td>
+                  <code><span title="polars.DataFrame">DataFrame</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>DataFrame containing benchmark returns data.
+                               Defaults to None.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="jquantstats.Data.index">index</span></code></td>
+            <td>
+                  <code><span title="polars.DataFrame">DataFrame</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>DataFrame containing the date index for the returns data.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="jquantstats.Data.plots" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">plots</span><span class="p">:</span> <span class="n">DataPlots</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#jquantstats.Data.plots" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Provides access to visualization methods for the financial data.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>DataPlots</code></td>            <td>
+                  <code><span title="jquantstats._plots.DataPlots">DataPlots</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>An instance of the DataPlots class initialized with this data.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="jquantstats.Data.stats" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">stats</span><span class="p">:</span> <span class="n">Stats</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#jquantstats.Data.stats" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Provides access to statistical analysis methods for the financial data.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>Stats</code></td>            <td>
+                  <code><span title="jquantstats._stats.Stats">Stats</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>An instance of the Stats class initialized with this data.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="jquantstats.Data.reports" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">reports</span><span class="p">:</span> <span class="n">Reports</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#jquantstats.Data.reports" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Provides access to reporting methods for the financial data.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>Reports</code></td>            <td>
+                  <code><span title="jquantstats._reports.Reports">Reports</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>An instance of the Reports class initialized with this data.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="jquantstats.Data.utils" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">utils</span><span class="p">:</span> <span class="n">DataUtils</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#jquantstats.Data.utils" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Provides access to utility transforms and conversions for the financial data.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>DataUtils</code></td>            <td>
+                  <code><span title="jquantstats._utils.DataUtils">DataUtils</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>An instance of the DataUtils class initialized with this data.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="jquantstats.Data.date_col" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">date_col</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#jquantstats.Data.date_col" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return the column names of the index DataFrame.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="list">list</span>[<span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>list[str]: List of column names in the index DataFrame, typically containing
+      the date column name.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="jquantstats.Data.assets" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">assets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#jquantstats.Data.assets" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return the combined list of asset column names from returns and benchmark.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="list">list</span>[<span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>list[str]: List of all asset column names from both returns and benchmark
+      (if available).</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="jquantstats.Data.all" class="doc doc-heading">
+            <code class="highlight language-python"><span class="nb">all</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#jquantstats.Data.all" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Combine index, returns, and benchmark data into a single DataFrame.</p>
+<p>This property provides a convenient way to access all data in a single DataFrame,
+which is useful for analysis and visualization.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="polars.DataFrame">DataFrame</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>pl.DataFrame: A DataFrame containing the index, all returns data, and benchmark data
+         (if available) combined horizontally.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="jquantstats.Data.__post_init__" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">__post_init__</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+
+<a href="#jquantstats.Data.__post_init__" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Validate the Data object after initialization.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="jquantstats.Data.from_returns" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">from_returns</span><span class="p">(</span><span class="n">returns</span><span class="p">:</span> <span class="n">NativeFrame</span><span class="p">,</span> <span class="n">rf</span><span class="p">:</span> <span class="n">NativeFrameOrScalar</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">benchmark</span><span class="p">:</span> <span class="n">NativeFrame</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">date_col</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Date&#39;</span><span class="p">,</span> <span class="n">null_strategy</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;raise&#39;</span><span class="p">,</span> <span class="s1">&#39;drop&#39;</span><span class="p">,</span> <span class="s1">&#39;forward_fill&#39;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Data</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+<a href="#jquantstats.Data.from_returns" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Create a Data object from returns and optional benchmark.</p>
+<h6 id="jquantstats.Data.from_returns--parameters">Parameters<a class="headerlink" href="#jquantstats.Data.from_returns--parameters" title="Permanent link">&para;</a></h6>
+<p>returns : NativeFrame
+    Financial returns data. First column should be the date column,
+    remaining columns are asset returns.</p>
+
+
+<details class="rf-" open>
+  <summary>float | NativeFrame, optional</summary>
+  <p>Risk-free rate. Default is 0.0 (no risk-free rate adjustment).</p>
+<ul>
+<li>If float: Constant risk-free rate applied to all dates.</li>
+<li>If NativeFrame: Time-varying risk-free rate with dates matching returns.</li>
+</ul>
+</details>
+
+<details class="benchmark-" open>
+  <summary>NativeFrame | None, optional</summary>
+  <p>Benchmark returns. Default is None (no benchmark).
+First column should be the date column, remaining columns are benchmark returns.</p>
+</details>
+
+<details class="date_col-" open>
+  <summary>str, optional</summary>
+  <p>Name of the date column in the DataFrames. Default is "Date".</p>
+</details>
+
+<details class="null_strategy-" open>
+  <summary>{"raise", "drop", "forward_fill"} | None, optional</summary>
+  <p>How to handle <code>null</code> (missing) values in <em>returns</em> and <em>benchmark</em>.
+Default is <code>None</code> (nulls are left as-is and will propagate through
+calculations, matching the current Polars behaviour).</p>
+<ul>
+<li><code>None</code> — no null checking; nulls propagate through all
+  downstream calculations.  This matches Polars' default semantics.</li>
+<li><code>"raise"</code> — raise :exc:<code>~jquantstats.exceptions.NullsInReturnsError</code>
+  if any null is found.  Use this to be notified of missing data
+  and clean it yourself before construction.</li>
+<li><code>"drop"</code> — silently drop every row that contains at least one null.
+  Mirrors the pandas/QuantStats silent-drop behaviour.</li>
+<li><code>"forward_fill"</code> — fill each null with the most recent non-null value
+  in the same column.</li>
+</ul>
+<p>.. note::
+   This parameter affects only Polars <code>null</code> values (i.e. <code>None</code> /
+   missing entries).  IEEE-754 <code>NaN</code> values (<code>float("nan")</code>) are not
+   nulls in Polars and are <strong>not</strong> affected — they continue to propagate
+   through calculations as per IEEE-754 semantics.</p>
+</details>        <h6 id="jquantstats.Data.from_returns--returns">Returns:<a class="headerlink" href="#jquantstats.Data.from_returns--returns" title="Permanent link">&para;</a></h6>
+<p>Data
+    Object containing excess returns and benchmark (if any), with methods for
+    analysis and visualization through the <code>stats</code> and <code>plots</code> properties.</p>
+<h6 id="jquantstats.Data.from_returns--raises">Raises:<a class="headerlink" href="#jquantstats.Data.from_returns--raises" title="Permanent link">&para;</a></h6>
+<p>NullsInReturnsError
+    If <em>null_strategy</em> is <code>"raise"</code> and the data contains null values.
+ValueError
+    If there are no overlapping dates between returns and benchmark.</p>
+<h6 id="jquantstats.Data.from_returns--examples">Examples:<a class="headerlink" href="#jquantstats.Data.from_returns--examples" title="Permanent link">&para;</a></h6>
+<p>Basic usage:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">jquantstats</span><span class="w"> </span><span class="kn">import</span> <span class="n">Data</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">polars</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
+
+<span class="n">returns</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s2">&quot;Date&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;2023-01-01&quot;</span><span class="p">,</span> <span class="s2">&quot;2023-01-02&quot;</span><span class="p">,</span> <span class="s2">&quot;2023-01-03&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;Asset1&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.03</span><span class="p">]</span>
+<span class="p">})</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;Date&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">to_date</span><span class="p">())</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">Data</span><span class="o">.</span><span class="n">from_returns</span><span class="p">(</span><span class="n">returns</span><span class="o">=</span><span class="n">returns</span><span class="p">)</span>
+</code></pre></div>
+<p>With benchmark and risk-free rate:</p>
+<div class="highlight"><pre><span></span><code><span class="n">benchmark</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s2">&quot;Date&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;2023-01-01&quot;</span><span class="p">,</span> <span class="s2">&quot;2023-01-02&quot;</span><span class="p">,</span> <span class="s2">&quot;2023-01-03&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;Market&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.005</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">]</span>
+<span class="p">})</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;Date&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">to_date</span><span class="p">())</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">Data</span><span class="o">.</span><span class="n">from_returns</span><span class="p">(</span><span class="n">returns</span><span class="o">=</span><span class="n">returns</span><span class="p">,</span> <span class="n">benchmark</span><span class="o">=</span><span class="n">benchmark</span><span class="p">,</span> <span class="n">rf</span><span class="o">=</span><span class="mf">0.0002</span><span class="p">)</span>
+</code></pre></div>
+<p>Handling nulls automatically:</p>
+<div class="highlight"><pre><span></span><code><span class="n">returns_with_nulls</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s2">&quot;Date&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;2023-01-01&quot;</span><span class="p">,</span> <span class="s2">&quot;2023-01-02&quot;</span><span class="p">,</span> <span class="s2">&quot;2023-01-03&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;Asset1&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mf">0.03</span><span class="p">]</span>
+<span class="p">})</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;Date&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">to_date</span><span class="p">())</span>
+
+<span class="c1"># Drop rows with nulls (mirrors pandas/QuantStats behaviour)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">Data</span><span class="o">.</span><span class="n">from_returns</span><span class="p">(</span><span class="n">returns</span><span class="o">=</span><span class="n">returns_with_nulls</span><span class="p">,</span> <span class="n">null_strategy</span><span class="o">=</span><span class="s2">&quot;drop&quot;</span><span class="p">)</span>
+
+<span class="c1"># Or forward-fill nulls</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">Data</span><span class="o">.</span><span class="n">from_returns</span><span class="p">(</span><span class="n">returns</span><span class="o">=</span><span class="n">returns_with_nulls</span><span class="p">,</span> <span class="n">null_strategy</span><span class="o">=</span><span class="s2">&quot;forward_fill&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="jquantstats.Data.from_prices" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">from_prices</span><span class="p">(</span><span class="n">prices</span><span class="p">:</span> <span class="n">NativeFrame</span><span class="p">,</span> <span class="n">rf</span><span class="p">:</span> <span class="n">NativeFrameOrScalar</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">benchmark</span><span class="p">:</span> <span class="n">NativeFrame</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">date_col</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Date&#39;</span><span class="p">,</span> <span class="n">null_strategy</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;raise&#39;</span><span class="p">,</span> <span class="s1">&#39;drop&#39;</span><span class="p">,</span> <span class="s1">&#39;forward_fill&#39;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Data</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+<a href="#jquantstats.Data.from_prices" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Create a Data object from prices and optional benchmark.</p>
+<p>Converts price levels to returns via percentage change and delegates
+to :meth:<code>from_returns</code>.  The first row of each asset is dropped
+because no prior price is available to compute a return.</p>
+<h6 id="jquantstats.Data.from_prices--parameters">Parameters<a class="headerlink" href="#jquantstats.Data.from_prices--parameters" title="Permanent link">&para;</a></h6>
+<p>prices : NativeFrame
+    Price-level data.  First column should be the date column;
+    remaining columns are asset prices.</p>
+
+
+<details class="rf-" open>
+  <summary>float | NativeFrame, optional</summary>
+  <p>Risk-free rate.  Forwarded unchanged to :meth:<code>from_returns</code>.
+Default is 0.0 (no risk-free rate adjustment).</p>
+</details>
+
+<details class="benchmark-" open>
+  <summary>NativeFrame | None, optional</summary>
+  <p>Benchmark prices.  Converted to returns in the same way as
+<code>prices</code> before being forwarded to :meth:<code>from_returns</code>.
+Default is None (no benchmark).</p>
+</details>
+
+<details class="date_col-" open>
+  <summary>str, optional</summary>
+  <p>Name of the date column in the DataFrames.  Default is <code>"Date"</code>.</p>
+</details>
+
+<details class="null_strategy-" open>
+  <summary>{"raise", "drop", "forward_fill"} | None, optional</summary>
+  <p>How to handle <code>null</code> (missing) values after converting prices to
+returns.  Forwarded unchanged to :meth:<code>from_returns</code>.
+Default is <code>None</code> (nulls propagate through calculations).</p>
+<ul>
+<li><code>None</code> — no null checking; nulls propagate.</li>
+<li><code>"raise"</code> — raise :exc:<code>~jquantstats.exceptions.NullsInReturnsError</code>
+  if any null is found in the derived returns.</li>
+<li><code>"drop"</code> — silently drop every row that contains at least one null.</li>
+<li><code>"forward_fill"</code> — fill each null with the most recent non-null value.</li>
+</ul>
+<p>.. note::
+   Prices that contain nulls will produce null returns via
+   <code>pct_change()</code>.  If you expect missing price entries, pass
+   <code>null_strategy="drop"</code> or <code>null_strategy="forward_fill"</code>.</p>
+</details>        <h6 id="jquantstats.Data.from_prices--returns">Returns:<a class="headerlink" href="#jquantstats.Data.from_prices--returns" title="Permanent link">&para;</a></h6>
+<p>Data
+    Object containing excess returns derived from the supplied prices,
+    with methods for analysis and visualization through the <code>stats</code>
+    and <code>plots</code> properties.</p>
+<h6 id="jquantstats.Data.from_prices--examples">Examples:<a class="headerlink" href="#jquantstats.Data.from_prices--examples" title="Permanent link">&para;</a></h6>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">jquantstats</span><span class="w"> </span><span class="kn">import</span> <span class="n">Data</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">polars</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
+
+<span class="n">prices</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s2">&quot;Date&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;2023-01-01&quot;</span><span class="p">,</span> <span class="s2">&quot;2023-01-02&quot;</span><span class="p">,</span> <span class="s2">&quot;2023-01-03&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;Asset1&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">100.0</span><span class="p">,</span> <span class="mf">101.0</span><span class="p">,</span> <span class="mf">99.0</span><span class="p">]</span>
+<span class="p">})</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;Date&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">to_date</span><span class="p">())</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">Data</span><span class="o">.</span><span class="n">from_prices</span><span class="p">(</span><span class="n">prices</span><span class="o">=</span><span class="n">prices</span><span class="p">)</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="jquantstats.Data.__repr__" class="doc doc-heading">
+            <code class="highlight language-python"><span class="fm">__repr__</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span></code>
+
+<a href="#jquantstats.Data.__repr__" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return a string representation of the Data object.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="jquantstats.Data.resample" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">resample</span><span class="p">(</span><span class="n">every</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;1mo&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Data</span></code>
+
+<a href="#jquantstats.Data.resample" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Resamples returns and benchmark to a different frequency using Polars.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>every</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Resampling frequency (e.g., '1mo', '1y'). Defaults to '1mo'.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;1mo&#39;</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>Data</code></td>            <td>
+                  <code><a class="autorefs autorefs-internal" title="Data
+
+
+  
+      dataclass
+   (jquantstats.data.Data)" href="#jquantstats.Data">Data</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Resampled data.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="jquantstats.Data.describe" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">describe</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span></code>
+
+<a href="#jquantstats.Data.describe" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return a tidy summary of shape, date range and asset names.</p>
+<h6 id="jquantstats.Data.describe--returns">Returns:<a class="headerlink" href="#jquantstats.Data.describe--returns" title="Permanent link">&para;</a></h6>
+<p>pl.DataFrame
+    One row per asset with columns: asset, start, end, rows, has_benchmark.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="jquantstats.Data.copy" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">copy</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Data</span></code>
+
+<a href="#jquantstats.Data.copy" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Create a deep copy of the Data object.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>Data</code></td>            <td>
+                  <code><a class="autorefs autorefs-internal" title="Data
+
+
+  
+      dataclass
+   (jquantstats.data.Data)" href="#jquantstats.Data">Data</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A new Data object with copies of the returns and benchmark.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="jquantstats.Data.head" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">head</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Data</span></code>
+
+<a href="#jquantstats.Data.head" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return the first n rows of the combined returns and benchmark data.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>n</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Number of rows to return. Defaults to 5.</p>
+              </div>
+            </td>
+            <td>
+                  <code>5</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>Data</code></td>            <td>
+                  <code><a class="autorefs autorefs-internal" title="Data
+
+
+  
+      dataclass
+   (jquantstats.data.Data)" href="#jquantstats.Data">Data</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A new Data object containing the first n rows of the combined data.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="jquantstats.Data.tail" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">tail</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Data</span></code>
+
+<a href="#jquantstats.Data.tail" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return the last n rows of the combined returns and benchmark data.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>n</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Number of rows to return. Defaults to 5.</p>
+              </div>
+            </td>
+            <td>
+                  <code>5</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>Data</code></td>            <td>
+                  <code><a class="autorefs autorefs-internal" title="Data
+
+
+  
+      dataclass
+   (jquantstats.data.Data)" href="#jquantstats.Data">Data</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A new Data object containing the last n rows of the combined data.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="jquantstats.Data.truncate" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">truncate</span><span class="p">(</span><span class="n">start</span><span class="p">:</span> <span class="n">date</span> <span class="o">|</span> <span class="n">datetime</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="n">date</span> <span class="o">|</span> <span class="n">datetime</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Data</span></code>
+
+<a href="#jquantstats.Data.truncate" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return a new Data object truncated to the inclusive [start, end] range.</p>
+<p>When the index is temporal (Date/Datetime), truncation is performed by
+comparing the date column against <code>start</code> and <code>end</code> values.</p>
+<p>When the index is integer-based, row slicing is used instead, and
+<code>start</code> and <code>end</code> must be non-negative integers.  Passing
+non-integer bounds to an integer-indexed Data raises :exc:<code>TypeError</code>.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>start</code>
+            </td>
+            <td>
+                  <code><span title="datetime.date">date</span> | <span title="datetime.datetime">datetime</span> | <span title="str">str</span> | <span title="int">int</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional lower bound (inclusive).  A date/datetime value
+when the index is temporal; a non-negative :class:<code>int</code> row
+index when the data has no temporal index.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>end</code>
+            </td>
+            <td>
+                  <code><span title="datetime.date">date</span> | <span title="datetime.datetime">datetime</span> | <span title="str">str</span> | <span title="int">int</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional upper bound (inclusive).  Same type rules as
+<code>start</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>Data</code></td>            <td>
+                  <code><a class="autorefs autorefs-internal" title="Data
+
+
+  
+      dataclass
+   (jquantstats.data.Data)" href="#jquantstats.Data">Data</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A new Data object filtered to the specified range.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="TypeError">TypeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>When the index is not temporal and a non-integer bound
+is supplied.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="jquantstats.Data.items" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">items</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">]]</span></code>
+
+<a href="#jquantstats.Data.items" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Iterate over all assets and their corresponding data series.</p>
+<p>This method provides a convenient way to iterate over all assets in the data,
+yielding each asset name and its corresponding data series.</p>
+
+
+    <p><span class="doc-section-title">Yields:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="tuple">tuple</span>[<span title="str">str</span>, <span title="polars.Series">Series</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>tuple[str, pl.Series]: A tuple containing the asset name and its data series.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="jquantstats.Portfolio" class="doc doc-heading">
+            <code>Portfolio</code>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+<a href="#jquantstats.Portfolio" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="jquantstats._portfolio_nav.PortfolioNavMixin">PortfolioNavMixin</span></code>, <code><span title="jquantstats._portfolio_attribution.PortfolioAttributionMixin">PortfolioAttributionMixin</span></code>, <code><span title="jquantstats._portfolio_turnover.PortfolioTurnoverMixin">PortfolioTurnoverMixin</span></code>, <code><span title="jquantstats._portfolio_cost.PortfolioCostMixin">PortfolioCostMixin</span></code></p>
+
+
+
+        <p>Portfolio analytics class for quant finance.</p>
+<p>Stores the three raw inputs — cash positions, prices, and AUM — and
+exposes the standard derived data series, analytics facades, transforms,
+and attribution tools.</p>
+<p>Derived data series:</p>
+<ul>
+<li>:attr:<code>profits</code> — per-asset daily cash P&amp;L</li>
+<li>:attr:<code>profit</code> — aggregate daily portfolio profit</li>
+<li>:attr:<code>nav_accumulated</code> — cumulative additive NAV</li>
+<li>:attr:<code>nav_compounded</code> — compounded NAV</li>
+<li>:attr:<code>returns</code> — daily returns (profit / AUM)</li>
+<li>:attr:<code>monthly</code> — monthly compounded returns</li>
+<li>:attr:<code>highwater</code> — running high-water mark</li>
+<li>:attr:<code>drawdown</code> — drawdown from high-water mark</li>
+<li>
+<p>:attr:<code>all</code> — merged view of all derived series</p>
+</li>
+<li>
+<p>Lazy composition accessors: :attr:<code>stats</code>, :attr:<code>plots</code>, :attr:<code>report</code></p>
+</li>
+<li>Portfolio transforms: :meth:<code>truncate</code>, :meth:<code>lag</code>,
+  :meth:<code>smoothed_holding</code></li>
+<li>Attribution: :attr:<code>tilt</code>, :attr:<code>timing</code>, :attr:<code>tilt_timing_decomp</code></li>
+<li>Turnover: :attr:<code>turnover</code>, :attr:<code>turnover_weekly</code>,
+  :meth:<code>turnover_summary</code></li>
+<li>Cost analysis: :meth:<code>cost_adjusted_returns</code>,
+  :meth:<code>trading_cost_impact</code></li>
+<li>Utility: :meth:<code>correlation</code></li>
+</ul>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="jquantstats.Portfolio.cashposition">cashposition</span></code></td>
+            <td>
+                  <code><span title="polars.DataFrame">DataFrame</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Polars DataFrame of positions per asset over time
+(includes date column if present).</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="jquantstats.Portfolio.prices">prices</span></code></td>
+            <td>
+                  <code><span title="polars.DataFrame">DataFrame</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Polars DataFrame of prices per asset over time (includes date
+column if present).</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="jquantstats.Portfolio.aum">aum</span></code></td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Assets under management used as base NAV offset.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+        <h5 id="jquantstats.Portfolio--analytics-facades">Analytics facades<a class="headerlink" href="#jquantstats.Portfolio--analytics-facades" title="Permanent link">&para;</a></h5>
+<ul>
+<li><code>.stats</code>   : delegates to the legacy <code>Stats</code> pipeline via <code>.data</code>; all 50+ metrics available.</li>
+<li><code>.plots</code>   : portfolio-specific <code>Plots</code>; NAV overlays, lead-lag IR, rolling Sharpe/vol, heatmaps.</li>
+<li><code>.report</code>  : HTML <code>Report</code>; self-contained portfolio performance report.</li>
+<li><code>.data</code>    : bridge to the legacy <code>Data</code> / <code>Stats</code> / <code>DataPlots</code> pipeline.</li>
+</ul>
+<p><code>.plots</code> and <code>.report</code> are intentionally <em>not</em> delegated to the legacy path: the legacy
+path operates on a bare returns series, while the analytics path has access to raw prices,
+positions, and AUM for richer portfolio-specific visualisations.</p>
+<h5 id="jquantstats.Portfolio--cost-models">Cost models<a class="headerlink" href="#jquantstats.Portfolio--cost-models" title="Permanent link">&para;</a></h5>
+<p>Two independent cost models are provided. They are not interchangeable:</p>
+<p><strong>Model A — position-delta (stateful, set at construction):</strong>
+    <code>cost_per_unit: float</code>  — one-way cost per unit of position change (e.g. 0.01 per share).
+    Used by <code>.position_delta_costs</code> and <code>.net_cost_nav</code>.
+    Best for: equity portfolios where cost scales with shares traded.</p>
+<p><strong>Model B — turnover-bps (stateless, passed at call time):</strong>
+    <code>cost_bps: float</code>  — one-way cost in basis points of AUM turnover (e.g. 5 bps).
+    Used by <code>.cost_adjusted_returns(cost_bps)</code> and <code>.trading_cost_impact(max_bps)</code>.
+    Best for: macro / fund-of-funds portfolios where cost scales with notional traded.</p>
+<p>To sweep a range of cost assumptions use <code>trading_cost_impact(max_bps=20)</code> (Model B).
+To compute a net-NAV curve set <code>cost_per_unit</code> at construction and read <code>.net_cost_nav</code> (Model A).</p>
+<h5 id="jquantstats.Portfolio--date-column-requirement">Date column requirement<a class="headerlink" href="#jquantstats.Portfolio--date-column-requirement" title="Permanent link">&para;</a></h5>
+<p>Most analytics work with or without a <code>date</code> column. The following features require a
+temporal <code>date</code> column (<code>pl.Date</code> or <code>pl.Datetime</code>):</p>
+<ul>
+<li><code>portfolio.plots.correlation_heatmap()</code></li>
+<li><code>portfolio.plots.lead_lag_ir_plot()</code></li>
+<li><code>stats.monthly_win_rate()</code>      — returns NaN per column when no date is present</li>
+<li><code>stats.annual_breakdown()</code>      — raises <code>ValueError</code> when no date is present</li>
+<li><code>stats.max_drawdown_duration()</code> — returns period count (int) instead of days</li>
+</ul>
+<p>Portfolios without a <code>date</code> column (integer-indexed) are fully supported for
+NAV, returns, Sharpe, drawdown, cost analytics, and most rolling metrics.</p>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">polars</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prices</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;date&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">date</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">date</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)],</span> <span class="s2">&quot;A&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">100.0</span><span class="p">,</span> <span class="mf">110.0</span><span class="p">]})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pos</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;date&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">date</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">date</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)],</span> <span class="s2">&quot;A&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1000.0</span><span class="p">,</span> <span class="mf">1000.0</span><span class="p">]})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pf</span> <span class="o">=</span> <span class="n">Portfolio</span><span class="p">(</span><span class="n">prices</span><span class="o">=</span><span class="n">prices</span><span class="p">,</span> <span class="n">cashposition</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span> <span class="n">aum</span><span class="o">=</span><span class="mf">1e6</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pf</span><span class="o">.</span><span class="n">assets</span>
+<span class="go">[&#39;A&#39;]</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="jquantstats.Portfolio.cost_model" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">cost_model</span><span class="p">:</span> <span class="n">CostModel</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#jquantstats.Portfolio.cost_model" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return the active cost model as a :class:<code>~jquantstats.CostModel</code> instance.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>A</code></td>            <td>
+                  <code><a class="autorefs autorefs-internal" title="CostModel
+
+
+  
+      dataclass
+   (jquantstats._cost_model.CostModel)" href="#jquantstats.CostModel">CostModel</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>class:<code>CostModel</code> whose <code>cost_per_unit</code> and <code>cost_bps</code> fields</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td></td>            <td>
+                  <code><a class="autorefs autorefs-internal" title="CostModel
+
+
+  
+      dataclass
+   (jquantstats._cost_model.CostModel)" href="#jquantstats.CostModel">CostModel</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>reflect the values stored on this portfolio.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="jquantstats.Portfolio.assets" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">assets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#jquantstats.Portfolio.assets" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>List the asset column names from prices (numeric columns).</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="list">list</span>[<span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>list[str]: Names of numeric columns in prices; typically excludes</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="list">list</span>[<span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p><code>'date'</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="jquantstats.Portfolio.data" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">data</span><span class="p">:</span> <span class="n">Data</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#jquantstats.Portfolio.data" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Build a legacy :class:<code>~jquantstats._data.Data</code> object from this portfolio's returns.</p>
+<p>This bridges the two entry points: <code>Portfolio</code> compiles the NAV curve from
+prices and positions; the returned :class:<code>~jquantstats._data.Data</code> object
+gives access to the full legacy analytics pipeline (<code>data.stats</code>,
+<code>data.plots</code>, <code>data.reports</code>).</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="Data
+
+
+  
+      dataclass
+   (jquantstats.data.Data)" href="#jquantstats.Data">Data</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>class:<code>~jquantstats._data.Data</code>: A Data object whose <code>returns</code> column</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="Data
+
+
+  
+      dataclass
+   (jquantstats.data.Data)" href="#jquantstats.Data">Data</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>is the portfolio's daily return series and whose <code>index</code> holds the date</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="Data
+
+
+  
+      dataclass
+   (jquantstats.data.Data)" href="#jquantstats.Data">Data</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>column (or a synthetic integer index for date-free portfolios).</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">polars</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prices</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;date&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">date</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">date</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)],</span> <span class="s2">&quot;A&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">100.0</span><span class="p">,</span> <span class="mf">110.0</span><span class="p">]})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pos</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;date&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">date</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">date</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)],</span> <span class="s2">&quot;A&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1000.0</span><span class="p">,</span> <span class="mf">1000.0</span><span class="p">]})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pf</span> <span class="o">=</span> <span class="n">Portfolio</span><span class="p">(</span><span class="n">prices</span><span class="o">=</span><span class="n">prices</span><span class="p">,</span> <span class="n">cashposition</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span> <span class="n">aum</span><span class="o">=</span><span class="mf">1e6</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">pf</span><span class="o">.</span><span class="n">data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s2">&quot;returns&quot;</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">returns</span><span class="o">.</span><span class="n">columns</span>
+<span class="go">True</span>
+</code></pre></div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="jquantstats.Portfolio.stats" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">stats</span><span class="p">:</span> <span class="n">Stats</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#jquantstats.Portfolio.stats" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return a Stats object built from the portfolio's daily returns.</p>
+<p>Delegates to the legacy :class:<code>~jquantstats._stats.Stats</code> pipeline via
+:attr:<code>data</code>, so all analytics (Sharpe, drawdown, summary, etc.) are
+available through the shared implementation.</p>
+<p>The result is cached after first access so repeated calls are O(1).</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="jquantstats.Portfolio.plots" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">plots</span><span class="p">:</span> <span class="n">PortfolioPlots</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#jquantstats.Portfolio.plots" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Convenience accessor returning a PortfolioPlots facade for this portfolio.</p>
+<p>Use this to create Plotly visualizations such as snapshots, lagged
+performance curves, and lead/lag IR charts.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="jquantstats._plots.PortfolioPlots">PortfolioPlots</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>class:<code>~jquantstats._plots.PortfolioPlots</code>: Helper object with</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="jquantstats._plots.PortfolioPlots">PortfolioPlots</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>plotting methods.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+        <p>The result is cached after first access so repeated calls are O(1).</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="jquantstats.Portfolio.report" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">report</span><span class="p">:</span> <span class="n">Report</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#jquantstats.Portfolio.report" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Convenience accessor returning a Report facade for this portfolio.</p>
+<p>Use this to generate a self-contained HTML performance report
+containing statistics tables and interactive charts.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="jquantstats._reports.Report">Report</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>class:<code>~jquantstats._reports.Report</code>: Helper object with</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="jquantstats._reports.Report">Report</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>report methods.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+        <p>The result is cached after first access so repeated calls are O(1).</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="jquantstats.Portfolio.utils" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">utils</span><span class="p">:</span> <span class="n">PortfolioUtils</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#jquantstats.Portfolio.utils" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Convenience accessor returning a PortfolioUtils facade for this portfolio.</p>
+<p>Use this for common data transformations such as converting returns to
+prices, computing log returns, rebasing, aggregating by period, and
+computing exponential standard deviation.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="jquantstats._utils.PortfolioUtils">PortfolioUtils</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>class:<code>~jquantstats._utils.PortfolioUtils</code>: Helper object with</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="jquantstats._utils.PortfolioUtils">PortfolioUtils</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>utility transform methods.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+        <p>The result is cached after first access so repeated calls are O(1).</p>
+
+    </div>
+
+</div>
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="jquantstats.Portfolio.__post_init__" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">__post_init__</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+
+<a href="#jquantstats.Portfolio.__post_init__" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Validate input types, shapes, and parameters post-initialization.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="jquantstats.Portfolio.__repr__" class="doc doc-heading">
+            <code class="highlight language-python"><span class="fm">__repr__</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span></code>
+
+<a href="#jquantstats.Portfolio.__repr__" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return a string representation of the Portfolio object.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="jquantstats.Portfolio.describe" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">describe</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span></code>
+
+<a href="#jquantstats.Portfolio.describe" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return a tidy summary of shape, date range and asset names.</p>
+<h6 id="jquantstats.Portfolio.describe--returns">Returns:<a class="headerlink" href="#jquantstats.Portfolio.describe--returns" title="Permanent link">&para;</a></h6>
+<p>pl.DataFrame
+    One row per asset with columns: asset, start, end, rows.</p>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">polars</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prices</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;date&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">date</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">date</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)],</span> <span class="s2">&quot;A&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">100.0</span><span class="p">,</span> <span class="mf">110.0</span><span class="p">]})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pos</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;date&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">date</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">date</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)],</span> <span class="s2">&quot;A&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1000.0</span><span class="p">,</span> <span class="mf">1000.0</span><span class="p">]})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pf</span> <span class="o">=</span> <span class="n">Portfolio</span><span class="p">(</span><span class="n">prices</span><span class="o">=</span><span class="n">prices</span><span class="p">,</span> <span class="n">cashposition</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span> <span class="n">aum</span><span class="o">=</span><span class="mf">1e6</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pf</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+<span class="go">[&#39;asset&#39;, &#39;start&#39;, &#39;end&#39;, &#39;rows&#39;]</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="jquantstats.Portfolio.from_risk_position" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">from_risk_position</span><span class="p">(</span><span class="n">prices</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">risk_position</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">aum</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">vola</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">32</span><span class="p">,</span> <span class="n">vol_cap</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">cost_per_unit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">cost_bps</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">cost_model</span><span class="p">:</span> <span class="n">CostModel</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+<a href="#jquantstats.Portfolio.from_risk_position" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Create a Portfolio from per-asset risk positions.</p>
+<p>De-volatizes each risk position using an EWMA volatility estimate
+derived from the corresponding price series.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>prices</code>
+            </td>
+            <td>
+                  <code><span title="polars.DataFrame">DataFrame</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Price levels per asset over time (may include a date column).</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>risk_position</code>
+            </td>
+            <td>
+                  <code><span title="polars.DataFrame">DataFrame</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Risk units per asset aligned with prices.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>vola</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span> | <span title="dict">dict</span>[<span title="str">str</span>, <span title="int">int</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>EWMA lookback (span-equivalent) used to estimate volatility.
+Pass an <code>int</code> to apply the same span to every asset, or a
+<code>dict[str, int]</code> to set a per-asset span (assets absent from
+the dict default to <code>32</code>).  Every span value must be a
+positive integer; a <code>ValueError</code> is raised otherwise.  Dict
+keys that do not correspond to any numeric column in <em>prices</em>
+also raise a <code>ValueError</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>32</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>vol_cap</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional lower bound for the EWMA volatility estimate.
+When provided, the vol series is clipped from below at this
+value before dividing the risk position, preventing
+position blow-up in calm, low-volatility regimes.  For
+example, <code>vol_cap=0.05</code> ensures annualised vol is never
+estimated below 5%.  Must be positive when not <code>None</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>aum</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Assets under management used as the base NAV offset.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>cost_per_unit</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>One-way trading cost per unit of position change.
+Defaults to 0.0 (no cost).  Ignored when <em>cost_model</em> is given.</p>
+              </div>
+            </td>
+            <td>
+                  <code>0.0</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>cost_bps</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>One-way trading cost in basis points of AUM turnover.
+Defaults to 0.0 (no cost).  Ignored when <em>cost_model</em> is given.</p>
+              </div>
+            </td>
+            <td>
+                  <code>0.0</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>cost_model</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="CostModel
+
+
+  
+      dataclass
+   (jquantstats._cost_model.CostModel)" href="#jquantstats.CostModel">CostModel</a> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional :class:<code>~jquantstats.CostModel</code>
+instance.  When supplied, its <code>cost_per_unit</code> and
+<code>cost_bps</code> values take precedence over the individual
+parameters above.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="typing.Self">Self</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A Portfolio instance whose cash positions are risk_position</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="typing.Self">Self</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>divided by EWMA volatility.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If any span value in <em>vola</em> is ≤ 0, or if a key in a
+<em>vola</em> dict does not match any numeric column in <em>prices</em>, or
+if <em>vol_cap</em> is provided but is not positive.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="jquantstats.Portfolio.from_position" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">from_position</span><span class="p">(</span><span class="n">prices</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">aum</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">cost_per_unit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">cost_bps</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">cost_model</span><span class="p">:</span> <span class="n">CostModel</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+<a href="#jquantstats.Portfolio.from_position" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Create a Portfolio from share/unit positions.</p>
+<p>Converts <em>position</em> (number of units held per asset) to cash exposure
+by multiplying element-wise with <em>prices</em>, then delegates to
+:py:meth:<code>from_cash_position</code>.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>prices</code>
+            </td>
+            <td>
+                  <code><span title="polars.DataFrame">DataFrame</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Price levels per asset over time (may include a date column).</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>position</code>
+            </td>
+            <td>
+                  <code><span title="polars.DataFrame">DataFrame</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Number of units held per asset over time, aligned with
+<em>prices</em>.  Non-numeric columns (e.g. <code>'date'</code>) are passed
+through unchanged.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>aum</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Assets under management used as the base NAV offset.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>cost_per_unit</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>One-way trading cost per unit of position change.
+Defaults to 0.0 (no cost).  Ignored when <em>cost_model</em> is given.</p>
+              </div>
+            </td>
+            <td>
+                  <code>0.0</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>cost_bps</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>One-way trading cost in basis points of AUM turnover.
+Defaults to 0.0 (no cost).  Ignored when <em>cost_model</em> is given.</p>
+              </div>
+            </td>
+            <td>
+                  <code>0.0</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>cost_model</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="CostModel
+
+
+  
+      dataclass
+   (jquantstats._cost_model.CostModel)" href="#jquantstats.CostModel">CostModel</a> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional :class:<code>~jquantstats.CostModel</code> instance.
+When supplied, its <code>cost_per_unit</code> and <code>cost_bps</code> values
+take precedence over the individual parameters above.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="typing.Self">Self</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A Portfolio instance whose cash positions equal <em>position</em> x <em>prices</em>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">polars</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prices</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;A&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">100.0</span><span class="p">,</span> <span class="mf">110.0</span><span class="p">,</span> <span class="mf">105.0</span><span class="p">]})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pos</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;A&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">10.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">]})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pf</span> <span class="o">=</span> <span class="n">Portfolio</span><span class="o">.</span><span class="n">from_position</span><span class="p">(</span><span class="n">prices</span><span class="o">=</span><span class="n">prices</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span> <span class="n">aum</span><span class="o">=</span><span class="mf">1e6</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pf</span><span class="o">.</span><span class="n">cashposition</span><span class="p">[</span><span class="s2">&quot;A&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+<span class="go">[1000.0, 1100.0, 1050.0]</span>
+</code></pre></div>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="jquantstats.Portfolio.from_cash_position" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">from_cash_position</span><span class="p">(</span><span class="n">prices</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">cash_position</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">aum</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">cost_per_unit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">cost_bps</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">cost_model</span><span class="p">:</span> <span class="n">CostModel</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+<a href="#jquantstats.Portfolio.from_cash_position" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Create a Portfolio directly from cash positions aligned with prices.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>prices</code>
+            </td>
+            <td>
+                  <code><span title="polars.DataFrame">DataFrame</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Price levels per asset over time (may include a date column).</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>cash_position</code>
+            </td>
+            <td>
+                  <code><span title="polars.DataFrame">DataFrame</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Cash exposure per asset over time.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>aum</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Assets under management used as the base NAV offset.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>cost_per_unit</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>One-way trading cost per unit of position change.
+Defaults to 0.0 (no cost).  Ignored when <em>cost_model</em> is given.</p>
+              </div>
+            </td>
+            <td>
+                  <code>0.0</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>cost_bps</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>One-way trading cost in basis points of AUM turnover.
+Defaults to 0.0 (no cost).  Ignored when <em>cost_model</em> is given.</p>
+              </div>
+            </td>
+            <td>
+                  <code>0.0</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>cost_model</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="CostModel
+
+
+  
+      dataclass
+   (jquantstats._cost_model.CostModel)" href="#jquantstats.CostModel">CostModel</a> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional :class:<code>~jquantstats.CostModel</code>
+instance.  When supplied, its <code>cost_per_unit</code> and
+<code>cost_bps</code> values take precedence over the individual
+parameters above.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="typing.Self">Self</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A Portfolio instance with the provided cash positions.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="jquantstats.Portfolio.truncate" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">truncate</span><span class="p">(</span><span class="n">start</span><span class="p">:</span> <span class="n">date</span> <span class="o">|</span> <span class="n">datetime</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="n">date</span> <span class="o">|</span> <span class="n">datetime</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Portfolio</span></code>
+
+<a href="#jquantstats.Portfolio.truncate" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return a new Portfolio truncated to the inclusive [start, end] range.</p>
+<p>When a <code>'date'</code> column is present in both prices and cash positions,
+truncation is performed by comparing the <code>'date'</code> column against
+<code>start</code> and <code>end</code> (which should be date/datetime values or strings
+parseable by Polars).</p>
+<p>When the <code>'date'</code> column is absent, integer-based row slicing is
+used instead.  In this case <code>start</code> and <code>end</code> must be non-negative
+integers representing 0-based row indices.  Passing non-integer bounds
+to an integer-indexed portfolio raises :exc:<code>TypeError</code>.</p>
+<p>In all cases the <code>aum</code> value is preserved.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>start</code>
+            </td>
+            <td>
+                  <code><span title="datetime.date">date</span> | <span title="datetime.datetime">datetime</span> | <span title="str">str</span> | <span title="int">int</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional lower bound (inclusive). A date/datetime or
+Polars-parseable string when a <code>'date'</code> column exists; a
+non-negative int row index when the data has no <code>'date'</code>
+column.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>end</code>
+            </td>
+            <td>
+                  <code><span title="datetime.date">date</span> | <span title="datetime.datetime">datetime</span> | <span title="str">str</span> | <span title="int">int</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional upper bound (inclusive). Same type rules as
+<code>start</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="Portfolio
+
+
+  
+      dataclass
+   (jquantstats.portfolio.Portfolio)" href="#jquantstats.Portfolio">Portfolio</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A new Portfolio instance with prices and cash positions filtered</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="Portfolio
+
+
+  
+      dataclass
+   (jquantstats.portfolio.Portfolio)" href="#jquantstats.Portfolio">Portfolio</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>to the specified range.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="TypeError">TypeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>When the portfolio has no <code>'date'</code> column and a
+non-integer bound is supplied.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="jquantstats.Portfolio.lag" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">lag</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Portfolio</span></code>
+
+<a href="#jquantstats.Portfolio.lag" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return a new Portfolio with cash positions lagged by <code>n</code> steps.</p>
+<p>This method shifts the numeric asset columns in the cashposition
+DataFrame by <code>n</code> rows, preserving the <code>'date'</code> column and any
+non-numeric columns unchanged.  Positive <code>n</code> delays weights (moves
+them down); negative <code>n</code> leads them (moves them up); <code>n == 0</code>
+returns the current portfolio unchanged.</p>
+
+
+<details class="notes" open>
+  <summary>Notes</summary>
+  <p>Missing values introduced by the shift are left as nulls;
+downstream profit computation already guards and treats nulls as
+zero when multiplying by returns.</p>
+</details>
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>n</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Number of rows to shift (can be negative, zero, or positive).</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="Portfolio
+
+
+  
+      dataclass
+   (jquantstats.portfolio.Portfolio)" href="#jquantstats.Portfolio">Portfolio</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A new Portfolio instance with lagged cash positions and the same</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="Portfolio
+
+
+  
+      dataclass
+   (jquantstats.portfolio.Portfolio)" href="#jquantstats.Portfolio">Portfolio</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>prices/AUM as the original.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="jquantstats.Portfolio.smoothed_holding" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">smoothed_holding</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Portfolio</span></code>
+
+<a href="#jquantstats.Portfolio.smoothed_holding" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return a new Portfolio with cash positions smoothed by a rolling mean.</p>
+<p>Applies a trailing window average over the last <code>n</code> steps for each
+numeric asset column (excluding <code>'date'</code>). The window length is
+<code>n + 1</code> so that:</p>
+<ul>
+<li>n=0 returns the original weights (no smoothing),</li>
+<li>n=1 averages the current and previous weights,</li>
+<li>n=k averages the current and last k weights.</li>
+</ul>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>n</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Non-negative integer specifying how many previous steps to
+include.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="Portfolio
+
+
+  
+      dataclass
+   (jquantstats.portfolio.Portfolio)" href="#jquantstats.Portfolio">Portfolio</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A new Portfolio with smoothed cash positions and the same</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="Portfolio
+
+
+  
+      dataclass
+   (jquantstats.portfolio.Portfolio)" href="#jquantstats.Portfolio">Portfolio</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>prices/AUM.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="jquantstats.Portfolio.correlation" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">correlation</span><span class="p">(</span><span class="n">frame</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;portfolio&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span></code>
+
+<a href="#jquantstats.Portfolio.correlation" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Compute a correlation matrix of asset returns plus the portfolio.</p>
+<p>Computes percentage changes for all numeric columns in <code>frame</code>,
+appends the portfolio profit series under the provided <code>name</code>, and
+returns the Pearson correlation matrix across all numeric columns.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>frame</code>
+            </td>
+            <td>
+                  <code><span title="polars.DataFrame">DataFrame</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A Polars DataFrame containing at least the asset price
+columns (and a date column which will be ignored if
+non-numeric).</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The column name to use when adding the portfolio profit
+series to the input frame.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;portfolio&#39;</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="polars.DataFrame">DataFrame</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A square Polars DataFrame where each cell is the correlation</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="polars.DataFrame">DataFrame</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>between a pair of series (values in [-1, 1]).</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "search.suggest", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@11.4.0/dist/mermaid.esm.min.mjs" type="module"></script>
+      
+    
+  </body>
+</html>

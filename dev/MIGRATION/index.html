@@ -1,0 +1,2011 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Quantitative financial analysis tools for Python">
+      
+      
+      
+        <link rel="canonical" href="https://jebel-quant.github.io/jquantstats/dev/MIGRATION/">
+      
+      
+        <link rel="prev" href="../api/">
+      
+      
+        <link rel="next" href="../STABILITY/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/rhiza-logo.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Migration Guide - jquantstats</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#migrating-from-quantstats-to-jquantstats" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="jquantstats" class="md-header__button md-logo" aria-label="jquantstats" data-md-component="logo">
+      
+  <img src="../assets/rhiza-logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            jquantstats
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Migration Guide
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/jebel-quant/jquantstats" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jebel-quant/jquantstats
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../getting_started/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Getting Started
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../notebooks/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Marimo Notebooks
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../reports/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Reports
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../cost_models/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Cost Models
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../api/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  API Reference
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+  Docs
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="jquantstats" class="md-nav__button md-logo" aria-label="jquantstats" data-md-component="logo">
+      
+  <img src="../assets/rhiza-logo.svg" alt="logo">
+
+    </a>
+    jquantstats
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/jebel-quant/jquantstats" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jebel-quant/jquantstats
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../notebooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Marimo Notebooks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cost_models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cost Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Docs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration Guide
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#why-migrate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why migrate
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data format
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data format">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#benchmarks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Benchmarks
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#entry-points" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Entry points
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Entry points">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#data-returns-series-drop-in-quantstats-replacement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data — returns series (drop-in QuantStats replacement)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#portfolio-prices-positions-no-quantstats-equivalent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Portfolio — prices + positions (no QuantStats equivalent)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-mapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API mapping
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="API mapping">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#statistics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Statistics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plots" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plots
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reports" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reports
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#accessing-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Accessing results
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#behavioural-differences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Behavioural differences
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Behavioural differences">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#nan-null-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NaN / null handling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-top-level-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        No top-level functions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#portfolio-only-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Portfolio-only features
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#minimal-migration-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Minimal migration checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#further-reading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Further reading
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../STABILITY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Stability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#why-migrate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why migrate
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data format
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data format">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#benchmarks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Benchmarks
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#entry-points" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Entry points
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Entry points">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#data-returns-series-drop-in-quantstats-replacement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data — returns series (drop-in QuantStats replacement)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#portfolio-prices-positions-no-quantstats-equivalent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Portfolio — prices + positions (no QuantStats equivalent)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-mapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API mapping
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="API mapping">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#statistics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Statistics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plots" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plots
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reports" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reports
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#accessing-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Accessing results
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#behavioural-differences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Behavioural differences
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Behavioural differences">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#nan-null-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NaN / null handling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-top-level-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        No top-level functions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#portfolio-only-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Portfolio-only features
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#minimal-migration-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Minimal migration checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#further-reading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Further reading
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="migrating-from-quantstats-to-jquantstats">Migrating from QuantStats to jquantstats<a class="headerlink" href="#migrating-from-quantstats-to-jquantstats" title="Permanent link">&para;</a></h1>
+<p><strong>A heartfelt thank you to <a href="https://github.com/ranaroussi">Ran Aroussi</a> for creating
+<a href="https://github.com/ranaroussi/quantstats">QuantStats</a> — a brilliant and widely loved
+library that has helped countless quants and portfolio managers understand their
+strategies better. This project would simply not exist without that foundation.
+We have enormous respect for the original work and encourage everyone to check it out.</strong></p>
+<p><code>jquantstats</code> is a modern variation on the theme set by QuantStats — not a copy, not a
+drop-in replacement, but a different take on the same problem space. Where QuantStats
+offers a collection of standalone functions each operating on a return series,
+jquantstats is built around a <strong>portfolio-centric entry point</strong>: you start from a
+<code>Portfolio</code> object constructed from prices and positions, and analytics flow naturally
+from there. This makes multi-asset analysis, cost modelling, and execution-lag studies
+first-class citizens rather than afterthoughts.</p>
+<p>This guide explains the <strong>key conceptual and API differences</strong> between the two libraries
+so you know what to expect, and provides <strong>concrete code translations</strong> to help you move
+your existing workflows over.</p>
+<hr />
+<h2 id="why-migrate">Why migrate<a class="headerlink" href="#why-migrate" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>QuantStats</th>
+<th>jquantstats</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DataFrame engine</td>
+<td>pandas</td>
+<td>Polars (zero pandas at runtime)</td>
+</tr>
+<tr>
+<td>Charts</td>
+<td>static matplotlib/seaborn</td>
+<td>interactive Plotly</td>
+</tr>
+<tr>
+<td>Type annotations</td>
+<td>partial</td>
+<td>full (PEP 484, <code>py.typed</code>)</td>
+</tr>
+<tr>
+<td>Multi-asset</td>
+<td>single <code>pd.Series</code> per call</td>
+<td>multi-column DataFrame, one call</td>
+</tr>
+<tr>
+<td>API style</td>
+<td>functions (<code>qs.stats.sharpe(r)</code>)</td>
+<td>object methods (<code>data.stats.sharpe()</code>)</td>
+</tr>
+<tr>
+<td>Portfolio analytics</td>
+<td>not supported</td>
+<td>prices + positions route via <code>Portfolio</code></td>
+</tr>
+<tr>
+<td>Execution-delay analysis</td>
+<td>not supported</td>
+<td><code>pf.lag(n)</code> + lead-lag IR plot</td>
+</tr>
+<tr>
+<td>Tilt / timing decomposition</td>
+<td>not supported</td>
+<td><code>pf.tilt</code>, <code>pf.timing</code>, <code>pf.tilt_timing_decomp</code></td>
+</tr>
+<tr>
+<td>Turnover analytics</td>
+<td>not supported</td>
+<td><code>pf.turnover</code>, <code>pf.turnover_weekly()</code></td>
+</tr>
+<tr>
+<td>Cost modelling</td>
+<td>not supported</td>
+<td><code>CostModel.per_unit()</code> / <code>CostModel.turnover_bps()</code></td>
+</tr>
+<tr>
+<td>Python version</td>
+<td>3.7+</td>
+<td>3.11+</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>jquantstats
+pip<span class="w"> </span>install<span class="w"> </span>jquantstats<span class="o">[</span>plot<span class="o">]</span><span class="w">   </span><span class="c1"># adds kaleido for static image export</span>
+</code></pre></div>
+<p>Uninstall QuantStats once you're done:</p>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>uninstall<span class="w"> </span>quantstats
+</code></pre></div>
+<hr />
+<h2 id="data-format">Data format<a class="headerlink" href="#data-format" title="Permanent link">&para;</a></h2>
+<p>QuantStats expects a <strong><code>pd.Series</code></strong> with a <code>DatetimeIndex</code>.
+jquantstats expects a <strong><code>pl.DataFrame</code></strong> with a dedicated date column.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">polars</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
+
+<span class="c1"># QuantStats — pd.Series with DatetimeIndex</span>
+<span class="n">returns_pd</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span> <span class="o">=</span> <span class="o">...</span>
+
+<span class="c1"># jquantstats — convert from pandas</span>
+<span class="n">returns_pl</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">from_pandas</span><span class="p">(</span><span class="n">returns_pd</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;MyStrategy&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">())</span>
+<span class="c1"># → DataFrame columns: [&quot;Date&quot;, &quot;MyStrategy&quot;]</span>
+
+<span class="c1"># jquantstats — build from scratch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
+<span class="n">returns_pl</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s2">&quot;Date&quot;</span><span class="p">:</span>       <span class="p">[</span><span class="n">date</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">date</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="o">...</span><span class="p">],</span>
+    <span class="s2">&quot;MyStrategy&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.005</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+<span class="p">})</span>
+</code></pre></div>
+<h3 id="benchmarks">Benchmarks<a class="headerlink" href="#benchmarks" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># QuantStats — benchmark passed to every function call</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">quantstats</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">qs</span>
+<span class="n">qs</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">information_ratio</span><span class="p">(</span><span class="n">returns_pd</span><span class="p">,</span> <span class="n">benchmark</span><span class="o">=</span><span class="n">benchmark_pd</span><span class="p">)</span>
+
+<span class="c1"># jquantstats — benchmark provided once at construction time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jquantstats</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jqs</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">jqs</span><span class="o">.</span><span class="n">Data</span><span class="o">.</span><span class="n">from_returns</span><span class="p">(</span>
+    <span class="n">returns</span><span class="o">=</span><span class="n">returns_pl</span><span class="p">,</span>
+    <span class="n">benchmark</span><span class="o">=</span><span class="n">benchmark_pl</span><span class="p">,</span>
+    <span class="n">date_col</span><span class="o">=</span><span class="s2">&quot;Date&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">data</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">information_ratio</span><span class="p">()</span>   <span class="c1"># benchmark used automatically</span>
+</code></pre></div>
+<hr />
+<h2 id="entry-points">Entry points<a class="headerlink" href="#entry-points" title="Permanent link">&para;</a></h2>
+<p>jquantstats has two entry points depending on what data you have.</p>
+<h3 id="data-returns-series-drop-in-quantstats-replacement"><code>Data</code> — returns series (drop-in QuantStats replacement)<a class="headerlink" href="#data-returns-series-drop-in-quantstats-replacement" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">jquantstats</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jqs</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">jqs</span><span class="o">.</span><span class="n">Data</span><span class="o">.</span><span class="n">from_returns</span><span class="p">(</span>
+    <span class="n">returns</span><span class="o">=</span><span class="n">returns_pl</span><span class="p">,</span>     <span class="c1"># pl.DataFrame with date + return columns</span>
+    <span class="n">benchmark</span><span class="o">=</span><span class="n">benchmark_pl</span><span class="p">,</span> <span class="c1"># optional</span>
+    <span class="n">date_col</span><span class="o">=</span><span class="s2">&quot;Date&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">data</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sharpe</span><span class="p">()</span>
+<span class="n">data</span><span class="o">.</span><span class="n">plots</span><span class="o">.</span><span class="n">snapshot</span><span class="p">()</span>
+<span class="n">data</span><span class="o">.</span><span class="n">reports</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</code></pre></div>
+<p>You can also construct from prices:</p>
+<div class="highlight"><pre><span></span><code><span class="n">data</span> <span class="o">=</span> <span class="n">jqs</span><span class="o">.</span><span class="n">Data</span><span class="o">.</span><span class="n">from_prices</span><span class="p">(</span><span class="n">prices</span><span class="o">=</span><span class="n">prices_pl</span><span class="p">,</span> <span class="n">date_col</span><span class="o">=</span><span class="s2">&quot;Date&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="portfolio-prices-positions-no-quantstats-equivalent"><code>Portfolio</code> — prices + positions (no QuantStats equivalent)<a class="headerlink" href="#portfolio-prices-positions-no-quantstats-equivalent" title="Permanent link">&para;</a></h3>
+<p>If you have asset prices and position sizes, use <code>Portfolio</code> to get
+execution-delay analysis, tilt/timing decomposition, turnover analytics,
+and cost modelling — none of which are available in QuantStats.</p>
+<div class="highlight"><pre><span></span><code><span class="n">pf</span> <span class="o">=</span> <span class="n">jqs</span><span class="o">.</span><span class="n">Portfolio</span><span class="o">.</span><span class="n">from_cash_position</span><span class="p">(</span>
+    <span class="n">prices</span><span class="o">=</span><span class="n">prices_df</span><span class="p">,</span>        <span class="c1"># pl.DataFrame: date + asset columns</span>
+    <span class="n">cash_position</span><span class="o">=</span><span class="n">pos_df</span><span class="p">,</span>    <span class="c1"># pl.DataFrame: date + asset columns (£ amounts)</span>
+    <span class="n">aum</span><span class="o">=</span><span class="mi">1_000_000</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># All stats, plots, and reports are available</span>
+<span class="n">pf</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sharpe</span><span class="p">()</span>
+<span class="n">pf</span><span class="o">.</span><span class="n">plots</span><span class="o">.</span><span class="n">snapshot</span><span class="p">()</span>
+<span class="n">pf</span><span class="o">.</span><span class="n">report</span><span class="o">.</span><span class="n">to_html</span><span class="p">()</span>
+
+<span class="c1"># Drop down to the returns-series API at any time</span>
+<span class="n">pf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">calmar</span><span class="p">()</span>
+</code></pre></div>
+<p>Other factory methods:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># From share counts</span>
+<span class="n">pf</span> <span class="o">=</span> <span class="n">jqs</span><span class="o">.</span><span class="n">Portfolio</span><span class="o">.</span><span class="n">from_position</span><span class="p">(</span><span class="n">prices</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">aum</span><span class="p">)</span>
+
+<span class="c1"># From risk-scaled positions</span>
+<span class="n">pf</span> <span class="o">=</span> <span class="n">jqs</span><span class="o">.</span><span class="n">Portfolio</span><span class="o">.</span><span class="n">from_risk_position</span><span class="p">(</span><span class="n">prices</span><span class="p">,</span> <span class="n">risk_position</span><span class="p">,</span> <span class="n">aum</span><span class="p">,</span> <span class="n">vola</span><span class="o">=</span><span class="n">vola_df</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="api-mapping">API mapping<a class="headerlink" href="#api-mapping" title="Permanent link">&para;</a></h2>
+<p>All jquantstats analytics live on <code>.stats</code>, <code>.plots</code>, or <code>.reports</code> of a
+<code>Data</code> (or <code>Portfolio</code>) instance.  Methods return a <strong><code>dict</code> keyed by
+column name</strong> rather than a scalar.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># one-time setup</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">jqs</span><span class="o">.</span><span class="n">Data</span><span class="o">.</span><span class="n">from_returns</span><span class="p">(</span><span class="n">returns</span><span class="o">=</span><span class="n">returns_pl</span><span class="p">,</span> <span class="n">benchmark</span><span class="o">=</span><span class="n">benchmark_pl</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="statistics">Statistics<a class="headerlink" href="#statistics" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>QuantStats</th>
+<th>jquantstats</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>qs.stats.sharpe(r, periods=252)</code></td>
+<td><code>data.stats.sharpe(periods=252)</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.smart_sharpe(r, periods=252)</code></td>
+<td><code>data.stats.smart_sharpe(periods=252)</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.sortino(r, periods=252)</code></td>
+<td><code>data.stats.sortino(periods=252)</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.smart_sortino(r)</code></td>
+<td><code>data.stats.smart_sortino()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.adjusted_sortino(r)</code></td>
+<td><code>data.stats.adjusted_sortino()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.calmar(r)</code></td>
+<td><code>data.stats.calmar()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.omega(r)</code></td>
+<td><code>data.stats.omega()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.treynor_ratio(r, benchmark=b)</code></td>
+<td><code>data.stats.treynor_ratio()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.volatility(r, periods=252)</code></td>
+<td><code>data.stats.volatility(periods=252)</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.implied_volatility(r)</code></td>
+<td><code>data.stats.implied_volatility()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.skew(r)</code></td>
+<td><code>data.stats.skew()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.kurtosis(r)</code></td>
+<td><code>data.stats.kurtosis()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.max_drawdown(r)</code></td>
+<td><code>data.stats.max_drawdown()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.value_at_risk(r)</code></td>
+<td><code>data.stats.value_at_risk(alpha=0.05)</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.conditional_value_at_risk(r, confidence=0.95)</code></td>
+<td><code>data.stats.conditional_value_at_risk(alpha=0.05)</code></td>
+<td><code>alpha = 1 − confidence</code>; see note below</td>
+</tr>
+<tr>
+<td><code>qs.stats.win_rate(r)</code></td>
+<td><code>data.stats.win_rate()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.avg_return(r)</code></td>
+<td><code>data.stats.avg_return()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.avg_win(r)</code></td>
+<td><code>data.stats.avg_win()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.avg_loss(r)</code></td>
+<td><code>data.stats.avg_loss()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.best(r)</code></td>
+<td><code>data.stats.best()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.worst(r)</code></td>
+<td><code>data.stats.worst()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.consecutive_wins(r)</code></td>
+<td><code>data.stats.consecutive_wins()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.consecutive_losses(r)</code></td>
+<td><code>data.stats.consecutive_losses()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.profit_factor(r)</code></td>
+<td><code>data.stats.profit_factor()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.profit_ratio(r)</code></td>
+<td><code>data.stats.profit_ratio()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.payoff_ratio(r)</code></td>
+<td><code>data.stats.payoff_ratio()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.win_loss_ratio(r)</code></td>
+<td><code>data.stats.win_loss_ratio()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.gain_to_pain_ratio(r)</code></td>
+<td><code>data.stats.gain_to_pain_ratio()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.risk_return_ratio(r)</code></td>
+<td><code>data.stats.risk_return_ratio()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.cpc_index(r)</code></td>
+<td><code>data.stats.cpc_index()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.common_sense_ratio(r)</code></td>
+<td><code>data.stats.common_sense_ratio()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.tail_ratio(r)</code></td>
+<td><code>data.stats.tail_ratio()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.outlier_win_ratio(r)</code></td>
+<td><code>data.stats.outlier_win_ratio()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.outlier_loss_ratio(r)</code></td>
+<td><code>data.stats.outlier_loss_ratio()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.kelly_criterion(r)</code></td>
+<td><code>data.stats.kelly_criterion()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.exposure(r)</code></td>
+<td><code>data.stats.exposure()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.cagr(r)</code></td>
+<td><code>data.stats.cagr()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.rar(r)</code></td>
+<td><code>data.stats.rar()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.recovery_factor(r)</code></td>
+<td><code>data.stats.recovery_factor()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.risk_of_ruin(r)</code></td>
+<td><code>data.stats.risk_of_ruin()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.ulcer_index(r)</code></td>
+<td><code>data.stats.ulcer_index()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.ulcer_performance_index(r)</code></td>
+<td><code>data.stats.ulcer_performance_index()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.serenity_index(r)</code></td>
+<td><code>data.stats.serenity_index()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.information_ratio(r, benchmark=b)</code></td>
+<td><code>data.stats.information_ratio()</code></td>
+<td>jquantstats annualises; see note below</td>
+</tr>
+<tr>
+<td><code>qs.stats.r_squared(r, benchmark=b)</code></td>
+<td><code>data.stats.r_squared()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.greeks(r, benchmark=b)</code></td>
+<td><code>data.stats.greeks()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.probabilistic_sharpe_ratio(r)</code></td>
+<td><code>data.stats.probabilistic_sharpe_ratio()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.probabilistic_sortino_ratio(r)</code></td>
+<td><code>data.stats.probabilistic_sortino_ratio()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.probabilistic_adjusted_sortino_ratio(r)</code></td>
+<td><code>data.stats.probabilistic_adjusted_sortino_ratio()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.geometric_mean(r)</code></td>
+<td><code>data.stats.geometric_mean()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.ghpr(r)</code></td>
+<td><code>data.stats.ghpr()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.expected_return(r)</code></td>
+<td><code>data.stats.expected_return()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.outliers(r)</code></td>
+<td><code>data.stats.outliers()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.remove_outliers(r)</code></td>
+<td><code>data.stats.remove_outliers()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.drawdown_details(r)</code></td>
+<td><code>data.stats.drawdown_details()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.monthly_returns(r)</code></td>
+<td><code>data.stats.monthly_returns()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.compare(r, benchmark=b)</code></td>
+<td><code>data.stats.compare()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.rolling_sharpe(r)</code></td>
+<td><code>data.stats.rolling_sharpe()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.rolling_sortino(r)</code></td>
+<td><code>data.stats.rolling_sortino()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.rolling_volatility(r)</code></td>
+<td><code>data.stats.rolling_volatility()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.rolling_greeks(r, benchmark=b)</code></td>
+<td><code>data.stats.rolling_greeks()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.autocorr_penalty(r)</code></td>
+<td><code>data.stats.autocorr_penalty()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.pct_rank(r)</code></td>
+<td><code>data.stats.pct_rank()</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4 id="quantstats-functions-with-no-jquantstats-equivalent">QuantStats functions with no jquantstats equivalent<a class="headerlink" href="#quantstats-functions-with-no-jquantstats-equivalent" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>QuantStats</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>qs.stats.montecarlo(r)</code></td>
+<td>Monte Carlo simulations not currently implemented</td>
+</tr>
+<tr>
+<td><code>qs.stats.montecarlo_sharpe(r)</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.montecarlo_drawdown(r)</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>qs.stats.montecarlo_cagr(r)</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4 id="jquantstats-only-stats-methods">jquantstats-only stats methods<a class="headerlink" href="#jquantstats-only-stats-methods" title="Permanent link">&para;</a></h4>
+<p>These methods have <strong>no QuantStats equivalent</strong> and are unique to jquantstats.</p>
+<table>
+<thead>
+<tr>
+<th>jquantstats</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data.stats.acf(nlags=20)</code></td>
+<td>Full autocorrelation function series</td>
+</tr>
+<tr>
+<td><code>data.stats.annual_breakdown()</code></td>
+<td>Year-by-year performance table</td>
+</tr>
+<tr>
+<td><code>data.stats.autocorr(lag=1)</code></td>
+<td>Autocorrelation at a given lag (qs only has <code>autocorr_penalty</code>)</td>
+</tr>
+<tr>
+<td><code>data.stats.avg_drawdown()</code></td>
+<td>Average drawdown across all drawdown episodes</td>
+</tr>
+<tr>
+<td><code>data.stats.down_capture()</code></td>
+<td>Downside capture ratio vs benchmark</td>
+</tr>
+<tr>
+<td><code>data.stats.hhi_positive()</code></td>
+<td>Herfindahl-Hirschman concentration index for positive returns</td>
+</tr>
+<tr>
+<td><code>data.stats.hhi_negative()</code></td>
+<td>Herfindahl-Hirschman concentration index for negative returns</td>
+</tr>
+<tr>
+<td><code>data.stats.max_drawdown_duration()</code></td>
+<td>Duration of the maximum drawdown in periods</td>
+</tr>
+<tr>
+<td><code>data.stats.monthly_win_rate()</code></td>
+<td>Win rate computed on monthly aggregated returns</td>
+</tr>
+<tr>
+<td><code>data.stats.periods_per_year</code></td>
+<td>Inferred annualisation factor (property)</td>
+</tr>
+<tr>
+<td><code>data.stats.sharpe_variance()</code></td>
+<td>Variance-penalised Sharpe variant</td>
+</tr>
+<tr>
+<td><code>data.stats.summary()</code></td>
+<td>Composite stats summary as a <code>pl.DataFrame</code></td>
+</tr>
+<tr>
+<td><code>data.stats.up_capture()</code></td>
+<td>Upside capture ratio vs benchmark</td>
+</tr>
+<tr>
+<td><code>data.stats.worst_n_periods(n=5)</code></td>
+<td>Worst N individual return periods</td>
+</tr>
+</tbody>
+</table>
+<h3 id="plots">Plots<a class="headerlink" href="#plots" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>QuantStats</th>
+<th>jquantstats</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>qs.plots.snapshot(r)</code></td>
+<td><code>data.plots.snapshot()</code></td>
+</tr>
+<tr>
+<td><code>qs.plots.drawdown(r)</code></td>
+<td><code>data.plots.drawdown()</code></td>
+</tr>
+<tr>
+<td><code>qs.plots.returns(r)</code></td>
+<td><code>data.plots.returns()</code></td>
+</tr>
+<tr>
+<td><code>qs.plots.monthly_heatmap(r)</code></td>
+<td><code>data.plots.monthly_heatmap()</code></td>
+</tr>
+<tr>
+<td><code>qs.plots.distribution(r)</code></td>
+<td><code>data.plots.distribution()</code></td>
+</tr>
+<tr>
+<td><code>qs.plots.rolling_sharpe(r)</code></td>
+<td><code>data.plots.rolling_sharpe()</code></td>
+</tr>
+<tr>
+<td><code>qs.plots.rolling_volatility(r)</code></td>
+<td><code>data.plots.rolling_volatility()</code></td>
+</tr>
+</tbody>
+</table>
+<p>All <code>data.plots.*</code> methods return an interactive <strong>Plotly figure</strong> instead
+of a static matplotlib figure.</p>
+<h3 id="reports">Reports<a class="headerlink" href="#reports" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># QuantStats</span>
+<span class="n">qs</span><span class="o">.</span><span class="n">reports</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">returns_pd</span><span class="p">,</span> <span class="n">benchmark</span><span class="o">=</span><span class="n">benchmark_pd</span><span class="p">)</span>
+<span class="n">qs</span><span class="o">.</span><span class="n">reports</span><span class="o">.</span><span class="n">metrics</span><span class="p">(</span><span class="n">returns_pd</span><span class="p">)</span>
+
+<span class="c1"># jquantstats</span>
+<span class="n">data</span><span class="o">.</span><span class="n">reports</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+<span class="n">data</span><span class="o">.</span><span class="n">reports</span><span class="o">.</span><span class="n">metrics</span><span class="p">()</span>
+<span class="n">data</span><span class="o">.</span><span class="n">reports</span><span class="o">.</span><span class="n">to_html</span><span class="p">()</span>          <span class="c1"># full HTML report</span>
+</code></pre></div>
+<hr />
+<h2 id="accessing-results">Accessing results<a class="headerlink" href="#accessing-results" title="Permanent link">&para;</a></h2>
+<p>QuantStats functions return scalars. jquantstats methods return a <code>dict</code>
+keyed by column name.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># QuantStats — scalar</span>
+<span class="n">sharpe</span> <span class="o">=</span> <span class="n">qs</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sharpe</span><span class="p">(</span><span class="n">returns_pd</span><span class="p">)</span>   <span class="c1"># 1.23</span>
+
+<span class="c1"># jquantstats — dict</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sharpe</span><span class="p">()</span>            <span class="c1"># {&quot;MyStrategy&quot;: 1.23}</span>
+<span class="n">sharpe</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;MyStrategy&quot;</span><span class="p">]</span>           <span class="c1"># 1.23</span>
+</code></pre></div>
+<p>Multi-asset results come back in the same call:</p>
+<div class="highlight"><pre><span></span><code><span class="n">returns_multi</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s2">&quot;Date&quot;</span><span class="p">:</span> <span class="n">dates</span><span class="p">,</span>
+    <span class="s2">&quot;AAPL&quot;</span><span class="p">:</span> <span class="n">aapl_rets</span><span class="p">,</span>
+    <span class="s2">&quot;MSFT&quot;</span><span class="p">:</span> <span class="n">msft_rets</span><span class="p">,</span>
+<span class="p">})</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">jqs</span><span class="o">.</span><span class="n">Data</span><span class="o">.</span><span class="n">from_returns</span><span class="p">(</span><span class="n">returns</span><span class="o">=</span><span class="n">returns_multi</span><span class="p">)</span>
+<span class="n">data</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sharpe</span><span class="p">()</span>
+<span class="c1"># → {&quot;AAPL&quot;: 1.34, &quot;MSFT&quot;: 0.91}</span>
+</code></pre></div>
+<hr />
+<h2 id="behavioural-differences">Behavioural differences<a class="headerlink" href="#behavioural-differences" title="Permanent link">&para;</a></h2>
+<h3 id="nan-null-handling">NaN / null handling<a class="headerlink" href="#nan-null-handling" title="Permanent link">&para;</a></h3>
+<p>pandas (and QuantStats) silently drop <code>NaN</code> values in most calculations.
+Polars propagates <code>null</code> by default — if any value in a column is <code>null</code>,
+most statistics will return <code>null</code> instead of a numeric result.</p>
+<blockquote>
+<p><strong>Note:</strong> in Polars, <code>null</code> (a missing entry, equivalent to pandas <code>NaN</code>)
+and <code>NaN</code> (IEEE-754 "Not a Number") are distinct. jquantstats treats <code>null</code>
+as missing; <code>NaN</code> is a numeric value that propagates through calculations.</p>
+</blockquote>
+<p>You can clean data manually before constructing <code>Data</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">returns_pl</span> <span class="o">=</span> <span class="n">returns_pl</span><span class="o">.</span><span class="n">drop_nulls</span><span class="p">()</span>
+<span class="c1"># or fill forward</span>
+<span class="n">returns_pl</span> <span class="o">=</span> <span class="n">returns_pl</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">forward_fill</span><span class="p">())</span>
+</code></pre></div>
+<p>Or use the <code>null_strategy</code> parameter on <code>Data.from_returns</code> / <code>Data.from_prices</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Mirrors pandas / QuantStats behaviour: silently drop rows with nulls</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">jqs</span><span class="o">.</span><span class="n">Data</span><span class="o">.</span><span class="n">from_returns</span><span class="p">(</span><span class="n">returns</span><span class="o">=</span><span class="n">returns_pl</span><span class="p">,</span> <span class="n">null_strategy</span><span class="o">=</span><span class="s2">&quot;drop&quot;</span><span class="p">)</span>
+
+<span class="c1"># Forward-fill nulls before computing statistics</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">jqs</span><span class="o">.</span><span class="n">Data</span><span class="o">.</span><span class="n">from_returns</span><span class="p">(</span><span class="n">returns</span><span class="o">=</span><span class="n">returns_pl</span><span class="p">,</span> <span class="n">null_strategy</span><span class="o">=</span><span class="s2">&quot;forward_fill&quot;</span><span class="p">)</span>
+
+<span class="c1"># Raise an informative error if any null is found (useful during development)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">jqs</span><span class="o">.</span><span class="n">Data</span><span class="o">.</span><span class="n">from_returns</span><span class="p">(</span><span class="n">returns</span><span class="o">=</span><span class="n">returns_pl</span><span class="p">,</span> <span class="n">null_strategy</span><span class="o">=</span><span class="s2">&quot;raise&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>The default (<code>null_strategy=None</code>) passes nulls through unchanged.</p>
+<h3 id="no-top-level-functions">No top-level functions<a class="headerlink" href="#no-top-level-functions" title="Permanent link">&para;</a></h3>
+<p>QuantStats exposes bare module-level functions. jquantstats has none.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># ❌ does not exist</span>
+<span class="n">jqs</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sharpe</span><span class="p">(</span><span class="n">returns</span><span class="p">)</span>
+
+<span class="c1"># ✅ correct</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">jqs</span><span class="o">.</span><span class="n">Data</span><span class="o">.</span><span class="n">from_returns</span><span class="p">(</span><span class="n">returns</span><span class="o">=</span><span class="n">returns_pl</span><span class="p">)</span>
+<span class="n">data</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sharpe</span><span class="p">()</span>
+</code></pre></div>
+<hr />
+<h2 id="portfolio-only-features">Portfolio-only features<a class="headerlink" href="#portfolio-only-features" title="Permanent link">&para;</a></h2>
+<p>These capabilities have no QuantStats equivalent and are only available
+through the <code>Portfolio</code> entry point.</p>
+<div class="highlight"><pre><span></span><code><span class="n">pf</span> <span class="o">=</span> <span class="n">jqs</span><span class="o">.</span><span class="n">Portfolio</span><span class="o">.</span><span class="n">from_cash_position</span><span class="p">(</span><span class="n">prices</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">aum</span><span class="o">=</span><span class="mi">1_000_000</span><span class="p">)</span>
+
+<span class="c1"># Execution-delay analysis</span>
+<span class="n">pf_lagged</span> <span class="o">=</span> <span class="n">pf</span><span class="o">.</span><span class="n">lag</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>                    <span class="c1"># shift positions forward by 1 day</span>
+<span class="n">pf</span><span class="o">.</span><span class="n">plots</span><span class="o">.</span><span class="n">lead_lag_ir_plot</span><span class="p">(</span><span class="n">max_lag</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>     <span class="c1"># information ratio across lags</span>
+
+<span class="c1"># Tilt / timing decomposition</span>
+<span class="n">pf</span><span class="o">.</span><span class="n">tilt</span>                                  <span class="c1"># constant-weight (allocation skill)</span>
+<span class="n">pf</span><span class="o">.</span><span class="n">timing</span>                                <span class="c1"># weight deviations (timing skill)</span>
+<span class="n">pf</span><span class="o">.</span><span class="n">tilt_timing_decomp</span>                    <span class="c1"># side-by-side NAV comparison</span>
+
+<span class="c1"># Turnover analytics</span>
+<span class="n">pf</span><span class="o">.</span><span class="n">turnover</span>                              <span class="c1"># daily one-way turnover (fraction of AUM)</span>
+<span class="n">pf</span><span class="o">.</span><span class="n">turnover_weekly</span><span class="p">()</span>                     <span class="c1"># weekly aggregate</span>
+<span class="n">pf</span><span class="o">.</span><span class="n">turnover_summary</span><span class="p">()</span>                    <span class="c1"># {&quot;mean_daily&quot;: ..., &quot;mean_weekly&quot;: ..., &quot;std&quot;: ...}</span>
+
+<span class="c1"># Cost modelling</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jquantstats</span><span class="w"> </span><span class="kn">import</span> <span class="n">CostModel</span>
+
+<span class="n">pf_a</span> <span class="o">=</span> <span class="n">jqs</span><span class="o">.</span><span class="n">Portfolio</span><span class="o">.</span><span class="n">from_cash_position</span><span class="p">(</span>
+    <span class="n">prices</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">aum</span><span class="p">,</span>
+    <span class="n">cost_model</span><span class="o">=</span><span class="n">CostModel</span><span class="o">.</span><span class="n">per_unit</span><span class="p">(</span><span class="mf">0.01</span><span class="p">),</span>    <span class="c1"># £0.01 per share traded</span>
+<span class="p">)</span>
+<span class="n">pf_b</span> <span class="o">=</span> <span class="n">jqs</span><span class="o">.</span><span class="n">Portfolio</span><span class="o">.</span><span class="n">from_cash_position</span><span class="p">(</span>
+    <span class="n">prices</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">aum</span><span class="p">,</span>
+    <span class="n">cost_model</span><span class="o">=</span><span class="n">CostModel</span><span class="o">.</span><span class="n">turnover_bps</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span>   <span class="c1"># 5 bps per unit of AUM turnover</span>
+<span class="p">)</span>
+
+<span class="n">pf</span><span class="o">.</span><span class="n">trading_cost_impact</span><span class="p">(</span><span class="n">max_bps</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>          <span class="c1"># sweep cost sensitivity 0 → 20 bps</span>
+</code></pre></div>
+<hr />
+<h2 id="minimal-migration-checklist">Minimal migration checklist<a class="headerlink" href="#minimal-migration-checklist" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Install</strong> <code>jquantstats</code> (<code>pip install jquantstats</code>).</li>
+<li><strong>Convert</strong> your <code>pd.Series</code> to a <code>pl.DataFrame</code> with a date column.</li>
+<li><strong>Construct</strong> a <code>Data</code> object once with <code>Data.from_returns(...)</code>.</li>
+<li><strong>Replace</strong> every <code>qs.stats.foo(r)</code> call with <code>data.stats.foo()["col"]</code>.</li>
+<li><strong>Drop</strong> any <code>NaN</code>-filled rows before passing data in, or use <code>null_strategy</code>.</li>
+</ol>
+<hr />
+<h2 id="further-reading">Further reading<a class="headerlink" href="#further-reading" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="docs/api.md">API Reference</a> — complete method signatures</li>
+<li><a href="docs/ARCHITECTURE.md">Architecture</a> — how the library is structured</li>
+<li><a href="CHANGELOG.md">Changelog</a> — version history and new features</li>
+<li><a href="docs/stability.md">API Stability</a> — versioning and deprecation policy</li>
+<li><a href="docs/QUICK_REFERENCE.md">Quick Reference</a> — one-page lookup table</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "search.suggest", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@11.4.0/dist/mermaid.esm.min.mjs" type="module"></script>
+      
+    
+  </body>
+</html>
