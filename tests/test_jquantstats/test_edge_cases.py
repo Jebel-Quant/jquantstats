@@ -468,3 +468,44 @@ def test_from_prices_null_strategy_forwarded():
     # 2 of which are null (the null and the row after it); drop_nulls leaves 3 rows
     assert data.returns["asset"].null_count() == 0
     assert data.returns.shape[0] == 3
+
+
+def test_null_strategy_interpolate_fills_interior_nulls():
+    """null_strategy='interpolate' linearly interpolates interior nulls."""
+    from datetime import date, timedelta
+
+    base = date(2023, 1, 1)
+    returns = pl.DataFrame(
+        {
+            "Date": [base + timedelta(days=i) for i in range(5)],
+            # Interior nulls at positions 1 and 2; known values: 0.01, 0.04
+            "asset": [0.01, None, None, 0.04, 0.05],
+        }
+    )
+    data = Data.from_returns(returns=returns, null_strategy="interpolate")
+    assert data.returns.shape[0] == 5
+    assert data.returns["asset"].null_count() == 0
+    # Linear interpolation between 0.01 and 0.04 over 3 steps:
+    # position 1 → 0.02, position 2 → 0.03
+    assert data.returns["asset"][1] == pytest.approx(0.02)
+    assert data.returns["asset"][2] == pytest.approx(0.03)
+
+
+def test_null_strategy_interpolate_backfills_leading_nulls():
+    """null_strategy='interpolate' backfills leading nulls (the backfill trick)."""
+    from datetime import date, timedelta
+
+    base = date(2023, 1, 1)
+    returns = pl.DataFrame(
+        {
+            "Date": [base + timedelta(days=i) for i in range(5)],
+            # Leading nulls at positions 0 and 1; first known value is 0.03
+            "asset": [None, None, 0.03, 0.04, 0.05],
+        }
+    )
+    data = Data.from_returns(returns=returns, null_strategy="interpolate")
+    assert data.returns.shape[0] == 5
+    assert data.returns["asset"].null_count() == 0
+    # Leading nulls are filled with the first known value via backward_fill
+    assert data.returns["asset"][0] == pytest.approx(0.03)
+    assert data.returns["asset"][1] == pytest.approx(0.03)

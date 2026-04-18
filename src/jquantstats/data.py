@@ -32,7 +32,7 @@ def _apply_null_strategy(
     dframe: pl.DataFrame,
     date_col: str,
     frame_name: str,
-    null_strategy: Literal["raise", "drop", "forward_fill"] | None,
+    null_strategy: Literal["raise", "drop", "forward_fill", "interpolate"] | None,
 ) -> pl.DataFrame:
     """Check for nulls in *dframe* and apply *null_strategy*.
 
@@ -44,7 +44,7 @@ def _apply_null_strategy(
         Name of the column to treat as the date index (excluded from null check).
     frame_name : str
         Descriptive name used in the error message (e.g. ``"returns"``).
-    null_strategy : {"raise", "drop", "forward_fill"} | None
+    null_strategy : {"raise", "drop", "forward_fill", "interpolate"} | None
         How to handle null values:
 
         - ``None`` — leave nulls as-is (current default behaviour; nulls will
@@ -54,12 +54,16 @@ def _apply_null_strategy(
         - ``"drop"`` — drop every row that contains at least one null value.
         - ``"forward_fill"`` — fill each null with the most recent non-null
           value in the same column.
+        - ``"interpolate"`` — linearly interpolate interior nulls between
+          known values, then backward-fill any remaining leading nulls (the
+          *backfill trick*).
 
     Returns:
     -------
     pl.DataFrame
         The original DataFrame (``None`` / ``"raise"``), a filtered DataFrame
-        (``"drop"``), or a filled DataFrame (``"forward_fill"``).
+        (``"drop"``), or a filled DataFrame (``"forward_fill"`` /
+        ``"interpolate"``).
 
     Raises:
     ------
@@ -81,6 +85,10 @@ def _apply_null_strategy(
         raise NullsInReturnsError(frame_name, cols_with_nulls)
     if null_strategy == "drop":
         return dframe.drop_nulls(subset=value_cols)
+    if null_strategy == "interpolate":
+        # Linearly interpolate interior nulls, then backfill leading nulls that
+        # cannot be reached by interpolation (the backfill trick).
+        return dframe.with_columns([pl.col(c).interpolate().backward_fill() for c in value_cols])
     # forward_fill
     return dframe.with_columns([pl.col(c).forward_fill() for c in value_cols])
 
@@ -178,7 +186,7 @@ class Data:
         rf: NativeFrameOrScalar = 0.0,
         benchmark: NativeFrame | None = None,
         date_col: str = "Date",
-        null_strategy: Literal["raise", "drop", "forward_fill"] | None = None,
+        null_strategy: Literal["raise", "drop", "forward_fill", "interpolate"] | None = None,
     ) -> Data:
         """Create a Data object from returns and optional benchmark.
 
@@ -201,7 +209,7 @@ class Data:
         date_col : str, optional
             Name of the date column in the DataFrames. Default is "Date".
 
-        null_strategy : {"raise", "drop", "forward_fill"} | None, optional
+        null_strategy : {"raise", "drop", "forward_fill", "interpolate"} | None, optional
             How to handle ``null`` (missing) values in *returns* and *benchmark*.
             Default is ``None`` (nulls are left as-is and will propagate through
             calculations, matching the current Polars behaviour).
@@ -215,6 +223,8 @@ class Data:
               Mirrors the pandas/QuantStats silent-drop behaviour.
             - ``"forward_fill"`` — fill each null with the most recent non-null value
               in the same column.
+            - ``"interpolate"`` — linearly interpolate interior nulls, then
+              backward-fill any remaining leading nulls (the backfill trick).
 
             .. note::
                This parameter affects only Polars ``null`` values (i.e. ``None`` /
@@ -314,7 +324,7 @@ class Data:
         rf: NativeFrameOrScalar = 0.0,
         benchmark: NativeFrame | None = None,
         date_col: str = "Date",
-        null_strategy: Literal["raise", "drop", "forward_fill"] | None = None,
+        null_strategy: Literal["raise", "drop", "forward_fill", "interpolate"] | None = None,
     ) -> Data:
         """Create a Data object from prices and optional benchmark.
 
@@ -340,7 +350,7 @@ class Data:
         date_col : str, optional
             Name of the date column in the DataFrames.  Default is ``"Date"``.
 
-        null_strategy : {"raise", "drop", "forward_fill"} | None, optional
+        null_strategy : {"raise", "drop", "forward_fill", "interpolate"} | None, optional
             How to handle ``null`` (missing) values after converting prices to
             returns.  Forwarded unchanged to :meth:`from_returns`.
             Default is ``None`` (nulls propagate through calculations).
@@ -350,6 +360,8 @@ class Data:
               if any null is found in the derived returns.
             - ``"drop"`` — silently drop every row that contains at least one null.
             - ``"forward_fill"`` — fill each null with the most recent non-null value.
+            - ``"interpolate"`` — linearly interpolate interior nulls, then
+              backward-fill any remaining leading nulls (the backfill trick).
 
             .. note::
                Prices that contain nulls will produce null returns via
