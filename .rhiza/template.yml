@@ -3,6 +3,9 @@ ref: "v0.10.9"
 
 templates:
   - github
+  - github-book
+  - github-marimo
+  - github-tests
   - legal
   - marimo
   - tests
