@@ -5,13 +5,10 @@ ref: v0.10.9
 include: []
 exclude: []
 templates:
-- github
 - github-book
 - github-marimo
 - github-tests
 - legal
-- marimo
-- tests
 files:
 - .bandit
 - .editorconfig
@@ -100,5 +97,5 @@ files:
 - docs/mkdocs-base.yml
 - pytest.ini
 - ruff.toml
-synced_at: '2026-05-23T18:44:36Z'
+synced_at: '2026-05-23T19:56:29Z'
 strategy: merge
