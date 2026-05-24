@@ -5,6 +5,6 @@ profiles:
   - github-project
 templates:
   #- github-book
-  #- github-marimo
+  - github-marimo
   #- github-tests
   - legal
