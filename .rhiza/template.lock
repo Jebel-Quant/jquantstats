@@ -1,14 +1,14 @@
-sha: 1c6bd1d29660d0d45e2e219bab6448f13f46c740
+sha: d20dd62adfdd9bfcd918fac200f5d37ed237c604
 repo: jebel-quant/rhiza
 host: github
-ref: v0.10.5
+ref: v0.10.9
 include: []
 exclude: []
 templates:
-- github
+- github-book
+- github-marimo
+- github-tests
 - legal
-- marimo
-- tests
 files:
 - .bandit
 - .editorconfig
@@ -53,10 +53,12 @@ files:
 - .rhiza/semgrep.yml
 - .rhiza/tests/README.md
 - .rhiza/tests/api/conftest.py
+- .rhiza/tests/api/test_ci_workflow.py
 - .rhiza/tests/api/test_gh_aw_targets.py
 - .rhiza/tests/api/test_github_targets.py
 - .rhiza/tests/api/test_makefile_api.py
 - .rhiza/tests/api/test_makefile_targets.py
+- .rhiza/tests/api/test_release_workflow.py
 - .rhiza/tests/api/test_weekly_workflow.py
 - .rhiza/tests/conftest.py
 - .rhiza/tests/deps/test_dependency_health.py
@@ -95,5 +97,5 @@ files:
 - docs/mkdocs-base.yml
 - pytest.ini
 - ruff.toml
-synced_at: '2026-05-15T13:36:15Z'
+synced_at: '2026-05-23T19:56:29Z'
 strategy: merge
