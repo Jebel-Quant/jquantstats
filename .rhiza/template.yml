@@ -1,8 +1,10 @@
 repository: "jebel-quant/rhiza"
 ref: "v0.10.9"
 
+profiles:
+  - github-project
 templates:
-  - github-book
+  #- github-book
   - github-marimo
-  - github-tests
+  #- github-tests
   - legal

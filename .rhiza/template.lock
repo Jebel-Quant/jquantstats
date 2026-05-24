@@ -5,9 +5,7 @@ ref: v0.10.9
 include: []
 exclude: []
 templates:
-- github-book
 - github-marimo
-- github-tests
 - legal
 files:
 - .bandit
@@ -97,5 +95,7 @@ files:
 - docs/mkdocs-base.yml
 - pytest.ini
 - ruff.toml
-synced_at: '2026-05-23T19:56:29Z'
+profiles:
+- github-project
+synced_at: '2026-05-24T08:10:57Z'
 strategy: merge
