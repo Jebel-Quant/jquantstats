@@ -1,3 +1,32 @@
+# docs/mkdocs-base.yml — Base MkDocs configuration for rhiza-based projects.
+#
+# USAGE (standalone)
+#   Build or serve this file directly if you have no root-level mkdocs.yml:
+#     uvx --with mkdocs-material mkdocs serve -f docs/mkdocs-base.yml
+#   The rhiza build system (make book) will pick this file up automatically
+#   as a fallback when no root-level mkdocs.yml is found.
+#
+# USAGE (with INHERIT)
+#   To extend this config from a root-level mkdocs.yml, add the following
+#   at the top of your mkdocs.yml and override only what you need:
+#
+#     INHERIT: docs/mkdocs-base.yml
+#
+#     site_name: My Project
+#     site_url: https://example.github.io/my-project/
+#     repo_url: https://github.com/example/my-project
+#     repo_name: example/my-project
+#
+#     docs_dir: docs   # always set this explicitly — base uses docs_dir: . which
+#                      # resolves relative to docs/mkdocs-base.yml, not mkdocs.yml
+#
+#     nav:             # nav is fully replaced — not merged — by the child config
+#       - Home: index.md
+#       - Guide: guide.md
+#
+#   Any key you omit in mkdocs.yml is inherited from this file.
+#   The 'nav' key is always fully replaced when defined in the child.
+
 docs_dir: docs
 site_dir: _book
 
@@ -79,3 +108,13 @@ markdown_extensions:
 # ----------------------------------------------------------------------------
 plugins:
   - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+            show_source: true
+            show_root_heading: true
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+

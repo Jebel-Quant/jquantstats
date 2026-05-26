@@ -14,16 +14,15 @@ __marimo__
 
 _tests
 _book
+_pdoc
+docs/notebooks/*.html
+docs/reports
+docs/reports.md
 _marimushka
 _mkdocs
 _benchmarks
 _jupyter
 _site
-site/
-docs/marimo.md
-docs/notebooks/*.html
-docs/reports/
-docs/reports.md
 
 # LaTeX build artifacts
 docs/paper/*.aux
@@ -121,9 +120,3 @@ local.mk
 
 .bandit-baseline.json
 
-report.html
-/demo_report.py
-/positions.csv
-/prices.csv
-LICENSES.md
-/test_output/

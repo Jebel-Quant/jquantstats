@@ -79,7 +79,6 @@ extend-select = [
     "ICN",   # flake8-import-conventions - Import convention enforcement
     #"PIE",   # flake8-pie - Miscellaneous rules
     #"PL",    # Pylint rules
-    "ANN2",  # flake8-annotations - Enforce return-type annotations on all functions/methods
 ]
 
 # Resolve incompatible pydocstyle rules: prefer D211 and D212 over D203 and D213
@@ -108,17 +107,15 @@ line-ending = "auto"
     "S603",     # Allow subprocess calls without shell=False check
     "S607",     # Allow starting processes with partial paths in tests
     "PLW1510",  # Allow subprocess without explicit check parameter
-    "ANN",      # Test functions and fixtures do not require type annotations
 ]
 "tests/**/*.py" = [
     "ERA001",   # Allow commented out code in project tests
     "PLR2004",  # Allow magic values in project tests
     "RUF002",   # Allow ambiguous unicode in project tests
     "RUF012",   # Allow mutable class attributes in project tests
-    "ANN",      # Test functions and fixtures do not require type annotations
 ]
 # Marimo notebooks - allow flexible coding patterns for interactive exploration
-"**/marimo/**/*.py" = [
+"**/notebooks/*.py" = [
     "D100",    # No module docstring - marimo requires `import marimo` as the first statement
     "N803",    # Allow non-lowercase variable names in notebooks
     "S101",    # Allow assert statements in notebooks
@@ -126,7 +123,6 @@ line-ending = "auto"
     "B018",    # Allow useless expressions in notebooks
     "RUF001",  # Allow ambiguous unicode in notebooks
     "RUF002",  # Allow ambiguous unicode in notebooks
-    "ANN",     # Marimo cell functions do not require type annotations
 ]
 # Internal utility scripts - specific exceptions for internal tooling
 ".rhiza/utils/*.py" = [

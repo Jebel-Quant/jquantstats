@@ -1,25 +1,67 @@
+# GitHub Release Notes Configuration
+# This file configures automatic categorization of pull requests in release notes
+# See: https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes
+
 changelog:
   exclude:
     labels:
       - ignore-for-release
+      - duplicate
+      - question
+      - invalid
+      - wontfix
+    authors:
+      - dependabot
+      - renovate
+  
   categories:
-    - title: Breaking Changes
+    - title: 🚀 Features
       labels:
-        - breaking
-    - title: New Features
-      labels:
+        - feature
         - enhancement
-    - title: Bug Fixes
+    
+    - title: 🐛 Bug Fixes
       labels:
         - bug
-    - title: Documentation
+        - fix
+    
+    - title: 📚 Documentation
       labels:
         - documentation
-    - title: Maintenance
+        - docs
+    
+    - title: 🔧 Technical Debt
       labels:
-        - chore
-        - dependencies
+        - technical-debt
         - refactor
-    - title: Other Changes
+        - cleanup
+    
+    - title: 🏗️ Infrastructure
+      labels:
+        - ci
+        - build
+        - infrastructure
+    
+    - title: ⚡ Performance
+      labels:
+        - performance
+        - optimization
+    
+    - title: 🧪 Testing
+      labels:
+        - test
+        - testing
+    
+    - title: 🔒 Security
+      labels:
+        - security
+        - vulnerability
+    
+    - title: 📦 Dependencies
+      labels:
+        - dependencies
+        - deps
+    
+    - title: 🔄 Other Changes
       labels:
         - "*"

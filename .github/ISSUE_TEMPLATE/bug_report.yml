@@ -22,7 +22,7 @@ body:
       label: Steps to reproduce
       description: Minimal steps to reproduce the behaviour.
       placeholder: |
-        1. Import `jquantstats` and run ...
+        1. Run `make ...`
         2. See error
     validations:
       required: true
@@ -39,12 +39,12 @@ body:
     id: environment
     attributes:
       label: Environment
-      description: Relevant versions and system info.
+      description: |
+        Relevant versions and system info. Run `make info` if available.
       placeholder: |
         - OS: macOS 14 / Ubuntu 24.04 / Windows 11
         - Python: 3.13.x
-        - jquantstats version:
-        - polars version:
+        - rhiza version:
     validations:
       required: false
 

@@ -1,29 +1,23 @@
-## Description
+## Summary
 
-<!-- A clear and concise description of the changes you are proposing. -->
+<!-- One or two sentences describing what this PR does and why. -->
 
-## Related Issue
+Closes #<!-- issue number -->
 
-<!-- Link to the issue this PR addresses, e.g. Closes #123 -->
+## Changes
 
-Closes #
+<!-- Bullet list of what changed. -->
 
-## Type of Change
+-
 
-<!-- Put an `x` in all boxes that apply. -->
+## Testing
 
-- [ ] Bug fix (non-breaking change that fixes an issue)
-- [ ] New feature (non-breaking change that adds functionality)
-- [ ] Breaking change (fix or feature that causes existing functionality to change)
-- [ ] Documentation update
+- [ ] `make test` passes locally
+- [ ] `make fmt` has been run
+- [ ] New tests added (or explain why not needed)
 
 ## Checklist
 
-<!-- Put an `x` in all boxes that apply. -->
-
-- [ ] I have run `make fmt` and my code passes the linter
-- [ ] I have run `make test` and all tests pass
-- [ ] I have run `make deptry` and there are no dependency issues
-- [ ] I have added or updated tests that cover my changes
-- [ ] I have updated documentation if necessary
-- [ ] My commit messages follow the [Conventional Commits](https://www.conventionalcommits.org/) format
+- [ ] Commit messages follow the [Conventional Commits](https://www.conventionalcommits.org/) format
+- [ ] Documentation updated if behaviour changed
+- [ ] `make deptry` passes (no unused or missing dependencies)
