@@ -105,7 +105,7 @@ class TestTemplateBundles:
     # Bundle directory structure
     # ------------------------------------------------------------------
 
-    def test_bundles_directory_exists(self, bundles_root):
+    def test_bundles_directory_exists(self, bundles_data, bundles_root):
         """Test that the bundles/ directory exists."""
         assert bundles_root.is_dir(), "bundles/ directory must exist at the repo root"
 
