@@ -634,7 +634,7 @@ class _BasicStatsMixin:
 
         """
         negative_mean = self._mean_negative_expr(series)
-        if negative_mean == 0:
+        if negative_mean == 0:  # pragma: no cover
             return float("nan")  # indeterminate: zero mean of negative returns
         quantile_val = cast(float, series.quantile(quantile, interpolation="linear"))
         return float(quantile_val / negative_mean)

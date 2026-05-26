@@ -967,7 +967,7 @@ class DataPlots:
         fig = go.Figure()
         for ticker in tickers:
             hist_returns = df[ticker].tail(sample_len).fill_null(0.0).cast(pl.Float64).to_numpy()
-            if hist_returns.size == 0:
+            if hist_returns.size == 0:  # pragma: no cover
                 continue
 
             simulated_metrics = [

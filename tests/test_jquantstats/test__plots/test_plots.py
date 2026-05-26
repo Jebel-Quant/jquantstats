@@ -349,3 +349,35 @@ def test_annual_sharpe_plot_returns_figure_with_bars(long_portfolio):
         assert isinstance(trace, go.Bar)
     assert "Annual Sharpe" in fig.layout.title.text
     _ = fig.to_dict()
+
+
+def test_montecarlo_invalid_n_raises(data):
+    """Montecarlo raises ValueError when n <= 0."""
+    with pytest.raises(ValueError, match="n must be a positive integer"):
+        data.plots.montecarlo(n=0)
+
+
+def test_montecarlo_invalid_period_raises(data):
+    """Montecarlo raises ValueError when period <= 0."""
+    with pytest.raises(ValueError, match="period must be a positive integer"):
+        data.plots.montecarlo(period=0)
+
+
+def test_montecarlo_distribution_invalid_n_raises(data):
+    """montecarlo_distribution raises ValueError when n <= 0."""
+    with pytest.raises(ValueError, match="n must be a positive integer"):
+        data.plots.montecarlo_distribution(n=0)
+
+
+def test_montecarlo_distribution_invalid_period_raises(data):
+    """montecarlo_distribution raises ValueError when period <= 0."""
+    with pytest.raises(ValueError, match="period must be a positive integer"):
+        data.plots.montecarlo_distribution(period=0)
+
+
+def test_montecarlo_distribution_cagr_metric(data):
+    """montecarlo_distribution supports metric='cagr'."""
+    fig = data.plots.montecarlo_distribution(n=20, period=30, metric="cagr")
+    assert isinstance(fig, go.Figure)
+    assert fig.layout.xaxis.title.text == "CAGR"
+    _ = fig.to_dict()

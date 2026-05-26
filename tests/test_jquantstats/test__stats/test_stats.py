@@ -1869,3 +1869,20 @@ def test_downside_deviation_empty():
     from jquantstats._stats._internals import _downside_deviation
 
     assert _downside_deviation(pl.Series([], dtype=pl.Float64)) == pytest.approx(0.0)
+
+
+def test_outlier_win_ratio_all_zero_returns_is_nan(flat_data):
+    """outlier_win_ratio returns NaN when all returns are zero (zero mean of non-negative returns)."""
+    import math
+
+    result = flat_data.stats.outlier_win_ratio()
+    assert math.isnan(result["ret"])
+
+
+def test_montecarlo_all_null_data_returns_nan_paths(all_null_data):
+    """Montecarlo returns all-NaN terminal returns when the asset has no usable data."""
+    import math
+
+    result = all_null_data.stats.montecarlo(n=10, period=5)
+    assert result.shape == (10, 1)
+    assert all(math.isnan(v) for v in result["ret"].to_list())
