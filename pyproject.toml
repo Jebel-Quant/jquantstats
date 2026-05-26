@@ -50,6 +50,7 @@ dev = [
     "quantstats==0.0.81",  # reference implementation used in test_quantstats.py for metric validation
     "httpx>=0.28.1",
     "marimo>=0.23.6",
+    "syrupy>=4.0.0",
 ]
 
 
