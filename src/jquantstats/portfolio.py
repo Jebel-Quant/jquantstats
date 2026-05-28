@@ -522,7 +522,7 @@ class Portfolio(
         """
         if self._stats_cache is None:
             object.__setattr__(self, "_stats_cache", self.data.stats)
-        return self._stats_cache  # type: ignore[return-value]
+        return cast("Stats", self._stats_cache)
 
     @property
     def plots(self) -> PortfolioPlots:
@@ -539,7 +539,7 @@ class Portfolio(
         """
         if self._plots_cache is None:
             object.__setattr__(self, "_plots_cache", PortfolioPlots(self))
-        return self._plots_cache  # type: ignore[return-value]
+        return cast(PortfolioPlots, self._plots_cache)
 
     @property
     def report(self) -> Report:
@@ -556,7 +556,7 @@ class Portfolio(
         """
         if self._report_cache is None:
             object.__setattr__(self, "_report_cache", Report(self))
-        return self._report_cache  # type: ignore[return-value]
+        return cast(Report, self._report_cache)
 
     @property
     def utils(self) -> "PortfolioUtils":
@@ -576,7 +576,7 @@ class Portfolio(
             from ._utils import PortfolioUtils
 
             object.__setattr__(self, "_utils_cache", PortfolioUtils(self))
-        return self._utils_cache  # type: ignore[return-value]
+        return cast("PortfolioUtils", self._utils_cache)
 
     # ── Portfolio transforms ───────────────────────────────────────────────────
 
