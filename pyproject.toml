@@ -26,11 +26,13 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "License :: OSI Approved :: MIT License",
 ]
 
 # Project URLs for documentation and reference
 [project.urls]
-repository = "https://github.com/jebel-quant/jquantstats"
+Homepage = "https://github.com/jebel-quant/jquantstats"
+Repository = "https://github.com/jebel-quant/jquantstats"
 
 # Optional dependencies that can be installed with extras (e.g., pip install jquantstats[plot])
 [project.optional-dependencies]
@@ -50,6 +52,23 @@ dev = [
     "quantstats==0.0.81",  # reference implementation used in test_quantstats.py for metric validation
     "httpx>=0.28.1",
     "marimo>=0.23.6",
+]
+test = [
+    "pytest>=8.0",
+    "pytest-cov>=6.0",
+    "pytest-html>=4.0",
+    "pytest-mock>=3.0",
+    "pytest-xdist>=3.0",
+    "pytest-timeout>=2.0",
+    "pytest-benchmark>=5.2.3",
+    "hypothesis>=6.150.0",
+    "syrupy>=4.9.1",
+    "pygal>=3.1.0",
+    "python-dotenv>=1.0",
+]
+lint = [
+    "pre-commit>=4.0",
+    "ty>=0.0.30",
 ]
 
 
