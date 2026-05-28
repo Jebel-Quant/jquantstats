@@ -6,9 +6,16 @@ installed so the base test suite remains dependency-free.
 
 from __future__ import annotations
 
+import sys
+
 import pytest
 
 kaleido = pytest.importorskip("kaleido", reason="kaleido not installed (pip install jquantstats[plot])")
+
+pytestmark = pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="kaleido launches a Chrome subprocess that crashes the xdist worker on Windows CI",
+)
 
 # PNG magic bytes: \x89PNG
 _PNG_MAGIC = b"\x89PNG"
