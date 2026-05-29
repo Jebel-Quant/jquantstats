@@ -837,7 +837,7 @@ requires-dist = [
     { name = "narwhals", specifier = ">=2.0.0" },
     { name = "numpy", specifier = ">=2.0.0" },
     { name = "plotly", specifier = ">=6.0.0" },
-    { name = "polars", specifier = ">=1.18.0" },
+    { name = "polars", specifier = ">=1.35.2" },
     { name = "python-multipart", marker = "extra == 'web'", specifier = ">=0.0.12" },
     { name = "scipy", specifier = ">=1.14.1" },
     { name = "uvicorn", marker = "extra == 'web'", specifier = ">=0.32.0" },
