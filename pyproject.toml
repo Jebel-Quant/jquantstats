@@ -11,7 +11,7 @@ dependencies = [
     "narwhals>=2.0.0",
     "numpy>=2.0.0",
     "plotly>=6.0.0",
-    "polars>=1.18.0",
+    "polars>=1.35.2",
     "scipy>=1.14.1"
 ]
 license = "MIT"

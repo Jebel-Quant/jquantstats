@@ -10,6 +10,9 @@ import random
 from datetime import date, timedelta
 
 import pytest
+
+pytest.importorskip("fastapi", reason="fastapi not installed (pip install jquantstats[api])")
+
 from starlette.testclient import TestClient
 
 from api.app import app

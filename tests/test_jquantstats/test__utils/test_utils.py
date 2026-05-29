@@ -7,6 +7,7 @@ and safe in the test context. No subprocess calls (S603/S607) are used here.
 from __future__ import annotations
 
 import math
+import sys
 from datetime import date, timedelta
 from pathlib import Path
 
@@ -524,6 +525,10 @@ def test_exponential_cov_late_start_asset_partial(multi_asset_data):
     assert not np.isnan(cov[date(2020, 1, 3)][1, 1])
 
 
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="memory-intensive EWM covariance computation crashes the xdist worker on Windows CI",
+)
 def test_exponential_cov_matches_pandas_stock_prices():
     """exponential_cov must match pandas ewm(span).cov(bias=True) on real stock data.
 
