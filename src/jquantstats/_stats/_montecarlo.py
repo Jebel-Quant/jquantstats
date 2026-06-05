@@ -49,7 +49,7 @@ class _MonteCarloStatsMixin:
 
         """
         n_obs = values.size
-        if n_obs == 0:
+        if n_obs == 0:  # pragma: no cover
             return np.full((n, period), np.nan, dtype=np.float64)
 
         n_blocks = math.ceil(period / block_size)

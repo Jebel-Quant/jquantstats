@@ -1376,6 +1376,14 @@ def test_montecarlo_cagr_shape(stats):
         assert np.isfinite(result[col].to_numpy()).all()
 
 
+def test_montecarlo_all_null_data(all_null_data):
+    """Montecarlo returns a DataFrame of NaN when all returns are null."""
+    result = all_null_data.stats.montecarlo(n=5, period=5)
+    assert isinstance(result, pl.DataFrame)
+    for col in result.columns:
+        assert result[col].is_nan().all()
+
+
 def test_montecarlo_invalid_params(stats):
     """Monte Carlo methods validate simulation counts and periods."""
     with pytest.raises(ValueError, match="positive integer"):
@@ -1536,6 +1544,12 @@ def test_omega_all_zero_returns_nan(flat_data):
 def test_outlier_win_ratio_no_positive_returns(all_negative_data):
     """outlier_win_ratio returns nan when no positive returns exist."""
     result = all_negative_data.stats.outlier_win_ratio()
+    assert all(np.isnan(v) for v in result.values())
+
+
+def test_outlier_win_ratio_zero_positive_mean(flat_data):
+    """outlier_win_ratio returns nan when positive_mean is zero (all returns are 0.0)."""
+    result = flat_data.stats.outlier_win_ratio()
     assert all(np.isnan(v) for v in result.values())
 
 

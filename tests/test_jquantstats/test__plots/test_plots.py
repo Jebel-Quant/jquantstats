@@ -110,6 +110,38 @@ def test_montecarlo_distribution_returns_histograms_and_observed_lines(data):
     _ = fig.to_dict()
 
 
+def test_montecarlo_invalid_n_raises(data):
+    """Montecarlo raises ValueError when n <= 0."""
+    with pytest.raises(ValueError, match="n must be a positive integer"):
+        data.plots.montecarlo(n=0, period=30)
+
+
+def test_montecarlo_invalid_period_raises(data):
+    """Montecarlo raises ValueError when period <= 0."""
+    with pytest.raises(ValueError, match="period must be a positive integer"):
+        data.plots.montecarlo(n=5, period=0)
+
+
+def test_montecarlo_distribution_invalid_n_raises(data):
+    """montecarlo_distribution raises ValueError when n <= 0."""
+    with pytest.raises(ValueError, match="n must be a positive integer"):
+        data.plots.montecarlo_distribution(n=0, period=30)
+
+
+def test_montecarlo_distribution_invalid_period_raises(data):
+    """montecarlo_distribution raises ValueError when period <= 0."""
+    with pytest.raises(ValueError, match="period must be a positive integer"):
+        data.plots.montecarlo_distribution(n=5, period=0)
+
+
+def test_montecarlo_distribution_cagr_metric(data):
+    """montecarlo_distribution renders histograms for the cagr metric."""
+    fig = data.plots.montecarlo_distribution(n=10, period=30, metric="cagr")
+    assert isinstance(fig, go.Figure)
+    assert fig.layout.xaxis.title.text == "CAGR"
+    _ = fig.to_dict()
+
+
 def test_montecarlo_distribution_invalid_metric_raises(data):
     """montecarlo_distribution rejects unsupported metric names."""
     with pytest.raises(ValueError, match="metric"):
