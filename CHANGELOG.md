@@ -1,3 +1,23 @@
+## [0.9.3] - 2026-06-05
+
+### 🐛 Bug Fixes
+
+- Update test_release_workflow to match inline release workflow
+
+### 💼 Other
+
+- Bump version 0.9.2 → 0.9.3
+
+### ⚙️ Miscellaneous Tasks
+
+- Update CHANGELOG.md for v0.9.2 [skip ci]
+- Bump rhiza template to v0.11.0 (#776)
+- Update rhiza to v0.15.2 (#778)
+- Bump rhiza to v0.17.0
+- Apply rhiza sync v0.17.0
+- Update rhiza to v0.15.3 (#779)
+- Upgrade paper workflow actions to Node.js 24-compatible versions
+- Update rhiza to v0.18.4 (#781)
 ## [0.9.2] - 2026-05-24
 
 ### 💼 Other
