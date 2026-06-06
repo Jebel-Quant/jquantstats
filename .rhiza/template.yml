@@ -1,5 +1,5 @@
 repository: "jebel-quant/rhiza"
-ref: "v0.18.4"
+ref: "v0.18.8"
 
 profiles:
   - github-project
