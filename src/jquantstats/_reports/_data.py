@@ -60,7 +60,7 @@ def _cagr_since(
             continue
         total = float((1.0 + s).product()) - 1.0
         years = n / periods_per_year
-        result[col] = float(abs(1.0 + total) ** (1.0 / years) - 1.0) * (1 if total >= 0 else -1)
+        result[col] = float(abs(1.0 + total) ** (1.0 / years) - 1.0)
     return result
 
 

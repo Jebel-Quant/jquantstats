@@ -1,7 +1,7 @@
 """Tests for the reports module functionality."""
 
 import math
-from datetime import date
+from datetime import date, timedelta
 
 import plotly.graph_objects as go
 import polars as pl
@@ -242,6 +242,20 @@ def test_cagr_since_single_observation():
     df = pl.DataFrame({"Date": [date(2023, 1, 1)], "ret": [0.01]}).with_columns(pl.col("Date").cast(pl.Date))
     result = _cagr_since(df, "Date", ["ret"], date(2023, 1, 1), 252)
     assert math.isnan(result["ret"])
+
+
+def test_cagr_since_negative_total_return_is_negative():
+    """A losing asset reports a negative annualised return (regression).
+
+    A constant daily loss compounding to exactly -50% over one year of 252
+    observations must produce a CAGR of -50%, not +50%.
+    """
+    n = 252
+    daily = 0.5 ** (1.0 / n) - 1.0  # compounds to exactly -50% over n periods
+    days = [date(2023, 1, 1) + timedelta(days=i) for i in range(n)]
+    df = pl.DataFrame({"Date": days, "ret": [daily] * n})
+    result = _cagr_since(df, "Date", ["ret"], date(2023, 1, 1), 252)
+    assert result["ret"] == pytest.approx(-0.5)
 
 
 def test_metrics_table_html_contains_table_tag():

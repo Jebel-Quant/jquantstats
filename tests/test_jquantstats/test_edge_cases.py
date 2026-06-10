@@ -174,7 +174,7 @@ def test_hhi_negative_nan_few_negatives(edge):
 
 
 def test_subtract_rf_invalid_type():
-    """Tests that Data.from_returns raises TypeError when rf is not a float or DataFrame."""
+    """Tests that Data.from_returns raises TypeError when rf is not numeric or a DataFrame."""
     from datetime import date
 
     returns = pl.DataFrame(
@@ -183,8 +183,9 @@ def test_subtract_rf_invalid_type():
             "asset": [0.01, -0.02],
         }
     )
-    with pytest.raises(TypeError, match="rf must be a float or DataFrame"):
-        Data.from_returns(returns=returns, rf=1)  # int is not float
+    # The exact wording comes from narwhals and varies across versions; match loosely.
+    with pytest.raises(TypeError, match="dataframe"):
+        Data.from_returns(returns=returns, rf="not a rate")  # str is neither numeric nor a frame
 
 
 # ── Empty returns ─────────────────────────────────────────────────────────────
