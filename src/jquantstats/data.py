@@ -318,11 +318,8 @@ class Data:
         """
         returns_pl = _to_polars(returns)
         benchmark_pl = _to_polars(benchmark) if benchmark is not None else None
-        rf_converted: float | pl.DataFrame
-        if isinstance(rf, pl.DataFrame) or (not isinstance(rf, float) and not isinstance(rf, int)):
-            rf_converted = _to_polars(rf)
-        else:
-            rf_converted = rf  # int is not float/DataFrame: _subtract_risk_free raises TypeError
+        # accept ints (e.g. rf=0) by coercing to float
+        rf_converted: float | pl.DataFrame = float(rf) if isinstance(rf, int | float) else _to_polars(rf)
 
         returns_pl = _apply_null_strategy(returns_pl, date_col, "returns", null_strategy)
         if benchmark_pl is not None:

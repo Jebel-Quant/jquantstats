@@ -45,6 +45,22 @@ def test_with_constant_rf(returns):
     assert result.benchmark is None
 
 
+def test_with_integer_rf(returns):
+    """Tests that Data.from_returns accepts an integer risk-free rate.
+
+    Args:
+        returns (pl.DataFrame): The returns fixture containing asset returns.
+
+    Verifies:
+        1. ``rf=0`` (int) behaves exactly like ``rf=0.0`` (float) instead of
+           raising a TypeError (regression).
+
+    """
+    result = Data.from_returns(returns=returns, rf=0, date_col="Date")
+    expected = Data.from_returns(returns=returns, rf=0.0, date_col="Date")
+    assert_frame_equal(result.returns, expected.returns)
+
+
 def test_with_series_rf(returns):
     """Tests that Data.from_returns works with a Series as the risk-free rate.
 

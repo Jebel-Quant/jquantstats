@@ -132,3 +132,71 @@ def test_report_html_is_non_empty(client: TestClient, csv_files: dict[str, bytes
         },
     )
     assert len(response.text) > 1_000
+
+
+def test_report_accepts_custom_aum(client: TestClient, csv_files: dict[str, bytes]) -> None:
+    """POST /report accepts an aum form field instead of the hardcoded default."""
+    response = client.post(
+        "/report",
+        files={
+            "prices": ("prices.csv", csv_files["prices"], "text/csv"),
+            "positions": ("positions.csv", csv_files["positions"], "text/csv"),
+        },
+        data={"aum": "500000"},
+    )
+    assert response.status_code == 200
+
+
+def test_report_rejects_nonpositive_aum(client: TestClient, csv_files: dict[str, bytes]) -> None:
+    """POST /report with aum <= 0 fails form validation with 422."""
+    response = client.post(
+        "/report",
+        files={
+            "prices": ("prices.csv", csv_files["prices"], "text/csv"),
+            "positions": ("positions.csv", csv_files["positions"], "text/csv"),
+        },
+        data={"aum": "0"},
+    )
+    assert response.status_code == 422
+
+
+def test_report_invalid_csv_returns_400(client: TestClient) -> None:
+    """POST /report with unparseable CSV content returns 400, not 500."""
+    response = client.post(
+        "/report",
+        files={
+            "prices": ("prices.csv", b"", "text/csv"),
+            "positions": ("positions.csv", b"", "text/csv"),
+        },
+    )
+    assert response.status_code == 400
+
+
+def test_report_inconsistent_data_returns_400(client: TestClient, csv_files: dict[str, bytes]) -> None:
+    """POST /report with CSVs that cannot form a portfolio returns 400, not 500."""
+    positions = b"date,UNKNOWN\n2023-01-02,100\n2023-01-03,100\n"
+    response = client.post(
+        "/report",
+        files={
+            "prices": ("prices.csv", csv_files["prices"], "text/csv"),
+            "positions": ("positions.csv", positions, "text/csv"),
+        },
+    )
+    assert response.status_code == 400
+
+
+def test_report_oversized_upload_returns_413(
+    client: TestClient, csv_files: dict[str, bytes], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """POST /report with a file above the size limit returns 413."""
+    import api.app as app_module
+
+    monkeypatch.setattr(app_module, "MAX_UPLOAD_BYTES", 16)
+    response = client.post(
+        "/report",
+        files={
+            "prices": ("prices.csv", csv_files["prices"], "text/csv"),
+            "positions": ("positions.csv", csv_files["positions"], "text/csv"),
+        },
+    )
+    assert response.status_code == 413
