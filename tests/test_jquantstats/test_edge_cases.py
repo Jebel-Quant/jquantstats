@@ -183,7 +183,8 @@ def test_subtract_rf_invalid_type():
             "asset": [0.01, -0.02],
         }
     )
-    with pytest.raises(TypeError, match="Unsupported dataframe type"):
+    # The exact wording comes from narwhals and varies across versions; match loosely.
+    with pytest.raises(TypeError, match="dataframe"):
         Data.from_returns(returns=returns, rf="not a rate")  # str is neither numeric nor a frame
 
 
