@@ -678,19 +678,18 @@ def test_full_skips_missing_plot_method(data):
     assert "<!DOCTYPE html>" in html
 
 
-def test_full_report_with_integer_index_is_unsupported():
-    """full() currently requires a temporal index — pins the limitation.
+def test_full_report_with_integer_index_degrades_gracefully():
+    """full() supports integer indexes by skipping calendar-based charts with a warning.
 
-    The period header is skipped gracefully for integer indexes, but the
-    monthly-heatmap chart downstream requires a temporal column and raises.
-    If this test starts failing because full() succeeds, integer-index
-    support has been added — update this test to assert on the HTML instead.
+    Charts that aggregate by calendar period (snapshot, monthly_heatmap,
+    yearly_returns) cannot be computed without a temporal index; the report
+    renders the remaining charts and warns about the skipped ones.
     """
-    import polars.exceptions
-
     from jquantstats import Data
 
     returns = pl.DataFrame({"A": [0.01, -0.02, 0.015, 0.0, 0.005] * 4})
     data = Data(returns=returns, index=pl.DataFrame({"index": list(range(20))}))
-    with pytest.raises(polars.exceptions.InvalidOperationError, match="duration"):
-        data.reports.full()
+    with pytest.warns(UserWarning, match="skipping calendar-based charts: snapshot, monthly_heatmap"):
+        html = data.reports.full()
+    assert "<!DOCTYPE html>" in html
+    assert "plotly" in html  # the CDN moved to the first *rendered* chart

@@ -80,6 +80,7 @@ extend-select = [
     #"PIE",   # flake8-pie - Miscellaneous rules
     #"PL",    # Pylint rules
     "ANN2",  # flake8-annotations - Enforce return-type annotations on all functions/methods
+    "ANN0",  # flake8-annotations - Enforce type annotations on function arguments
 ]
 
 # Resolve incompatible pydocstyle rules: prefer D211 and D212 over D203 and D213

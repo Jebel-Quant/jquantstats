@@ -177,3 +177,41 @@ def test_from_cash_position_accepts_expr(prices):
 
     for col in ["A", "B"]:
         assert np.allclose(pf_expr.profits[col].to_numpy(), pf_df.profits[col].to_numpy())
+
+
+def test_from_cash_position_expr_with_new_column_raises(prices):
+    """from_cash_position rejects an Expr that creates a column absent from prices."""
+    from jquantstats.exceptions import PositionExprColumnError
+
+    expr = (pl.col("A") * 10.0).alias("A_scaled")
+    with pytest.raises(PositionExprColumnError, match="cash_position expression created new column"):
+        Portfolio.from_cash_position(prices=prices, cash_position=expr, aum=1e5)
+
+
+def test_from_cash_position_expr_error_names_extra_columns(prices):
+    """The PositionExprColumnError carries the parameter name and offending columns."""
+    from jquantstats.exceptions import PositionExprColumnError
+
+    expr = (pl.col("A") * 10.0).alias("A_scaled")
+    with pytest.raises(PositionExprColumnError) as exc_info:
+        Portfolio.from_cash_position(prices=prices, cash_position=expr, aum=1e5)
+    assert exc_info.value.param == "cash_position"
+    assert exc_info.value.extra == ["A_scaled"]
+
+
+def test_from_position_expr_with_new_column_raises(prices):
+    """from_position rejects an Expr that creates a column absent from prices."""
+    from jquantstats.exceptions import PositionExprColumnError
+
+    expr = (pl.col("A") * 2.0).alias("units")
+    with pytest.raises(PositionExprColumnError, match="position expression created new column"):
+        Portfolio.from_position(prices=prices, position=expr, aum=1e5)
+
+
+def test_from_risk_position_expr_with_new_column_raises(prices):
+    """from_risk_position rejects an Expr that creates a column absent from prices."""
+    from jquantstats.exceptions import PositionExprColumnError
+
+    expr = (pl.col("A") * 0.5).alias("risk_units")
+    with pytest.raises(PositionExprColumnError, match="risk_position expression created new column"):
+        Portfolio.from_risk_position(prices=prices, risk_position=expr, aum=1e5)

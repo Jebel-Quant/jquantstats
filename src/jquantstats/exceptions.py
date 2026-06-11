@@ -21,10 +21,15 @@ class JQuantStatsError(Exception):
 
 
 class MissingDateColumnError(JQuantStatsError, ValueError):
-    """Raised when a required ``'date'`` column is absent from a DataFrame.
+    """Raised when a required date column is absent from a DataFrame.
 
     Args:
         frame_name: Descriptive name of the frame missing the column (e.g. ``"prices"``).
+        column: Name of the date column that was looked up (e.g. the
+            ``date_col`` argument). When omitted, the default ``'date'``
+            column is assumed.
+        available: Column names actually present in the frame, included in
+            the error message to help diagnose the mismatch.
 
     Examples:
         >>> raise MissingDateColumnError("prices")  # doctest: +ELLIPSIS
@@ -33,10 +38,21 @@ class MissingDateColumnError(JQuantStatsError, ValueError):
         jquantstats.exceptions.MissingDateColumnError: ...
     """
 
-    def __init__(self, frame_name: str) -> None:
-        """Initialize with the name of the frame that is missing the column."""
-        super().__init__(f"DataFrame '{frame_name}' is missing the required 'date' column.")
+    def __init__(self, frame_name: str, column: str | None = None, available: list[str] | None = None) -> None:
+        """Initialize with the frame name and, optionally, the missing column and available columns."""
+        if column is None:
+            msg = f"DataFrame '{frame_name}' is missing the required 'date' column."
+        else:
+            cols = ", ".join(f"'{c}'" for c in available) if available else ""
+            msg = (
+                f"DataFrame '{frame_name}' has no column '{column}' to use as the date column"
+                + (f"; available columns: {cols}" if cols else "")
+                + ". Pass date_col=<name of an existing column>."
+            )
+        super().__init__(msg)
         self.frame_name = frame_name
+        self.column = column
+        self.available = list(available) if available is not None else None
 
 
 class InvalidCashPositionTypeError(JQuantStatsError, TypeError):
@@ -139,6 +155,38 @@ class IntegerIndexBoundError(JQuantStatsError, TypeError):
         super().__init__(f"{param} must be an integer, got {actual_type}.")
         self.param = param
         self.actual_type = actual_type
+
+
+class PositionExprColumnError(JQuantStatsError, ValueError):
+    """Raised when a position expression creates columns that do not exist in prices.
+
+    Position expressions (``cash_position``, ``position``, ``risk_position``)
+    are evaluated against the prices frame and must overwrite existing asset
+    columns. An expression that creates a *new* column (e.g. via ``.alias``)
+    leaves the original asset columns untouched, which would silently treat
+    raw prices as positions.
+
+    Args:
+        param: Name of the offending parameter (e.g. ``"cash_position"``).
+        extra: Column names created by the expression that are absent from prices.
+
+    Examples:
+        >>> raise PositionExprColumnError("cash_position", ["A2"])  # doctest: +ELLIPSIS
+        Traceback (most recent call last):
+            ...
+        jquantstats.exceptions.PositionExprColumnError: ...
+    """
+
+    def __init__(self, param: str, extra: list[str]) -> None:
+        """Initialize with the parameter name and the unexpected columns it created."""
+        cols = ", ".join(f"'{c}'" for c in extra)
+        super().__init__(
+            f"{param} expression created new column(s) {cols} that do not exist in prices. "
+            f"Expressions must overwrite existing asset columns (e.g. pl.col('A') * 2); "
+            f"asset columns the expression does not overwrite keep their raw price values."
+        )
+        self.param = param
+        self.extra = list(extra)
 
 
 class NoAssetColumnsError(JQuantStatsError, ValueError):

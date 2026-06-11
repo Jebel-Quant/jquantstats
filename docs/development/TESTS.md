@@ -286,3 +286,44 @@ If stress tests fail occasionally:
 - [Hypothesis Documentation](https://hypothesis.readthedocs.io/)
 - [pytest-benchmark Documentation](https://pytest-benchmark.readthedocs.io/)
 - [GitHub Actions Benchmark Action](https://github.com/benchmark-action/github-action-benchmark)
+
+## Mutation Testing
+
+Mutation testing (via [mutmut](https://mutmut.readthedocs.io/)) checks that
+the test suite actually *fails* when the source is deliberately broken.
+Every source module is covered and gated against a triaged baseline.
+
+### How the gate works
+
+`tests/mutation/baseline.json` maps each module in `src/jquantstats` to
+
+- **tests** — the focused pytest paths used as the mutmut runner for that
+  module (keeps per-mutant cost low), and
+- **max_survivors** — the triaged ceiling of acceptable surviving mutants
+  (typing-only, cosmetic strings, or numerically equivalent mutations).
+
+The gate fails as soon as a module produces *more* survivors than its
+ceiling — i.e. a new mutant survived that no test kills.
+
+### Running
+
+```bash
+make mutation-gate                                              # full gated sweep
+uv run python bin/mutation_gate.py --module src/jquantstats/data.py   # one module
+uv run python bin/mutation_gate.py --record                     # rewrite ceilings
+```
+
+The full sweep is slow (hours) and runs weekly in CI
+(`.github/workflows/mutation.yml`), not per-PR.
+
+### When the gate fails
+
+1. Inspect the survivors: `uv run mutmut results`, then `uv run mutmut show <id>`.
+2. Preferred fix: add a test that kills the mutant.
+3. If the mutant is genuinely acceptable (typing-only, cosmetic, or
+   numerically equivalent), raise the module's `max_survivors` ceiling —
+   and say why in the commit message.
+
+Survivor counts are relative to each module's focused runner, so the gate is
+self-consistent; a mutant only killable by an unrelated suite still counts
+as a survivor for its module.

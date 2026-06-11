@@ -138,6 +138,27 @@ The `[web]` extra ships a FastAPI app (`api/app.py`) with hardening built in
     (reverse proxy or Redis-backed) — the in-process one will not coordinate
     across instances.
 
+To rate-limit at the edge with nginx, define a shared zone keyed by client IP
+and apply it to the report endpoint (30 requests/minute mirrors the
+in-process default):
+
+```nginx
+limit_req_zone $binary_remote_addr zone=jqs:10m rate=30r/m;
+
+server {
+    location / {
+        limit_req zone=jqs burst=10 nodelay;
+        limit_req_status 429;
+        proxy_pass http://jquantstats-upstream;
+    }
+}
+```
+
+The in-process limiter then acts as defense-in-depth behind the proxy; you
+can raise `JQS_RATE_LIMIT_MAX_REQUESTS` so the edge limit is the binding one.
+On platforms without an edge proxy (e.g. Railway), keep the service at a
+single replica or front it with a CDN/WAF rate rule.
+
 ### Can `rf` be an integer? A Series?
 
 `rf=0` (int) works — it is coerced to float. A time-varying risk-free rate

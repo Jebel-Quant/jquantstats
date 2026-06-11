@@ -48,9 +48,36 @@ from .exceptions import (
     InvalidCashPositionTypeError,
     InvalidPricesTypeError,
     NonPositiveAumError,
+    PositionExprColumnError,
     RowCountMismatchError,
     UncleanSeriesError,
 )
+
+
+def _evaluate_position_expr(prices: pl.DataFrame, expr: pl.Expr, param: str) -> pl.DataFrame:
+    """Evaluate a position expression against *prices* and validate the result.
+
+    Args:
+        prices: Price levels per asset over time.
+        expr: Polars expression producing positions, evaluated via
+            ``prices.with_columns(expr)``.
+        param: Name of the parameter the expression was passed as (used in
+            the error message).
+
+    Returns:
+        The evaluated positions frame, guaranteed to have the same columns
+        as *prices*.
+
+    Raises:
+        PositionExprColumnError: If the expression created columns that do
+            not exist in *prices* — those would leave the original asset
+            columns untouched, silently treating raw prices as positions.
+    """
+    evaluated = prices.with_columns(expr)
+    extra = [c for c in evaluated.columns if c not in prices.columns]
+    if extra:
+        raise PositionExprColumnError(param, extra)
+    return evaluated
 
 
 @dataclasses.dataclass(frozen=True, slots=True)
@@ -325,9 +352,11 @@ class Portfolio(
             ValueError: If any span value in *vola* is ≤ 0, or if a key in a
                 *vola* dict does not match any numeric column in *prices*, or
                 if *vol_cap* is provided but is not positive.
+            PositionExprColumnError: If *risk_position* is an expression that
+                creates columns not present in *prices*.
         """
         if isinstance(risk_position, pl.Expr):
-            risk_position = prices.with_columns(risk_position)
+            risk_position = _evaluate_position_expr(prices, risk_position, "risk_position")
         if cost_model is not None:
             cost_per_unit = cost_model.cost_per_unit
             cost_bps = cost_model.cost_bps
@@ -400,6 +429,10 @@ class Portfolio(
         Returns:
             A Portfolio instance whose cash positions equal *position* x *prices*.
 
+        Raises:
+            PositionExprColumnError: If *position* is an expression that
+                creates columns not present in *prices*.
+
         Examples:
             >>> import polars as pl
             >>> prices = pl.DataFrame({"A": [100.0, 110.0, 105.0]})
@@ -409,7 +442,7 @@ class Portfolio(
             [1000.0, 1100.0, 1050.0]
         """
         if isinstance(position, pl.Expr):
-            position = prices.with_columns(position)
+            position = _evaluate_position_expr(prices, position, "position")
         assets = [col for col, dtype in prices.schema.items() if dtype.is_numeric()]
         cash_position = position.with_columns((pl.col(asset) * prices[asset]).alias(asset) for asset in assets)
         return cls.from_cash_position(
@@ -449,9 +482,15 @@ class Portfolio(
 
         Returns:
             A Portfolio instance with the provided cash positions.
+
+        Raises:
+            PositionExprColumnError: If *cash_position* is an expression that
+                creates columns not present in *prices* (e.g. via ``.alias``);
+                such expressions leave the original asset columns untouched,
+                silently treating raw prices as positions.
         """
         if isinstance(cash_position, pl.Expr):
-            cash_position = prices.with_columns(cash_position)
+            cash_position = _evaluate_position_expr(prices, cash_position, "cash_position")
         if cost_model is not None:
             cost_per_unit = cost_model.cost_per_unit
             cost_bps = cost_model.cost_bps

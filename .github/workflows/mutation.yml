@@ -1,0 +1,40 @@
+# Workflow: Weekly gated mutation testing
+#
+# Purpose: Run mutmut over all source modules and fail when surviving
+#          mutants exceed the triaged ceilings in tests/mutation/baseline.json.
+#          Runs weekly (not per-PR) because a full mutation sweep takes far
+#          longer than a normal CI run.
+#
+# When this fails: either kill the new survivor with a test, or re-triage it
+# as acceptable (typing-only / cosmetic / numerically equivalent) and raise
+# the module's ceiling in tests/mutation/baseline.json.
+
+name: "MUTATION"
+
+permissions:
+  contents: read
+
+on:
+  schedule:
+    # Mondays 04:00 UTC — after the rhiza weekly jobs, before working hours.
+    - cron: "0 4 * * 1"
+  workflow_dispatch:
+
+jobs:
+  mutation-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.3
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7.6.0
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Run gated mutation tests
+        run: uv run python bin/mutation_gate.py

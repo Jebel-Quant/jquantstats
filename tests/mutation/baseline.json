@@ -1,0 +1,212 @@
+{
+  "src/jquantstats/__init__.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test_api_contract.py",
+      "tests/test_jquantstats/test_version.py"
+    ]
+  },
+  "src/jquantstats/_types.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test_api_contract.py"
+    ]
+  },
+  "src/jquantstats/_protocol.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test_protocols.py"
+    ]
+  },
+  "src/jquantstats/exceptions.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test_portfolio",
+      "tests/test_jquantstats/test_data.py",
+      "tests/test_jquantstats/test_data_from_returns.py",
+      "tests/test_jquantstats/test_data_from_prices.py",
+      "tests/test_jquantstats/test_edge_cases.py"
+    ]
+  },
+  "src/jquantstats/data.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test_data.py",
+      "tests/test_jquantstats/test_data_from_returns.py",
+      "tests/test_jquantstats/test_data_from_prices.py",
+      "tests/test_jquantstats/test_edge_cases.py"
+    ]
+  },
+  "src/jquantstats/portfolio.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test_portfolio",
+      "tests/test_jquantstats/test__cost_model.py"
+    ]
+  },
+  "src/jquantstats/result.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test_result.py"
+    ]
+  },
+  "src/jquantstats/_cost_model.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test_portfolio",
+      "tests/test_jquantstats/test__cost_model.py"
+    ]
+  },
+  "src/jquantstats/_portfolio_attribution.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test_portfolio"
+    ]
+  },
+  "src/jquantstats/_portfolio_cost.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test_portfolio"
+    ]
+  },
+  "src/jquantstats/_portfolio_nav.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test_portfolio"
+    ]
+  },
+  "src/jquantstats/_portfolio_turnover.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test_portfolio"
+    ]
+  },
+  "src/jquantstats/_stats/__init__.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test__stats"
+    ]
+  },
+  "src/jquantstats/_stats/_core.py": {
+    "max_survivors": 13,
+    "tests": [
+      "tests/test_jquantstats/test__stats"
+    ]
+  },
+  "src/jquantstats/_stats/_internals.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test__stats"
+    ]
+  },
+  "src/jquantstats/_stats/_stats.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test__stats"
+    ]
+  },
+  "src/jquantstats/_stats/_basic.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test__stats"
+    ]
+  },
+  "src/jquantstats/_stats/_reporting.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test__stats"
+    ]
+  },
+  "src/jquantstats/_stats/_rolling.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test__stats"
+    ]
+  },
+  "src/jquantstats/_stats/_montecarlo.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test__stats"
+    ]
+  },
+  "src/jquantstats/_reports/__init__.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test__reports"
+    ]
+  },
+  "src/jquantstats/_reports/_formatting.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test__reports"
+    ]
+  },
+  "src/jquantstats/_reports/_data.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test__reports",
+      "tests/test_jquantstats/test_snapshots.py"
+    ]
+  },
+  "src/jquantstats/_reports/_portfolio.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test__reports",
+      "tests/test_jquantstats/test_snapshots.py"
+    ]
+  },
+  "src/jquantstats/_reports/_protocol.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test__reports"
+    ]
+  },
+  "src/jquantstats/_plots/__init__.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test__plots"
+    ]
+  },
+  "src/jquantstats/_plots/_data.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test__plots"
+    ]
+  },
+  "src/jquantstats/_plots/_portfolio.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test__plots"
+    ]
+  },
+  "src/jquantstats/_plots/_protocol.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test__plots"
+    ]
+  },
+  "src/jquantstats/_utils/__init__.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test__utils"
+    ]
+  },
+  "src/jquantstats/_utils/_data.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test__utils"
+    ]
+  },
+  "src/jquantstats/_utils/_portfolio.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test__utils"
+    ]
+  },
+  "src/jquantstats/_utils/_protocol.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test__utils"
+    ]
+  }
+}
