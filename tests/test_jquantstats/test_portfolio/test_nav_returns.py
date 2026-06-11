@@ -82,16 +82,16 @@ def test_portfolio_snapshot_log_scale(portfolio):
 
 
 def test_assert_clean_series_raises_on_null():
-    """_assert_clean_series should raise ValueError when series contains null values."""
+    """_assert_clean_series should raise UncleanSeriesError when series contains null values."""
     s = pl.Series([1.0, None, 3.0])
-    with pytest.raises(ValueError, match=r".*"):
+    with pytest.raises(ValueError, match="contains null values"):
         Portfolio._assert_clean_series(s)
 
 
 def test_assert_clean_series_raises_on_nonfinite():
-    """_assert_clean_series should raise ValueError when series contains non-finite values."""
+    """_assert_clean_series should raise UncleanSeriesError when series contains non-finite values."""
     s = pl.Series([1.0, float("inf"), 3.0])
-    with pytest.raises(ValueError, match=r".*"):
+    with pytest.raises(ValueError, match="contains non-finite values"):
         Portfolio._assert_clean_series(s)
 
 

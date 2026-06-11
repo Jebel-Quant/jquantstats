@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
+from .exceptions import InvalidMaxBpsError, NegativeCostBpsError
+
 if TYPE_CHECKING:
     from .data import Data
 
@@ -120,7 +122,7 @@ class PortfolioCostMixin:
             ``returns`` column reduced by the per-period trading cost.
 
         Raises:
-            ValueError: If ``cost_bps`` is negative.
+            NegativeCostBpsError: If ``cost_bps`` is negative.
 
         Examples:
             >>> from jquantstats.portfolio import Portfolio
@@ -136,7 +138,7 @@ class PortfolioCostMixin:
         """
         effective_bps = cost_bps if cost_bps is not None else self.cost_bps
         if effective_bps < 0:
-            raise ValueError
+            raise NegativeCostBpsError(effective_bps)
         base = self.returns
         daily_cost = self.turnover["turnover"] * (effective_bps / 10_000.0)
         return base.with_columns((pl.col("returns") - daily_cost).alias("returns"))
@@ -160,7 +162,7 @@ class PortfolioCostMixin:
             ``max_bps`` inclusive.
 
         Raises:
-            ValueError: If ``max_bps`` is not a positive integer.
+            InvalidMaxBpsError: If ``max_bps`` is not a positive integer.
 
         Examples:
             >>> from jquantstats.portfolio import Portfolio
@@ -183,11 +185,12 @@ class PortfolioCostMixin:
             [0, 1, 2, 3, 4, 5]
         """
         if not isinstance(max_bps, int) or max_bps < 1:
-            raise ValueError
+            raise InvalidMaxBpsError(max_bps)
         import numpy as np
 
+        from ._stats._core import _std_is_negligible
+
         periods = self.data._periods_per_year  # one Data object, outside the loop
-        _eps = np.finfo(np.float64).eps
         sqrt_periods = float(np.sqrt(periods))
         cost_levels = list(range(0, max_bps + 1))
 
@@ -204,7 +207,7 @@ class PortfolioCostMixin:
         sharpe_values: list[float] = []
         for mean_raw, std_raw in zip(means_row, stds_row, strict=False):
             mean_val = 0.0 if mean_raw is None else float(mean_raw)
-            if std_raw is None or float(std_raw) <= _eps * max(abs(mean_val), _eps) * 10:
+            if _std_is_negligible(std_raw, mean_val):
                 sharpe_values.append(float("nan"))
             else:
                 sharpe_values.append(mean_val / float(std_raw) * sqrt_periods)

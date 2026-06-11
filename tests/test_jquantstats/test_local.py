@@ -200,3 +200,130 @@ def test_report_oversized_upload_returns_413(
         },
     )
     assert response.status_code == 413
+
+
+def test_report_too_many_rows_returns_413(
+    client: TestClient, csv_files: dict[str, bytes], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """POST /report with a CSV above the row limit returns 413."""
+    import api.app as app_module
+
+    monkeypatch.setattr(app_module, "MAX_ROWS", 10)
+    response = client.post(
+        "/report",
+        files={
+            "prices": ("prices.csv", csv_files["prices"], "text/csv"),
+            "positions": ("positions.csv", csv_files["positions"], "text/csv"),
+        },
+    )
+    assert response.status_code == 413
+    assert "rows" in response.json()["detail"]
+
+
+def test_report_too_many_columns_returns_413(
+    client: TestClient, csv_files: dict[str, bytes], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """POST /report with a CSV above the column limit returns 413."""
+    import api.app as app_module
+
+    monkeypatch.setattr(app_module, "MAX_COLUMNS", 2)
+    response = client.post(
+        "/report",
+        files={
+            "prices": ("prices.csv", csv_files["prices"], "text/csv"),
+            "positions": ("positions.csv", csv_files["positions"], "text/csv"),
+        },
+    )
+    assert response.status_code == 413
+    assert "columns" in response.json()["detail"]
+
+
+@pytest.mark.parametrize("bad_aum", ["inf", "-inf", "nan", "1e308"])
+def test_report_rejects_nonfinite_or_oversized_aum(
+    client: TestClient, csv_files: dict[str, bytes], bad_aum: str
+) -> None:
+    """POST /report with non-finite or absurdly large aum fails validation with 422."""
+    response = client.post(
+        "/report",
+        files={
+            "prices": ("prices.csv", csv_files["prices"], "text/csv"),
+            "positions": ("positions.csv", csv_files["positions"], "text/csv"),
+        },
+        data={"aum": bad_aum},
+    )
+    assert response.status_code == 422
+
+
+def test_report_parse_errors_do_not_echo_filename_or_internals(client: TestClient) -> None:
+    """CSV parse errors identify uploads by field name, not client-supplied filename or parser internals."""
+    response = client.post(
+        "/report",
+        files={
+            "prices": ("../secret/path.csv", b"", "text/csv"),
+            "positions": ("positions.csv", b"date,A\n2023-01-02,1.0\n", "text/csv"),
+        },
+    )
+    assert response.status_code == 400
+    assert response.json()["detail"] == "prices: file is not valid CSV"
+
+
+def test_report_build_errors_are_generic(client: TestClient, csv_files: dict[str, bytes]) -> None:
+    """Report-build failures return a generic message without exception internals."""
+    positions = b"date,UNKNOWN\n2023-01-02,100\n"
+    response = client.post(
+        "/report",
+        files={
+            "prices": ("prices.csv", csv_files["prices"], "text/csv"),
+            "positions": ("positions.csv", positions, "text/csv"),
+        },
+    )
+    assert response.status_code == 400
+    assert response.json()["detail"] == "failed to build a report from the uploaded data"
+
+
+def test_report_rate_limit_returns_429(
+    client: TestClient, csv_files: dict[str, bytes], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """POST /report returns 429 once a client exceeds the rate limit."""
+    import api.app as app_module
+
+    monkeypatch.setattr(app_module, "RATE_LIMIT_MAX_REQUESTS", 1)
+    app_module._request_log.clear()
+    files = {
+        "prices": ("prices.csv", csv_files["prices"], "text/csv"),
+        "positions": ("positions.csv", csv_files["positions"], "text/csv"),
+    }
+    first = client.post("/report", files=files)
+    second = client.post("/report", files=files)
+    app_module._request_log.clear()
+    assert first.status_code == 200
+    assert second.status_code == 429
+
+
+def test_rate_limit_window_evicts_old_requests(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Requests older than the window are evicted, so the client is no longer throttled."""
+    import api.app as app_module
+
+    monkeypatch.setattr(app_module, "RATE_LIMIT_MAX_REQUESTS", 1)
+    monkeypatch.setattr(app_module, "RATE_LIMIT_WINDOW_SECONDS", 0.0)
+    app_module._request_log.clear()
+    app_module._request_log["testclient"].append(-1.0)  # stale entry, outside any window
+
+    class _FakeClient:
+        """Stand-in for starlette's request.client address."""
+
+        host = "testclient"
+
+    class _FakeRequest:
+        """Stand-in for a starlette Request exposing only .client."""
+
+        client = _FakeClient()
+
+    app_module._enforce_rate_limit(_FakeRequest())  # stale entry evicted, no 429
+    app_module._request_log.clear()
+
+
+def test_cross_origin_requests_denied_by_default(client: TestClient) -> None:
+    """Without JQS_CORS_ORIGINS configured, responses carry no CORS allow header."""
+    response = client.get("/", headers={"Origin": "https://evil.example"})
+    assert "access-control-allow-origin" not in response.headers

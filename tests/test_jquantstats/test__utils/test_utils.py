@@ -411,7 +411,7 @@ def test_exponential_cov_warmup_bool_type_error(simple_data):
 
 def test_exponential_cov_warmup_negative_value_error(simple_data):
     """Negative warmup must raise ValueError."""
-    with pytest.raises(ValueError):  # noqa: PT011 — bare raise has no message to match
+    with pytest.raises(ValueError, match="non-negative integer"):
         simple_data.utils.exponential_cov(warmup=-1)
 
 

@@ -7,6 +7,18 @@ import pytest
 from polars.testing import assert_frame_equal
 
 from jquantstats import Data
+from jquantstats.data import _subtract_risk_free
+
+
+def test_subtract_risk_free_rejects_invalid_rf_type():
+    """_subtract_risk_free rejects rf values that are neither float nor DataFrame.
+
+    `from_returns` coerces int rf to float before calling, so this guard only
+    fires for direct callers passing an unsupported type.
+    """
+    frame = pl.DataFrame({"Date": [date(2023, 1, 1), date(2023, 1, 2)], "A": [0.01, 0.02]})
+    with pytest.raises(TypeError, match="rf must be a float or DataFrame"):
+        _subtract_risk_free(frame, 1, "Date")
 
 
 def test_head(data):

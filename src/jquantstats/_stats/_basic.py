@@ -339,6 +339,9 @@ class _BasicStatsMixin:
         extended = pl.concat([pl.Series([0.0]), series.cast(pl.Float64)])
         nav = (1.0 + extended).cum_prod()
         hwm = nav.cum_max()
+        # The phantom baseline pins nav[0] = 1.0, so hwm >= 1.0 throughout and
+        # the 1e-10 floor is purely defensive (unreachable); a -100 % return
+        # correctly reports as a full drawdown of 1.0 here.
         dd = ((hwm - nav) / hwm.clip(lower_bound=1e-10)).clip(lower_bound=0.0)
         return dd[1:]  # drop phantom point
 

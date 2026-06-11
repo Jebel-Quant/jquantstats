@@ -9,7 +9,7 @@ import numpy as np
 import polars as pl
 from scipy.stats import norm
 
-from ._core import _mean, _to_float, columnwise_stat, to_frame
+from ._core import _mean, _std_is_negligible, _to_float, columnwise_stat, to_frame
 from ._internals import _annualization_factor, _comp_return, _downside_deviation, _nav_series
 
 if TYPE_CHECKING:
@@ -70,16 +70,14 @@ class _RiskStatsMixin:
         """
         periods = periods or self._data._periods_per_year
 
-        std_val = series.std(ddof=1)
+        std_val = cast(float | None, series.std(ddof=1))
         mean_val = series.mean()
-        divisor = cast(float, std_val) if std_val is not None else 0.0
         mean_f = cast(float, mean_val) if mean_val is not None else 0.0
 
-        _eps = np.finfo(np.float64).eps
-        if divisor <= _eps * max(abs(mean_f), _eps) * 10:
+        if _std_is_negligible(std_val, mean_f):
             return float("nan")
 
-        res = mean_f / divisor
+        res = mean_f / cast(float, std_val)
         factor = periods or 1
         return float(res * _annualization_factor(factor))
 

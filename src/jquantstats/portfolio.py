@@ -49,6 +49,7 @@ from .exceptions import (
     InvalidPricesTypeError,
     NonPositiveAumError,
     RowCountMismatchError,
+    UncleanSeriesError,
 )
 
 
@@ -460,11 +461,19 @@ class Portfolio(
 
     @staticmethod
     def _assert_clean_series(series: pl.Series, name: str = "") -> None:
-        """Raise ValueError if *series* contains nulls or non-finite values."""
+        """Raise `UncleanSeriesError` if *series* contains nulls or non-finite values.
+
+        Args:
+            series: The series to validate.
+            name: Optional series name included in the error message.
+
+        Raises:
+            UncleanSeriesError: If the series contains null or non-finite values.
+        """
         if series.null_count() != 0:
-            raise ValueError
+            raise UncleanSeriesError(name, "null")
         if not series.is_finite().all():
-            raise ValueError
+            raise UncleanSeriesError(name, "non-finite")
 
     # ── Core data properties ───────────────────────────────────────────────────
 
@@ -698,9 +707,9 @@ class Portfolio(
             prices/AUM.
         """
         if not isinstance(n, int):
-            raise TypeError
+            raise TypeError(f"n must be an integer, got {type(n).__name__}")  # noqa: TRY003
         if n < 0:
-            raise ValueError
+            raise ValueError(f"n must be a non-negative integer, got {n}")  # noqa: TRY003
         if n == 0:
             return self
 

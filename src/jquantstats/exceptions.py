@@ -141,6 +141,91 @@ class IntegerIndexBoundError(JQuantStatsError, TypeError):
         self.actual_type = actual_type
 
 
+class NoAssetColumnsError(JQuantStatsError, ValueError):
+    """Raised when a DataFrame contains no numeric asset columns to aggregate.
+
+    Args:
+        frame_name: Descriptive name of the frame without asset columns (e.g. ``"profits"``).
+
+    Examples:
+        >>> raise NoAssetColumnsError("profits")  # doctest: +ELLIPSIS
+        Traceback (most recent call last):
+            ...
+        jquantstats.exceptions.NoAssetColumnsError: ...
+    """
+
+    def __init__(self, frame_name: str) -> None:
+        """Initialize with the name of the frame lacking asset columns."""
+        super().__init__(
+            f"DataFrame '{frame_name}' contains no numeric asset columns; "
+            f"at least one numeric column besides 'date' is required."
+        )
+        self.frame_name = frame_name
+
+
+class NegativeCostBpsError(JQuantStatsError, ValueError):
+    """Raised when a trading cost in basis points is negative.
+
+    Args:
+        cost_bps: The negative cost value that was supplied.
+
+    Examples:
+        >>> raise NegativeCostBpsError(-1.0)
+        Traceback (most recent call last):
+            ...
+        jquantstats.exceptions.NegativeCostBpsError: cost_bps must be non-negative, got -1.0.
+    """
+
+    def __init__(self, cost_bps: float) -> None:
+        """Initialize with the offending cost value."""
+        super().__init__(f"cost_bps must be non-negative, got {cost_bps}.")
+        self.cost_bps = cost_bps
+
+
+class InvalidMaxBpsError(JQuantStatsError, ValueError):
+    """Raised when ``max_bps`` is not a positive integer.
+
+    Args:
+        max_bps: The invalid value that was supplied.
+
+    Examples:
+        >>> raise InvalidMaxBpsError(0)
+        Traceback (most recent call last):
+            ...
+        jquantstats.exceptions.InvalidMaxBpsError: max_bps must be a positive integer, got 0.
+    """
+
+    def __init__(self, max_bps: object) -> None:
+        """Initialize with the offending value."""
+        super().__init__(f"max_bps must be a positive integer, got {max_bps!r}.")
+        self.max_bps = max_bps
+
+
+class UncleanSeriesError(JQuantStatsError, ValueError):
+    """Raised when a derived series contains null or non-finite values.
+
+    Args:
+        name: Name of the offending series (may be empty when unknown).
+        reason: Either ``"null"`` or ``"non-finite"``.
+
+    Examples:
+        >>> raise UncleanSeriesError("profit", "null")  # doctest: +ELLIPSIS
+        Traceback (most recent call last):
+            ...
+        jquantstats.exceptions.UncleanSeriesError: ...
+    """
+
+    def __init__(self, name: str, reason: str) -> None:
+        """Initialize with the series name and the kind of dirty value found."""
+        label = f"series '{name}'" if name else "series"
+        super().__init__(
+            f"{label} contains {reason} values; inputs must produce a clean, finite series. "
+            f"Check prices and positions for gaps or zero/negative prices."
+        )
+        self.name = name
+        self.reason = reason
+
+
 class NullsInReturnsError(JQuantStatsError, ValueError):
     """Raised when null values are detected in returns (or benchmark) data.
 

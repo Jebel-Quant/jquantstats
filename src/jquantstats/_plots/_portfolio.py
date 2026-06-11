@@ -267,7 +267,7 @@ class PortfolioPlots:
             ValueError: If ``window`` is not a positive integer.
         """
         if not isinstance(window, int) or window <= 0:
-            raise ValueError
+            raise ValueError(f"window must be a positive integer, got {window!r}")  # noqa: TRY003
 
         rolling = self._portfolio.stats.rolling_sharpe(rolling_period=window)
 
@@ -308,7 +308,7 @@ class PortfolioPlots:
             ValueError: If ``window`` is not a positive integer.
         """
         if not isinstance(window, int) or window <= 0:
-            raise ValueError
+            raise ValueError(f"window must be a positive integer, got {window!r}")  # noqa: TRY003
 
         rolling = self._portfolio.stats.rolling_volatility(rolling_period=window)
 

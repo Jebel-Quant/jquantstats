@@ -4,3 +4,10 @@ buildCommand = "pip install '.[web]'"
 
 [deploy]
 startCommand = "uvicorn api.app:app --host 0.0.0.0 --port $PORT"
+
+# Optional hardening env vars (see api/app.py):
+#   JQS_CORS_ORIGINS                 comma-separated allowed origins (default: deny all cross-origin)
+#   JQS_RATE_LIMIT_MAX_REQUESTS      requests allowed per client per window (default: 30)
+#   JQS_RATE_LIMIT_WINDOW_SECONDS    sliding-window length in seconds (default: 60)
+# The built-in rate limiter is per-process; if this service is scaled beyond
+# one instance, add a shared limiter (reverse proxy or Redis-backed) in front.

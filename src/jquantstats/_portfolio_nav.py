@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-import contextlib
 from typing import TYPE_CHECKING
 
 import polars as pl
 
-from .exceptions import MissingDateColumnError
+from .exceptions import MissingDateColumnError, NoAssetColumnsError
 
 
 class PortfolioNavMixin:
@@ -68,8 +67,9 @@ class PortfolioNavMixin:
                 pl.when(pl.col(c).is_finite()).then(pl.col(c)).otherwise(0.0).fill_null(0.0).alias(c) for c in assets
             )
 
-        with contextlib.suppress(AttributeError, TypeError):
-            object.__setattr__(self, "_profits_cache", result)
+        # Direct write is safe: Portfolio is a frozen, slotted dataclass that
+        # declares every cache field, so object.__setattr__ cannot fail here.
+        object.__setattr__(self, "_profits_cache", result)
         return result
 
     @property
@@ -78,12 +78,15 @@ class PortfolioNavMixin:
 
         Aggregates per-asset profits into a single ``'profit'`` column and
         validates that no day's total profit is NaN/null.
+
+        Raises:
+            NoAssetColumnsError: If the profits frame has no numeric asset columns.
         """
         df_profits = self.profits
         assets = [c for c in df_profits.columns if df_profits[c].dtype.is_numeric()]
 
         if not assets:
-            raise ValueError
+            raise NoAssetColumnsError("profits")
 
         non_assets = [c for c in df_profits.columns if c not in set(assets)]
 
@@ -121,8 +124,8 @@ class PortfolioNavMixin:
         result = self.nav_accumulated.with_columns(
             (pl.col("profit") / self.aum).alias("returns"),
         )
-        with contextlib.suppress(AttributeError, TypeError):
-            object.__setattr__(self, "_returns_cache", result)
+        # Direct write is safe: see the comment on the profits cache above.
+        object.__setattr__(self, "_returns_cache", result)
         return result
 
     @property

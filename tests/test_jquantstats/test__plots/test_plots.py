@@ -342,9 +342,9 @@ def test_rolling_sharpe_plot_returns_figure_with_traces(long_portfolio):
 
 def test_rolling_sharpe_plot_invalid_window_raises(long_portfolio):
     """rolling_sharpe_plot should raise ValueError for non-positive window."""
-    with pytest.raises(ValueError, match=r".*"):
+    with pytest.raises(ValueError, match="positive integer"):
         _ = long_portfolio.plots.rolling_sharpe_plot(window=0)
-    with pytest.raises(ValueError, match=r".*"):
+    with pytest.raises(ValueError, match="positive integer"):
         _ = long_portfolio.plots.rolling_sharpe_plot(window=-1)
 
 
@@ -365,7 +365,7 @@ def test_rolling_volatility_plot_returns_figure_with_traces(long_portfolio):
 
 def test_rolling_volatility_plot_invalid_window_raises(long_portfolio):
     """rolling_volatility_plot should raise ValueError for non-positive window."""
-    with pytest.raises(ValueError, match=r".*"):
+    with pytest.raises(ValueError, match="positive integer"):
         _ = long_portfolio.plots.rolling_volatility_plot(window=0)
 
 

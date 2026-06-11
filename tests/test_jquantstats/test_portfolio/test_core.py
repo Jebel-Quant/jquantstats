@@ -165,7 +165,7 @@ def test_profit_raises_when_no_numeric_asset_columns():
     positions = pl.DataFrame({"date": dates})
     pf = Portfolio(prices=prices, cashposition=positions, aum=1e5)
 
-    with pytest.raises(ValueError, match=r".*"):
+    with pytest.raises(ValueError, match="no numeric asset columns"):
         _ = pf.profit
 
 

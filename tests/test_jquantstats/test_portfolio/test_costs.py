@@ -82,7 +82,7 @@ def test_cost_adjusted_returns_preserves_date_column(turnover_portfolio):
 
 def test_cost_adjusted_returns_negative_bps_raises(turnover_portfolio):
     """cost_adjusted_returns must raise ValueError for negative cost_bps."""
-    with pytest.raises(ValueError, match=r".*"):
+    with pytest.raises(ValueError, match="cost_bps must be non-negative"):
         turnover_portfolio.cost_adjusted_returns(-1.0)
 
 
@@ -134,9 +134,9 @@ def test_trading_cost_impact_sharpe_decreases_with_cost():
 
 def test_trading_cost_impact_invalid_max_bps_raises(turnover_portfolio):
     """trading_cost_impact must raise ValueError for max_bps=0 or non-integer."""
-    with pytest.raises(ValueError, match=r".*"):
+    with pytest.raises(ValueError, match="max_bps must be a positive integer"):
         turnover_portfolio.trading_cost_impact(max_bps=0)
-    with pytest.raises(ValueError, match=r".*"):
+    with pytest.raises(ValueError, match="max_bps must be a positive integer"):
         turnover_portfolio.trading_cost_impact(max_bps=-1)  # type: ignore[arg-type]
 
 

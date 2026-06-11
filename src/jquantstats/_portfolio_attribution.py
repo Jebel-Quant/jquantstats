@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import contextlib
 from typing import TYPE_CHECKING, Self
 
 import polars as pl
@@ -65,8 +64,9 @@ class PortfolioAttributionMixin:
             cost_per_unit=self.cost_per_unit,
             cost_bps=self.cost_bps,
         )
-        with contextlib.suppress(AttributeError, TypeError):
-            object.__setattr__(self, "_tilt_cache", result)
+        # Direct write is safe: Portfolio is a frozen, slotted dataclass that
+        # declares every cache field, so object.__setattr__ cannot fail here.
+        object.__setattr__(self, "_tilt_cache", result)
         return result
 
     @property

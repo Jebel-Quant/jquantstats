@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import contextlib
 from typing import TYPE_CHECKING
 
 import polars as pl
@@ -61,8 +60,9 @@ class PortfolioTurnoverMixin:
         cols.append(daily_abs_chg)
         result = self.cashposition.select(cols)
 
-        with contextlib.suppress(AttributeError, TypeError):
-            object.__setattr__(self, "_turnover_cache", result)
+        # Direct write is safe: Portfolio is a frozen, slotted dataclass that
+        # declares every cache field, so object.__setattr__ cannot fail here.
+        object.__setattr__(self, "_turnover_cache", result)
         return result
 
     @property

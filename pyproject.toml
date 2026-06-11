@@ -121,6 +121,7 @@ httpx = "httpx"
 
 # Coverage configuration
 [tool.coverage.report]
+fail_under = 100
 exclude_lines = [
     "pragma: no cover",
     "if TYPE_CHECKING:",  # type-only imports are never executed at runtime

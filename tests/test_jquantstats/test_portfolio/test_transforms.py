@@ -138,7 +138,7 @@ def test_truncate_with_only_start_or_end_open_bounds(truncate_portfolio):
 
 def test_portfolio_smoothed_holding_negative_raises_value_error(portfolio):
     """Portfolio.smoothed_holding should raise ValueError when n < 0."""
-    with pytest.raises(ValueError, match=r".*"):
+    with pytest.raises(ValueError, match="non-negative integer"):
         _ = portfolio.smoothed_holding(-1)
 
 
