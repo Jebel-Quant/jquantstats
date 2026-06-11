@@ -57,8 +57,18 @@ date column type (`pl.Date` vs `pl.Datetime` mismatches are a common cause).
 
 A derived portfolio series (e.g. `profit`) picked up NaN/inf. The usual
 culprits are gaps, zeros, or negative values in the **prices** frame —
-`pct_change` on a zero price produces infinity. Inspect
-`portfolio.prices` for zero/negative entries.
+`pct_change` on a zero price produces infinity. This surfaces lazily (at
+report/stats time, not construction), so check your inputs upfront:
+
+```python
+import polars as pl
+
+# zero or negative prices are the usual culprit
+bad = pf.prices.filter(pl.any_horizontal(pl.col(a) <= 0 for a in pf.assets))
+
+# or trigger the validation early instead of at report time
+_ = pf.profit  # raises UncleanSeriesError now rather than later
+```
 
 ### `ValueError: annual_breakdown requires a date column` (and friends)
 
@@ -94,6 +104,39 @@ Polars.
 Zero dispersion. Constant returns (including all-zero) have no meaningful
 mean/std ratio, so jquantstats returns NaN instead of an absurdly large
 number. The same guard applies to `trading_cost_impact`.
+
+### Why is my Kelly criterion (or another metric) NaN?
+
+NaN means "mathematically indeterminate for this data", not "bug". Common
+cases:
+
+- **`kelly_criterion`** — needs both winning *and* losing periods; a strategy
+  with no losses (or no wins) has no defined Kelly fraction.
+- **`payoff_ratio` / `profit_factor`** — undefined without losses.
+- **`hhi_positive` / `hhi_negative`** — need at least three positive
+  (resp. negative) returns.
+- **Anything ratio-like** — NaN when the denominator has no observations.
+
+When a metric is NaN, inspect the inputs it needs (e.g.
+`data.returns.filter(pl.col("Asset") < 0).height` for loss-dependent metrics).
+
+### How do I deploy the web API safely?
+
+The `[web]` extra ships a FastAPI app (`api/app.py`) with hardening built in
+(upload limits, rate limiting, deny-by-default CORS). Configure via env vars:
+
+| Variable | Effect | Default |
+|---|---|---|
+| `JQS_API_KEY` | require this value in the `X-API-Key` header | unset (auth off) |
+| `JQS_CORS_ORIGINS` | comma-separated allowed origins | deny all cross-origin |
+| `JQS_RATE_LIMIT_MAX_REQUESTS` | requests per client per window | 30 |
+| `JQS_RATE_LIMIT_WINDOW_SECONDS` | sliding-window length | 60 |
+
+!!! warning "Scaling beyond one instance"
+    The built-in rate limiter is **per-process**. If you run multiple
+    instances behind a load balancer, add a shared limiter in front
+    (reverse proxy or Redis-backed) — the in-process one will not coordinate
+    across instances.
 
 ### Can `rf` be an integer? A Series?
 

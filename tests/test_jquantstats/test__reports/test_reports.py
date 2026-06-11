@@ -676,3 +676,21 @@ def test_full_skips_missing_plot_method(data):
     reports_proxy = Reports(data=_DataProxy(data))  # type: ignore[arg-type]
     html = reports_proxy.full()
     assert "<!DOCTYPE html>" in html
+
+
+def test_full_report_with_integer_index_is_unsupported():
+    """full() currently requires a temporal index — pins the limitation.
+
+    The period header is skipped gracefully for integer indexes, but the
+    monthly-heatmap chart downstream requires a temporal column and raises.
+    If this test starts failing because full() succeeds, integer-index
+    support has been added — update this test to assert on the HTML instead.
+    """
+    import polars.exceptions
+
+    from jquantstats import Data
+
+    returns = pl.DataFrame({"A": [0.01, -0.02, 0.015, 0.0, 0.005] * 4})
+    data = Data(returns=returns, index=pl.DataFrame({"index": list(range(20))}))
+    with pytest.raises(polars.exceptions.InvalidOperationError, match="duration"):
+        data.reports.full()

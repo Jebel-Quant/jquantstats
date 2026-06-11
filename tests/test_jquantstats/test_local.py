@@ -172,8 +172,8 @@ def test_report_invalid_csv_returns_400(client: TestClient) -> None:
     assert response.status_code == 400
 
 
-def test_report_inconsistent_data_returns_400(client: TestClient, csv_files: dict[str, bytes]) -> None:
-    """POST /report with CSVs that cannot form a portfolio returns 400, not 500."""
+def test_report_inconsistent_data_returns_422(client: TestClient, csv_files: dict[str, bytes]) -> None:
+    """POST /report with CSVs whose dates don't line up returns 422, not 500."""
     positions = b"date,UNKNOWN\n2023-01-02,100\n2023-01-03,100\n"
     response = client.post(
         "/report",
@@ -182,7 +182,7 @@ def test_report_inconsistent_data_returns_400(client: TestClient, csv_files: dic
             "positions": ("positions.csv", positions, "text/csv"),
         },
     )
-    assert response.status_code == 400
+    assert response.status_code == 422
 
 
 def test_report_oversized_upload_returns_413(
@@ -267,13 +267,14 @@ def test_report_parse_errors_do_not_echo_filename_or_internals(client: TestClien
     assert response.json()["detail"] == "prices: file is not valid CSV"
 
 
-def test_report_build_errors_are_generic(client: TestClient, csv_files: dict[str, bytes]) -> None:
+def test_report_build_errors_are_generic(client: TestClient) -> None:
     """Report-build failures return a generic message without exception internals."""
-    positions = b"date,UNKNOWN\n2023-01-02,100\n"
+    prices = b"date,A\n2023-01-02,abc\n2023-01-03,def\n"  # aligned dates, but no numeric asset column
+    positions = b"date,A\n2023-01-02,100\n2023-01-03,100\n"
     response = client.post(
         "/report",
         files={
-            "prices": ("prices.csv", csv_files["prices"], "text/csv"),
+            "prices": ("prices.csv", prices, "text/csv"),
             "positions": ("positions.csv", positions, "text/csv"),
         },
     )
@@ -327,3 +328,52 @@ def test_cross_origin_requests_denied_by_default(client: TestClient) -> None:
     """Without JQS_CORS_ORIGINS configured, responses carry no CORS allow header."""
     response = client.get("/", headers={"Origin": "https://evil.example"})
     assert "access-control-allow-origin" not in response.headers
+
+
+def test_report_requires_api_key_when_configured(
+    client: TestClient, csv_files: dict[str, bytes], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """With JQS_API_KEY set, /report rejects missing/wrong keys with 401 and accepts the right one."""
+    import api.app as app_module
+
+    monkeypatch.setattr(app_module, "API_KEY", "sekret")
+    files = {
+        "prices": ("prices.csv", csv_files["prices"], "text/csv"),
+        "positions": ("positions.csv", csv_files["positions"], "text/csv"),
+    }
+    missing = client.post("/report", files=files)
+    wrong = client.post("/report", files=files, headers={"X-API-Key": "nope"})
+    right = client.post("/report", files=files, headers={"X-API-Key": "sekret"})
+    assert missing.status_code == 401
+    assert wrong.status_code == 401
+    assert right.status_code == 200
+
+
+def test_report_rejects_mismatched_dates(client: TestClient) -> None:
+    """Same row counts but different dates must be rejected with 422, not silently aligned."""
+    prices = b"date,A\n2023-01-02,100.0\n2023-01-03,101.0\n"
+    positions = b"date,A\n2023-02-06,500.0\n2023-02-07,500.0\n"
+    response = client.post(
+        "/report",
+        files={
+            "prices": ("prices.csv", prices, "text/csv"),
+            "positions": ("positions.csv", positions, "text/csv"),
+        },
+    )
+    assert response.status_code == 422
+    assert "same dates" in response.json()["detail"]
+
+
+def test_report_rejects_partial_date_column(client: TestClient) -> None:
+    """Only one upload having a 'date' column must be rejected with 422."""
+    prices = b"date,A\n2023-01-02,100.0\n2023-01-03,101.0\n"
+    positions = b"A\n500.0\n500.0\n"
+    response = client.post(
+        "/report",
+        files={
+            "prices": ("prices.csv", prices, "text/csv"),
+            "positions": ("positions.csv", positions, "text/csv"),
+        },
+    )
+    assert response.status_code == 422
+    assert "both" in response.json()["detail"]

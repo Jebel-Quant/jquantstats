@@ -100,3 +100,76 @@ def test_trading_cost_impact_is_nan_for_zero_variance_returns() -> None:
     pf = Portfolio(prices=prices, cashposition=pos, aum=1e5)
     impact = pf.trading_cost_impact(max_bps=3)
     assert impact["sharpe"].is_nan().all()
+
+
+# ── Mutation-testing killers (issue #808) ─────────────────────────────────────
+# These pin behaviors that line coverage alone could not distinguish from
+# mutants: exact values, boundary inclusivity, and decorator error paths.
+
+
+def test_drawdown_series_exact_values():
+    """Drawdown values are exact, not just bounded — kills sign/operator mutants."""
+    dd = _drawdown_series(pl.Series([0.0, -0.1, 0.2], dtype=pl.Float64))
+    assert [round(x, 10) for x in dd.to_list()] == [0.0, 0.1, 0.0]
+
+
+def test_to_float_conversions():
+    """_to_float maps None to 0.0, timedeltas to seconds, and floats through."""
+    from jquantstats._stats._core import _to_float
+
+    assert _to_float(None) == 0.0
+    assert _to_float(2.5) == 2.5
+    assert _to_float(timedelta(seconds=90)) == 90.0
+
+
+def test_mean_of_empty_series_is_nan():
+    """_mean returns NaN (not an error, not 0.0) for empty input."""
+    from jquantstats._stats._core import _mean
+
+    assert math.isnan(_mean(pl.Series([], dtype=pl.Float64)))
+
+
+def test_std_is_negligible_threshold_boundaries():
+    """The 10-epsilon threshold is exact: scale factor, mean scaling, and inclusive boundary."""
+    import sys
+
+    eps = sys.float_info.epsilon
+    # threshold scales with |mean|: cutoff is 10 * eps * |mean|
+    assert _std_is_negligible(9.9 * eps * 0.05, 0.05)
+    assert not _std_is_negligible(10.5 * eps * 0.05, 0.05)
+    # well above the relative threshold but below an eps/|mean| mis-scaling
+    assert not _std_is_negligible(1e-15, 0.05)
+    # absolute floor for zero mean, boundary is inclusive (<=)
+    assert _std_is_negligible(eps * eps * 10.0, 0.0)
+
+
+def test_decorators_raise_for_hosts_without_data_attr():
+    """columnwise_stat/to_frame fail loudly when the host lacks the data attribute."""
+    from jquantstats._stats._core import columnwise_stat, to_frame
+
+    class _NoData:
+        """Host class deliberately missing the '_data' attribute."""
+
+        @columnwise_stat
+        def metric(self, series):
+            """Dummy metric."""
+            return 0.0
+
+        @to_frame
+        def framed(self, series):
+            """Dummy per-column frame builder."""
+            return series
+
+    obj = _NoData()
+    with pytest.raises(AttributeError, match=r"columnwise_stat requires host object to define '_data'"):
+        obj.metric()
+    with pytest.raises(AttributeError, match=r"to_frame requires host object to define '_data'"):
+        obj.framed()
+
+
+def test_decorated_methods_preserve_metadata(data):
+    """@wraps keeps the wrapped method's name; to_frame builds a full-height frame."""
+    assert data.stats.sharpe.__name__ == "sharpe"
+    assert data.stats.compsum.__name__ == "compsum"
+    frame = data.stats.compsum()
+    assert frame.height == data.returns.height

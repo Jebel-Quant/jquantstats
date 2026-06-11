@@ -41,6 +41,16 @@ and the [FAQ](faq.md) for common errors.
 
 ## Result
 
+`Result` bundles a `Portfolio` with an optional per-asset expected-returns
+frame (`mu`) and exports a standard artifact set in one call:
+`create_reports(output_dir)` writes CSVs (prices, profit, returns, positions,
+tilt/timing decomposition, and the `mu` signal when present) plus interactive
+HTML plots. Use it when you want a reproducible on-disk report bundle from a
+backtest or experiment; call `portfolio.plots` / `portfolio.report` directly
+when you just want figures in a notebook. `mu` (when given) must be a Polars
+DataFrame with one column per portfolio asset — anything else raises at
+construction time.
+
 ::: jquantstats.Result
 
 ## Exceptions

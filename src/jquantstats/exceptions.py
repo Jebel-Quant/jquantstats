@@ -226,6 +226,26 @@ class UncleanSeriesError(JQuantStatsError, ValueError):
         self.reason = reason
 
 
+class MuSchemaError(JQuantStatsError, ValueError):
+    """Raised when a ``mu`` (expected-returns) frame doesn't match the portfolio's assets.
+
+    Args:
+        missing: Portfolio asset columns absent from the mu frame.
+
+    Examples:
+        >>> raise MuSchemaError(["AAPL"])  # doctest: +ELLIPSIS
+        Traceback (most recent call last):
+            ...
+        jquantstats.exceptions.MuSchemaError: ...
+    """
+
+    def __init__(self, missing: list[str]) -> None:
+        """Initialize with the asset columns missing from the mu frame."""
+        cols = ", ".join(f"'{c}'" for c in missing)
+        super().__init__(f"mu is missing expected-return columns for portfolio asset(s): {cols}.")
+        self.missing = missing
+
+
 class NullsInReturnsError(JQuantStatsError, ValueError):
     """Raised when null values are detected in returns (or benchmark) data.
 

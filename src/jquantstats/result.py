@@ -5,6 +5,7 @@ from pathlib import Path
 
 import polars as pl
 
+from .exceptions import MuSchemaError
 from .portfolio import Portfolio
 
 
@@ -19,6 +20,21 @@ class Result:
 
     portfolio: Portfolio
     mu: pl.DataFrame | None = None
+
+    def __post_init__(self) -> None:
+        """Validate that mu (when given) is a DataFrame covering every portfolio asset.
+
+        Raises:
+            TypeError: If ``mu`` is neither ``None`` nor a `polars.DataFrame`.
+            MuSchemaError: If ``mu`` lacks a column for one or more portfolio assets.
+        """
+        if self.mu is None:
+            return
+        if not isinstance(self.mu, pl.DataFrame):
+            raise TypeError(f"mu must be a polars DataFrame or None, got {type(self.mu).__name__}")  # noqa: TRY003
+        missing = [asset for asset in self.portfolio.assets if asset not in self.mu.columns]
+        if missing:
+            raise MuSchemaError(missing)
 
     def create_reports(self, output_dir: Path) -> None:
         """Generate CSV exports and interactive HTML plots for this result.
