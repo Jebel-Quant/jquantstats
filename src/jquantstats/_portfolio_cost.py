@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from typing import TYPE_CHECKING
 
 import polars as pl
@@ -122,6 +123,8 @@ class PortfolioCostMixin:
             ``returns`` column reduced by the per-period trading cost.
 
         Raises:
+            TypeError: If ``cost_bps`` is not a number.
+            ValueError: If ``cost_bps`` is not finite (NaN or infinity).
             NegativeCostBpsError: If ``cost_bps`` is negative.
 
         Examples:
@@ -137,6 +140,11 @@ class PortfolioCostMixin:
             True
         """
         effective_bps = cost_bps if cost_bps is not None else self.cost_bps
+        if isinstance(effective_bps, bool) or not isinstance(effective_bps, int | float):
+            raise TypeError(f"cost_bps must be a number, got {type(effective_bps).__name__}")  # noqa: TRY003
+        effective_bps = float(effective_bps)
+        if not math.isfinite(effective_bps):
+            raise ValueError(f"cost_bps must be finite, got {effective_bps}")  # noqa: TRY003
         if effective_bps < 0:
             raise NegativeCostBpsError(effective_bps)
         base = self.returns

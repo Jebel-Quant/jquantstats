@@ -15,10 +15,11 @@ from jquantstats import Portfolio
 from jquantstats._plots._protocol import DataLike as PlotsDataLike
 from jquantstats._plots._protocol import PortfolioLike as PlotsPortfolioLike
 from jquantstats._protocol import DataLike as RootDataLike
+from jquantstats._protocol import DataLike as StatsDataLike  # stats mixins now use the root protocol
+from jquantstats._protocol import StatsLike as RootStatsLike
 from jquantstats._reports._protocol import DataLike as ReportsDataLike
 from jquantstats._reports._protocol import PortfolioLike as ReportsPortfolioLike
 from jquantstats._reports._protocol import StatsLike as ReportsStatsLike
-from jquantstats._stats._protocol import DataLike as StatsDataLike
 from jquantstats._utils._protocol import DataLike as UtilsDataLike
 
 
@@ -51,6 +52,11 @@ def test_data_like_protocol_is_shared_across_subpackages():
     assert PlotsDataLike is RootDataLike
     assert ReportsDataLike is RootDataLike
     assert UtilsDataLike is RootDataLike
+
+
+def test_stats_like_protocol_is_shared():
+    """Reports StatsLike points to the root StatsLike protocol."""
+    assert ReportsStatsLike is RootStatsLike
 
 
 def test_portfolio_satisfies_plots_portfolio_like(simple_portfolio):

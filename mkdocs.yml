@@ -15,9 +15,11 @@ nav:
     - Cost Models: cost_models.md
     - Migration from QuantStats: MIGRATION.md
     - QuantStats Parity Benchmark: benchmark.md
+    - FAQ & Troubleshooting: faq.md
   - API Reference: api.md
   - Reference:
     - API Stability: STABILITY.md
+    - Changelog: changelog.md
   - Notebooks:
     - Analytics Demo: notebooks/analytics_demo.html
     - Plots and Reports: notebooks/plots_and_reports.html

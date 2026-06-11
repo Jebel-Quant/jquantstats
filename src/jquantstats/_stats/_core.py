@@ -30,9 +30,12 @@ import sys
 from collections.abc import Callable
 from datetime import timedelta
 from functools import wraps
-from typing import Any, cast, overload
+from typing import Any, Concatenate, ParamSpec, TypeVar, cast, overload
 
 import polars as pl
+
+P = ParamSpec("P")
+R = TypeVar("R")
 
 # ── Module helpers ────────────────────────────────────────────────────────────
 
@@ -147,19 +150,29 @@ def _mean(series: pl.Series) -> float:
 
 
 @overload
-def columnwise_stat(func: Callable[..., Any], *, data_attr: str = ...) -> Callable[..., dict[str, float]]: ...
+def columnwise_stat(
+    func: Callable[Concatenate[Any, pl.Series, P], R], *, data_attr: str = ...
+) -> Callable[Concatenate[Any, P], dict[str, R]]: ...
 
 
 @overload
 def columnwise_stat(
     func: None = ..., *, data_attr: str = ...
-) -> Callable[[Callable[..., Any]], Callable[..., dict[str, float]]]: ...
+) -> Callable[[Callable[Concatenate[Any, pl.Series, P], R]], Callable[Concatenate[Any, P], dict[str, R]]]: ...
 
 
 def columnwise_stat(
-    func: Callable[..., Any] | None = None, *, data_attr: str = "_data"
-) -> Callable[..., dict[str, float]] | Callable[[Callable[..., Any]], Callable[..., dict[str, float]]]:
+    func: Callable[Concatenate[Any, pl.Series, P], R] | None = None, *, data_attr: str = "_data"
+) -> (
+    Callable[Concatenate[Any, P], dict[str, R]]
+    | Callable[[Callable[Concatenate[Any, pl.Series, P], R]], Callable[Concatenate[Any, P], dict[str, R]]]
+):
     """Apply a column-wise statistical function to all numeric columns.
+
+    The decorated method must accept ``(self, series, *args, **kwargs)``; the
+    wrapper drops the ``series`` parameter and preserves the remaining
+    signature (via ParamSpec), returning ``{column: value}`` with the wrapped
+    method's return type as the value type.
 
     Args:
         func (Callable | None): The function to decorate.
@@ -170,11 +183,13 @@ def columnwise_stat(
 
     """
 
-    def decorator(inner_func: Callable[..., Any]) -> Callable[..., dict[str, float]]:
+    def decorator(
+        inner_func: Callable[Concatenate[Any, pl.Series, P], R],
+    ) -> Callable[Concatenate[Any, P], dict[str, R]]:
         """Wrap *inner_func* to iterate over the configured data attribute columns."""
 
         @wraps(inner_func)
-        def wrapper(self: Any, *args: Any, **kwargs: Any) -> dict[str, float]:
+        def wrapper(self: Any, *args: P.args, **kwargs: P.kwargs) -> dict[str, R]:
             """Apply *func* to every column and return a ``{column: value}`` mapping."""
             if not hasattr(self, data_attr):
                 msg = (
@@ -193,19 +208,28 @@ def columnwise_stat(
 
 
 @overload
-def to_frame(func: Callable[..., Any], *, data_attr: str = ...) -> Callable[..., pl.DataFrame]: ...
+def to_frame(
+    func: Callable[Concatenate[Any, pl.Series, P], pl.Series], *, data_attr: str = ...
+) -> Callable[Concatenate[Any, P], pl.DataFrame]: ...
 
 
 @overload
 def to_frame(
     func: None = ..., *, data_attr: str = ...
-) -> Callable[[Callable[..., Any]], Callable[..., pl.DataFrame]]: ...
+) -> Callable[[Callable[Concatenate[Any, pl.Series, P], pl.Series]], Callable[Concatenate[Any, P], pl.DataFrame]]: ...
 
 
 def to_frame(
-    func: Callable[..., Any] | None = None, *, data_attr: str = "_data"
-) -> Callable[..., pl.DataFrame] | Callable[[Callable[..., Any]], Callable[..., pl.DataFrame]]:
+    func: Callable[Concatenate[Any, pl.Series, P], pl.Series] | None = None, *, data_attr: str = "_data"
+) -> (
+    Callable[Concatenate[Any, P], pl.DataFrame]
+    | Callable[[Callable[Concatenate[Any, pl.Series, P], pl.Series]], Callable[Concatenate[Any, P], pl.DataFrame]]
+):
     """Apply per-column expressions and evaluates with .with_columns(...).
+
+    The decorated method must accept ``(self, series, *args, **kwargs)`` and
+    return a per-column Polars Series; the wrapper drops the ``series``
+    parameter and preserves the remaining signature (via ParamSpec).
 
     Args:
         func (Callable | None): The function to decorate.
@@ -216,11 +240,13 @@ def to_frame(
 
     """
 
-    def decorator(inner_func: Callable[..., Any]) -> Callable[..., pl.DataFrame]:
+    def decorator(
+        inner_func: Callable[Concatenate[Any, pl.Series, P], pl.Series],
+    ) -> Callable[Concatenate[Any, P], pl.DataFrame]:
         """Wrap *inner_func* to build a per-column frame from the configured data attribute."""
 
         @wraps(inner_func)
-        def wrapper(self: Any, *args: Any, **kwargs: Any) -> pl.DataFrame:
+        def wrapper(self: Any, *args: P.args, **kwargs: P.kwargs) -> pl.DataFrame:
             """Apply *func* per column and return the result as a Polars DataFrame."""
             if not hasattr(self, data_attr):
                 msg = (

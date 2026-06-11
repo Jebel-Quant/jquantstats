@@ -86,6 +86,22 @@ def test_cost_adjusted_returns_negative_bps_raises(turnover_portfolio):
         turnover_portfolio.cost_adjusted_returns(-1.0)
 
 
+def test_cost_adjusted_returns_non_numeric_bps_raises(turnover_portfolio):
+    """cost_adjusted_returns must raise TypeError for non-numeric cost_bps (incl. bool)."""
+    with pytest.raises(TypeError, match="cost_bps must be a number"):
+        turnover_portfolio.cost_adjusted_returns("5")
+    with pytest.raises(TypeError, match="cost_bps must be a number"):
+        turnover_portfolio.cost_adjusted_returns(True)
+
+
+def test_cost_adjusted_returns_non_finite_bps_raises(turnover_portfolio):
+    """cost_adjusted_returns must raise ValueError for NaN or infinite cost_bps."""
+    with pytest.raises(ValueError, match="cost_bps must be finite"):
+        turnover_portfolio.cost_adjusted_returns(float("inf"))
+    with pytest.raises(ValueError, match="cost_bps must be finite"):
+        turnover_portfolio.cost_adjusted_returns(float("nan"))
+
+
 def test_cost_adjusted_returns_higher_bps_lower_returns(turnover_portfolio):
     """Higher basis points must lead to lower (or equal) total adjusted returns."""
     adj5 = float(turnover_portfolio.cost_adjusted_returns(5.0)["returns"].sum())

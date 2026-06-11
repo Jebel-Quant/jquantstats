@@ -43,7 +43,7 @@ class _RiskStatsMixin:
     all: pl.DataFrame
 
     if TYPE_CHECKING:
-        from ._protocol import DataLike
+        from .._protocol import DataLike
 
         data: DataLike
         all: pl.DataFrame | None
@@ -311,16 +311,16 @@ class _RiskStatsMixin:
     # ── Cumulative returns ────────────────────────────────────────────────────
 
     @to_frame
-    def compsum(self, series: pl.Expr) -> pl.Expr:
+    def compsum(self, series: pl.Series) -> pl.Series:
         """Calculate the rolling compounded (cumulative) returns.
 
         Computed as cumprod(1 + r) - 1 for each period.
 
         Args:
-            series (pl.Expr): The expression to calculate cumulative returns for.
+            series (pl.Series): The series to calculate cumulative returns for.
 
         Returns:
-            pl.Expr: Cumulative compounded returns expression.
+            pl.Series: Cumulative compounded returns per period.
 
         """
         return (1.0 + series).cum_prod() - 1.0

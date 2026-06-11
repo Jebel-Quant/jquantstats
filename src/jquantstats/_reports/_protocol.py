@@ -7,17 +7,9 @@ from typing import Protocol, runtime_checkable
 import plotly.graph_objects as go
 import polars as pl
 
-from jquantstats._protocol import DataLike
+from jquantstats._protocol import DataLike, StatsLike
 
 __all__ = ["DataLike", "PlotsLike", "PortfolioLike", "StatsLike"]
-
-
-class StatsLike(Protocol):  # pragma: no cover
-    """Structural interface for the statistics methods used by `Report`."""
-
-    def summary(self) -> pl.DataFrame:
-        """Full summary DataFrame (one row per metric, one column per asset)."""
-        ...
 
 
 @runtime_checkable

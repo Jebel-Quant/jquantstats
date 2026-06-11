@@ -33,7 +33,7 @@ class _ReportingStatsMixin:
     all: pl.DataFrame
 
     if TYPE_CHECKING:
-        from ._protocol import DataLike
+        from .._protocol import DataLike
 
         data: DataLike
         all: pl.DataFrame | None

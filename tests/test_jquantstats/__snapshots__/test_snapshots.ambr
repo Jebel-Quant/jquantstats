@@ -1,0 +1,86 @@
+# serializer version: 1
+# name: test_monthly_returns_heatmap_structure
+  dict({
+    'title': 'Monthly Returns Heatmap',
+    'traces': list([
+      dict({
+        'name': None,
+        'type': 'heatmap',
+      }),
+    ]),
+    'xaxis_title': 'Month',
+    'yaxis_title': 'Year',
+  })
+# ---
+# name: test_report_html_structure
+  dict({
+    'assets': list([
+      'A',
+      'B',
+    ]),
+    'headings': list([
+      '&#x1F4CA; JQuantStats Portfolio Report',
+      'Portfolio Performance',
+      'Risk Analysis',
+      'Annual Breakdown',
+      'Monthly Returns',
+      'Performance Statistics',
+      'Correlation Analysis',
+      'Lead / Lag Information Ratio',
+      'Trading Cost Impact',
+      'Turnover Summary',
+    ]),
+    'n_figures': 8,
+  })
+# ---
+# name: test_rolling_sharpe_plot_structure
+  dict({
+    'title': 'Rolling Sharpe Ratio (63-period window)',
+    'traces': list([
+      dict({
+        'name': 'returns',
+        'type': 'scatter',
+      }),
+    ]),
+    'xaxis_title': None,
+    'yaxis_title': 'Sharpe ratio',
+  })
+# ---
+# name: test_snapshot_plot_structure
+  dict({
+    'title': 'Performance Dashboard',
+    'traces': list([
+      dict({
+        'name': 'NAV',
+        'type': 'scatter',
+      }),
+      dict({
+        'name': 'Tilt',
+        'type': 'scatter',
+      }),
+      dict({
+        'name': 'Timing',
+        'type': 'scatter',
+      }),
+      dict({
+        'name': 'Drawdown',
+        'type': 'scatter',
+      }),
+    ]),
+    'xaxis_title': None,
+    'yaxis_title': 'NAV (accumulated)',
+  })
+# ---
+# name: test_trading_cost_impact_plot_structure
+  dict({
+    'title': 'Trading Cost Impact on Sharpe Ratio (0–20 bps)',
+    'traces': list([
+      dict({
+        'name': 'Sharpe (cost-adjusted)',
+        'type': 'scatter',
+      }),
+    ]),
+    'xaxis_title': 'One-way cost (basis points)',
+    'yaxis_title': 'Annualised Sharpe ratio',
+  })
+# ---
