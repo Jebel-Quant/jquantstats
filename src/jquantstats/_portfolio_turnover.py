@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
+from ._cache import cached_in_slot
+
 
 class PortfolioTurnoverMixin:
     """Mixin providing turnover analytics for Portfolio."""
@@ -16,6 +18,7 @@ class PortfolioTurnoverMixin:
         _turnover_cache: pl.DataFrame | None
 
     @property
+    @cached_in_slot("_turnover_cache")
     def turnover(self) -> pl.DataFrame:
         """Daily one-way portfolio turnover as a fraction of AUM.
 
@@ -46,10 +49,6 @@ class PortfolioTurnoverMixin:
             >>> pf.turnover["turnover"].to_list()
             [0.0, 0.002, 0.003]
         """
-        cache = getattr(self, "_turnover_cache", None)
-        if cache is not None:
-            return cache
-
         assets = [c for c in self.cashposition.columns if c != "date" and self.cashposition[c].dtype.is_numeric()]
         daily_abs_chg = (
             pl.sum_horizontal(pl.col(c).diff().abs().fill_null(0.0).fill_nan(0.0) for c in assets) / self.aum
@@ -58,12 +57,7 @@ class PortfolioTurnoverMixin:
         if "date" in self.cashposition.columns:
             cols.append("date")
         cols.append(daily_abs_chg)
-        result = self.cashposition.select(cols)
-
-        # Direct write is safe: Portfolio is a frozen, slotted dataclass that
-        # declares every cache field, so object.__setattr__ cannot fail here.
-        object.__setattr__(self, "_turnover_cache", result)
-        return result
+        return self.cashposition.select(cols)
 
     @property
     def turnover_weekly(self) -> pl.DataFrame:

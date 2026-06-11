@@ -105,6 +105,18 @@
       "tests/test_jquantstats/test__stats"
     ]
   },
+  "src/jquantstats/_cache.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test_portfolio"
+    ]
+  },
+  "src/jquantstats/_stats/_performance.py": {
+    "max_survivors": 0,
+    "tests": [
+      "tests/test_jquantstats/test__stats"
+    ]
+  },
   "src/jquantstats/_stats/_basic.py": {
     "max_survivors": 0,
     "tests": [

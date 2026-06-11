@@ -12,6 +12,8 @@ import pytest
 from jquantstats import Portfolio
 from jquantstats.exceptions import IntegerIndexBoundError, MissingDateColumnError
 
+from ..tolerances import TOL_PARITY, TOL_PINNED
+
 # ─── Lag ─────────────────────────────────────────────────────────────────────
 
 
@@ -241,7 +243,7 @@ def test_tilt_timing_decomp_works_without_date_column(int_portfolio):
     assert decomp.height == int_portfolio.prices.height
     # Numerical check: portfolio NAV ≈ tilt NAV + timing NAV - aum (decomposition identity)
     expected_portfolio = decomp["tilt"].to_numpy() + decomp["timing"].to_numpy() - int_portfolio.aum
-    assert np.allclose(decomp["portfolio"].to_numpy(), expected_portfolio, rtol=1e-10, atol=1e-6)
+    assert np.allclose(decomp["portfolio"].to_numpy(), expected_portfolio, rtol=TOL_PINNED, atol=TOL_PARITY)
 
 
 # ─── Tilt caching tests ───────────────────────────────────────────────────────

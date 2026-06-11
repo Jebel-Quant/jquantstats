@@ -170,16 +170,9 @@ def test_volatility_invalid_periods():
         data.stats.volatility(periods="bad")
 
 
-def test_sharpe_variance_nan_zero_std(edge):
-    """Tests that sharpe_variance returns NaN when std is zero (all-zero returns)."""
-    result = edge.stats.sharpe_variance()
-    assert np.isnan(result["returns"])
-
-
-def test_sharpe_variance_nan_short_series():
-    """Tests that sharpe_variance returns NaN when kurtosis cannot be computed (< 4 obs)."""
-    from datetime import date
-
+@pytest.mark.parametrize("metric", ["sharpe_variance", "probabilistic_sharpe_ratio"])
+def test_moment_metric_nan_short_series(metric):
+    """Moment-based metrics return NaN when kurtosis cannot be computed (< 4 obs)."""
     returns = pl.DataFrame(
         {
             "Date": [date(2023, 1, 1), date(2023, 1, 2), date(2023, 1, 3)],
@@ -187,41 +180,8 @@ def test_sharpe_variance_nan_short_series():
         }
     )
     data = Data.from_returns(returns=returns)
-    result = data.stats.sharpe_variance()
+    result = getattr(data.stats, metric)()
     assert np.isnan(result["asset"])
-
-
-def test_prob_sharpe_ratio_nan_zero_std(edge):
-    """Tests that prob_sharpe_ratio returns NaN when std is zero (all-zero returns)."""
-    result = edge.stats.probabilistic_sharpe_ratio()
-    assert np.isnan(result["returns"])
-
-
-def test_prob_sharpe_ratio_nan_short_series():
-    """Tests that prob_sharpe_ratio returns NaN when kurtosis cannot be computed (< 4 obs)."""
-    from datetime import date
-
-    returns = pl.DataFrame(
-        {
-            "Date": [date(2023, 1, 1), date(2023, 1, 2), date(2023, 1, 3)],
-            "asset": [1.0, -0.5, 0.25],
-        }
-    )
-    data = Data.from_returns(returns=returns)
-    result = data.stats.probabilistic_sharpe_ratio()
-    assert np.isnan(result["asset"])
-
-
-def test_hhi_positive_nan_few_positives(edge):
-    """Tests that hhi_positive returns NaN when there are <= 2 positive returns."""
-    result = edge.stats.hhi_positive()
-    assert np.isnan(result["returns"])
-
-
-def test_hhi_negative_nan_few_negatives(edge):
-    """Tests that hhi_negative returns NaN when there are <= 2 negative returns."""
-    result = edge.stats.hhi_negative()
-    assert np.isnan(result["returns"])
 
 
 def test_subtract_rf_invalid_type():
@@ -272,46 +232,29 @@ def test_from_returns_single_row_raises():
 # ── All-zero returns — additional statistics ──────────────────────────────────
 
 
-def test_all_zero_volatility(edge):
-    """Volatility of all-zero returns is 0.0 (no variation)."""
-    result = edge.stats.volatility()
-    assert result["returns"] == pytest.approx(0.0)
-
-
-def test_all_zero_max_drawdown(edge):
-    """max_drawdown of all-zero returns is 0 (price curve never declines)."""
-    result = edge.stats.max_drawdown()
-    assert result["returns"] == pytest.approx(0.0)
-
-
-def test_all_zero_avg_drawdown(edge):
-    """avg_drawdown of all-zero returns is 0.0 (no underwater periods)."""
-    result = edge.stats.avg_drawdown()
-    assert result["returns"] == pytest.approx(0.0)
-
-
-def test_all_zero_calmar_is_nan(edge):
-    """Calmar of all-zero returns is NaN because max_drawdown is zero."""
-    result = edge.stats.calmar()
-    assert np.isnan(result["returns"])
-
-
-def test_all_zero_recovery_factor_is_nan(edge):
-    """recovery_factor of all-zero returns is NaN because max_drawdown is zero."""
-    result = edge.stats.recovery_factor()
-    assert np.isnan(result["returns"])
-
-
-def test_all_zero_gain_to_pain_is_nan(edge):
-    """gain_to_pain_ratio of all-zero returns is NaN (no losses to divide by)."""
-    result = edge.stats.gain_to_pain_ratio()
-    assert np.isnan(result["returns"])
-
-
-def test_all_zero_exposure(edge):
-    """Exposure of all-zero returns is 0.0 (no non-zero periods)."""
-    result = edge.stats.exposure()
-    assert result["returns"] == pytest.approx(0.0)
+@pytest.mark.parametrize(
+    ("metric", "expected"),
+    [
+        ("volatility", 0.0),  # no variation
+        ("max_drawdown", 0.0),  # price curve never declines
+        ("avg_drawdown", 0.0),  # no underwater periods
+        ("exposure", 0.0),  # no non-zero periods
+        ("calmar", float("nan")),  # max_drawdown is zero
+        ("recovery_factor", float("nan")),  # max_drawdown is zero
+        ("gain_to_pain_ratio", float("nan")),  # no losses to divide by
+        ("sharpe_variance", float("nan")),  # zero standard deviation
+        ("probabilistic_sharpe_ratio", float("nan")),  # zero standard deviation
+        ("hhi_positive", float("nan")),  # <= 2 positive returns
+        ("hhi_negative", float("nan")),  # <= 2 negative returns
+    ],
+)
+def test_all_zero_returns_metric(edge, metric, expected):
+    """All-zero returns produce the documented value (or NaN) for each metric."""
+    result = getattr(edge.stats, metric)()
+    if np.isnan(expected):
+        assert np.isnan(result["returns"])
+    else:
+        assert result["returns"] == pytest.approx(expected)
 
 
 # ── NaN-containing frames ─────────────────────────────────────────────────────

@@ -11,6 +11,8 @@ import pytest
 
 from jquantstats import Portfolio
 
+from ..tolerances import TOL_FLOAT64
+
 # ─── Core: profits, NAV, Sharpe ───────────────────────────────────────────────
 
 
@@ -30,7 +32,7 @@ def test_compute_daily_profits_portfolio_basic(portfolio):
 
     assert profits.columns == expected.columns
     for c in ["A", "B"]:
-        assert np.allclose(profits[c].to_numpy(), expected[c].to_numpy(), rtol=1e-12, atol=1e-12)
+        assert np.allclose(profits[c].to_numpy(), expected[c].to_numpy(), rtol=TOL_FLOAT64, atol=TOL_FLOAT64)
 
 
 def test_portfolio_profit_and_nav(portfolio):
@@ -52,7 +54,7 @@ def test_portfolio_sharpe_matches_manual(portfolio):
     """Sharpe returned by class matches manual computation."""
     out = portfolio.stats.sharpe()["returns"]
     assert np.isfinite(out)
-    assert np.isclose(out, 20.845234695819794, rtol=1e-12, atol=1e-12)
+    assert np.isclose(out, 20.845234695819794, rtol=TOL_FLOAT64, atol=TOL_FLOAT64)
 
 
 def test_portfolio_plot_returns_figure(portfolio):

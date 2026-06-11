@@ -3,6 +3,8 @@
 import pytest
 import quantstats as qs
 
+from ..tolerances import TOL_FLOAT64
+
 
 @pytest.mark.parametrize(
     ("method", "kwargs", "tol"),
@@ -70,4 +72,4 @@ def test_conditional_value_at_risk(stats):
     returns = stats.all.to_pandas().set_index("Date")["AAPL"]
     x = qs.stats.conditional_value_at_risk(returns, confidence=0.99)
     y = stats.conditional_value_at_risk(confidence=0.99)["AAPL"]
-    assert x == pytest.approx(y, abs=1e-12)
+    assert x == pytest.approx(y, abs=TOL_FLOAT64)

@@ -9,6 +9,8 @@ import pytest
 
 from jquantstats import Portfolio
 
+from ..tolerances import TOL_FLOAT64
+
 
 def test_returns_property_scales_profit_by_aum_and_preserves_date(portfolio):
     """Returns should divide numeric columns by aum and retain the 'date' column."""
@@ -19,7 +21,7 @@ def test_returns_property_scales_profit_by_aum_and_preserves_date(portfolio):
 
     expected = (portfolio.profit.select(pl.col("profit")) / portfolio.aum)["profit"].to_numpy()
     actual = rets["returns"].to_numpy()
-    assert np.allclose(actual, expected, rtol=1e-12, atol=1e-12)
+    assert np.allclose(actual, expected, rtol=TOL_FLOAT64, atol=TOL_FLOAT64)
 
 
 def test_nav_compounded_uses_compounding_and_is_close_to_nav_for_small_returns(portfolio):
@@ -47,7 +49,7 @@ def test_highwater_is_cummax_of_nav(portfolio):
 
     expected = nav_df["NAV_accumulated"].cum_max().to_numpy()
     actual = hw_df["highwater"].to_numpy()
-    assert np.allclose(actual, expected, rtol=1e-12, atol=1e-12)
+    assert np.allclose(actual, expected, rtol=TOL_FLOAT64, atol=TOL_FLOAT64)
 
 
 def test_drawdown_is_highwater_minus_nav_and_preserves_date(portfolio):
@@ -62,7 +64,7 @@ def test_drawdown_is_highwater_minus_nav_and_preserves_date(portfolio):
 
     assert np.isclose(actual[0], 0.0)
     assert np.all(actual >= 0.0)
-    assert np.allclose(actual, expected, rtol=1e-12, atol=1e-12)
+    assert np.allclose(actual, expected, rtol=TOL_FLOAT64, atol=TOL_FLOAT64)
 
 
 def test_stats(portfolio):

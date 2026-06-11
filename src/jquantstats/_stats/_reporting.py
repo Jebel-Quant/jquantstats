@@ -143,6 +143,9 @@ class _ReportingStatsMixin:
 
         Returns:
             float: CAGR of excess returns.
+
+        Returns NaN when:
+            ``float("nan")`` when the series is empty.
         """
         raw_periods = periods or self._data._periods_per_year
         n = len(series)
@@ -181,6 +184,10 @@ class _ReportingStatsMixin:
         Note:
             Requires a temporal (Date / Datetime) index when *aggregate* is not
             ``None``; falls back to the raw per-period mean otherwise.
+
+        Returns NaN when:
+            Entries are ``float("nan")`` when an asset has no non-null
+            observations.
         """
         _freq_map: dict[str, str] = {
             "weekly": "1w",
@@ -339,6 +346,10 @@ class _ReportingStatsMixin:
 
         Returns:
             dict[str, float]: Monthly win rate in [0, 1] per asset.
+
+        Returns NaN when:
+            Entries are ``float("nan")`` when no temporal index is present or an
+            asset has no non-null observations.
         """
         all_df = cast(pl.DataFrame, self.all)
         date_col_name = self._data.date_col[0] if self._data.date_col else None
@@ -631,6 +642,11 @@ class _ReportingStatsMixin:
 
         Returns:
             dict[str, float]: Up capture ratio per asset.
+
+        Returns NaN when:
+            Entries are ``float("nan")`` when the benchmark has no positive
+            periods, its up-market geometric mean is zero, or an asset has no
+            usable returns during those periods.
         """
         up_mask = benchmark > 0
         bench_up = benchmark.filter(up_mask).drop_nulls()
@@ -662,6 +678,11 @@ class _ReportingStatsMixin:
 
         Returns:
             dict[str, float]: Down capture ratio per asset.
+
+        Returns NaN when:
+            Entries are ``float("nan")`` when the benchmark has no negative
+            periods, its down-market geometric mean is zero, or an asset has no
+            usable returns during those periods.
         """
         down_mask = benchmark < 0
         bench_down = benchmark.filter(down_mask).drop_nulls()
@@ -766,6 +787,10 @@ class _ReportingStatsMixin:
         Returns:
             pl.DataFrame: A DataFrame with a ``metric`` column followed by one
             column per asset.
+
+        Returns NaN when:
+            Cells are ``float("nan")`` when the underlying metric is unavailable
+            for the data (e.g. no temporal index or no benchmark).
         """
         assets = [col for col, _ in self._data.items()]
 

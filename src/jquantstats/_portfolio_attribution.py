@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING, Self
 
 import polars as pl
 
+from ._cache import cached_in_slot
+
 if TYPE_CHECKING:
     pass
 
@@ -36,6 +38,7 @@ class PortfolioAttributionMixin:
             ...
 
     @property
+    @cached_in_slot("_tilt_cache")
     def tilt(self) -> Self:
         """Return the 'tilt' portfolio with constant average weights.
 
@@ -51,23 +54,16 @@ class PortfolioAttributionMixin:
             incorrect results because each thread stores the same deterministic
             value.
         """
-        cache = getattr(self, "_tilt_cache", None)
-        if cache is not None:
-            return cache
         const_position = self.cashposition.with_columns(
             pl.col(col).drop_nulls().drop_nans().mean().alias(col) for col in self.assets
         )
-        result = type(self).from_cash_position(
+        return type(self).from_cash_position(
             self.prices,
             const_position,
             aum=self.aum,
             cost_per_unit=self.cost_per_unit,
             cost_bps=self.cost_bps,
         )
-        # Direct write is safe: Portfolio is a frozen, slotted dataclass that
-        # declares every cache field, so object.__setattr__ cannot fail here.
-        object.__setattr__(self, "_tilt_cache", result)
-        return result
 
     @property
     def timing(self) -> Self:

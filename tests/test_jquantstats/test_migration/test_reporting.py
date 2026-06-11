@@ -4,6 +4,8 @@ import numpy as np
 import pytest
 import quantstats as qs
 
+from ..tolerances import TOL_FLOAT64, TOL_PINNED
+
 
 def test_monthly_returns(stats, aapl):
     """monthly_returns values match quantstats for all years and months."""
@@ -14,7 +16,7 @@ def test_monthly_returns(stats, aapl):
     for col in months:
         jqs_vals = jqs_df.sort("year")[col].to_numpy()
         qs_vals = qs_df[col].to_numpy()
-        np.testing.assert_allclose(jqs_vals, qs_vals, atol=1e-12, err_msg=f"Mismatch in {col}")
+        np.testing.assert_allclose(jqs_vals, qs_vals, atol=TOL_FLOAT64, err_msg=f"Mismatch in {col}")
 
 
 def test_monthly_returns_no_eoy(stats, aapl):
@@ -27,7 +29,7 @@ def test_monthly_returns_no_eoy(stats, aapl):
     for col in months:
         jqs_vals = jqs_df.sort("year")[col].to_numpy()
         qs_vals = qs_df[col].to_numpy()
-        np.testing.assert_allclose(jqs_vals, qs_vals, atol=1e-12, err_msg=f"Mismatch in {col}")
+        np.testing.assert_allclose(jqs_vals, qs_vals, atol=TOL_FLOAT64, err_msg=f"Mismatch in {col}")
 
 
 @pytest.mark.parametrize("period", ["Daily", "Monthly", "Quarterly", "Yearly"])
@@ -40,7 +42,7 @@ def test_distribution(stats, aapl, period):
     qs_total = sorted(qs_dist["values"] + qs_dist["outliers"])
 
     assert len(jqs_total) == len(qs_total), f"{period}: count mismatch {len(jqs_total)} vs {len(qs_total)}"
-    np.testing.assert_allclose(jqs_total, qs_total, atol=1e-12)
+    np.testing.assert_allclose(jqs_total, qs_total, atol=TOL_FLOAT64)
 
 
 def test_compare_returns(stats, aapl, benchmark_pd):
@@ -52,7 +54,7 @@ def test_compare_returns(stats, aapl, benchmark_pd):
     qs_vals = qs_df["Returns"].dropna().to_numpy()
 
     assert len(jqs_vals) == len(qs_vals)
-    np.testing.assert_allclose(jqs_vals, qs_vals, atol=1e-10)
+    np.testing.assert_allclose(jqs_vals, qs_vals, atol=TOL_PINNED)
 
 
 def test_compare_benchmark(stats, aapl, benchmark_pd):
@@ -64,11 +66,11 @@ def test_compare_benchmark(stats, aapl, benchmark_pd):
     qs_vals = qs_df["Benchmark"].dropna().to_numpy()
 
     assert len(jqs_vals) == len(qs_vals)
-    np.testing.assert_allclose(jqs_vals, qs_vals, atol=1e-10)
+    np.testing.assert_allclose(jqs_vals, qs_vals, atol=TOL_PINNED)
 
 
 def test_implied_volatility_scalar(stats, aapl):
     """implied_volatility scalar (annualize=False) matches quantstats."""
     jqs_val = stats.implied_volatility(periods=252, annualize=False)["AAPL"]
     qs_val = float(qs.stats.implied_volatility(aapl, periods=252, annualize=False))
-    assert jqs_val == pytest.approx(qs_val, abs=1e-10)
+    assert jqs_val == pytest.approx(qs_val, abs=TOL_PINNED)

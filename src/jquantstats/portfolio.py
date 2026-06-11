@@ -36,6 +36,7 @@ if TYPE_CHECKING:
 import polars as pl
 import polars.selectors as cs
 
+from ._cache import cached_in_slot
 from ._cost_model import CostModel
 from ._plots import PortfolioPlots
 from ._portfolio_attribution import PortfolioAttributionMixin
@@ -78,6 +79,21 @@ def _evaluate_position_expr(prices: pl.DataFrame, expr: pl.Expr, param: str) -> 
     if extra:
         raise PositionExprColumnError(param, extra)
     return evaluated
+
+
+# Slot fields used as lazy caches; __post_init__ initialises each to None and
+# `cached_in_slot` fills them on first property access.
+_CACHE_SLOTS = (
+    "_data_bridge",
+    "_stats_cache",
+    "_plots_cache",
+    "_report_cache",
+    "_utils_cache",
+    "_profits_cache",
+    "_returns_cache",
+    "_tilt_cache",
+    "_turnover_cache",
+)
 
 
 @dataclasses.dataclass(frozen=True, slots=True)
@@ -233,15 +249,8 @@ class Portfolio(
             raise RowCountMismatchError(self.prices.shape[0], self.cashposition.shape[0])
         if self.aum <= 0.0:
             raise NonPositiveAumError(self.aum)
-        object.__setattr__(self, "_data_bridge", None)
-        object.__setattr__(self, "_stats_cache", None)
-        object.__setattr__(self, "_plots_cache", None)
-        object.__setattr__(self, "_report_cache", None)
-        object.__setattr__(self, "_utils_cache", None)
-        object.__setattr__(self, "_profits_cache", None)
-        object.__setattr__(self, "_returns_cache", None)
-        object.__setattr__(self, "_tilt_cache", None)
-        object.__setattr__(self, "_turnover_cache", None)
+        for slot in _CACHE_SLOTS:
+            object.__setattr__(self, slot, None)
 
     def _date_range(self) -> tuple[int, date | datetime | None, date | datetime | None]:
         """Return (rows, start, end) for the portfolio's returns series.
@@ -529,6 +538,7 @@ class Portfolio(
     # ── Lazy composition accessors ─────────────────────────────────────────────
 
     @property
+    @cached_in_slot("_data_bridge")
     def data(self) -> "Data":
         """Build a legacy `Data` object from this portfolio's returns.
 
@@ -552,13 +562,10 @@ class Portfolio(
             >>> "returns" in d.returns.columns
             True
         """
-        if self._data_bridge is not None:
-            return self._data_bridge
-        bridge = Portfolio._build_data_bridge(self.returns)
-        object.__setattr__(self, "_data_bridge", bridge)
-        return bridge
+        return Portfolio._build_data_bridge(self.returns)
 
     @property
+    @cached_in_slot("_stats_cache")
     def stats(self) -> "Stats":
         """Return a Stats object built from the portfolio's daily returns.
 
@@ -568,11 +575,10 @@ class Portfolio(
 
         The result is cached after first access so repeated calls are O(1).
         """
-        if self._stats_cache is None:
-            object.__setattr__(self, "_stats_cache", self.data.stats)
-        return cast("Stats", self._stats_cache)
+        return self.data.stats
 
     @property
+    @cached_in_slot("_plots_cache")
     def plots(self) -> PortfolioPlots:
         """Convenience accessor returning a PortfolioPlots facade for this portfolio.
 
@@ -585,11 +591,10 @@ class Portfolio(
 
         The result is cached after first access so repeated calls are O(1).
         """
-        if self._plots_cache is None:
-            object.__setattr__(self, "_plots_cache", PortfolioPlots(self))
-        return cast(PortfolioPlots, self._plots_cache)
+        return PortfolioPlots(self)
 
     @property
+    @cached_in_slot("_report_cache")
     def report(self) -> Report:
         """Convenience accessor returning a Report facade for this portfolio.
 
@@ -602,11 +607,10 @@ class Portfolio(
 
         The result is cached after first access so repeated calls are O(1).
         """
-        if self._report_cache is None:
-            object.__setattr__(self, "_report_cache", Report(self))
-        return cast(Report, self._report_cache)
+        return Report(self)
 
     @property
+    @cached_in_slot("_utils_cache")
     def utils(self) -> "PortfolioUtils":
         """Convenience accessor returning a PortfolioUtils facade for this portfolio.
 
@@ -620,11 +624,9 @@ class Portfolio(
 
         The result is cached after first access so repeated calls are O(1).
         """
-        if self._utils_cache is None:
-            from ._utils import PortfolioUtils
+        from ._utils import PortfolioUtils
 
-            object.__setattr__(self, "_utils_cache", PortfolioUtils(self))
-        return cast("PortfolioUtils", self._utils_cache)
+        return PortfolioUtils(self)
 
     # ── Portfolio transforms ───────────────────────────────────────────────────
 

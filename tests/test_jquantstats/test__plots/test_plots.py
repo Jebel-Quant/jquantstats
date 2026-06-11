@@ -11,6 +11,8 @@ import pytest
 
 from jquantstats import Data, Portfolio
 
+from ..tolerances import TOL_FLOAT64
+
 # ─── Data.plots tests ────────────────────────────────────────────────────────
 
 
@@ -251,7 +253,7 @@ def test_lead_lag_ir_plot_basic_structure_and_values(pf):
     for lag in (-10, 0, 5, 19):
         pf_lagged = pf if lag == 0 else pf.lag(lag)
         sharpe_n = pf_lagged.stats.sharpe()["returns"]
-        assert np.isclose(list(bar.y)[expected_lags.index(lag)], sharpe_n, rtol=1e-12, atol=1e-12)
+        assert np.isclose(list(bar.y)[expected_lags.index(lag)], sharpe_n, rtol=TOL_FLOAT64, atol=TOL_FLOAT64)
 
     _ = fig.to_dict()
 

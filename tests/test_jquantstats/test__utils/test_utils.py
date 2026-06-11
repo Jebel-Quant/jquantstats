@@ -18,6 +18,8 @@ from jquantstats import Data, Portfolio
 from jquantstats._utils import DataUtils, PortfolioUtils
 from jquantstats.exceptions import MissingDateColumnError
 
+from ..tolerances import TOL_COMPOUNDING, TOL_FLOAT64, TOL_PINNED
+
 _RESOURCE_DIR = Path(__file__).parent.parent / "resources"
 
 # ─── Fixtures ────────────────────────────────────────────────────────────────
@@ -121,13 +123,13 @@ def test_to_prices_base_parameter(simple_data):
     prices = simple_data.utils.to_prices(base=base)
     # cumprod starts at (1 + r[0]) * base
     expected_first = base * (1.0 + 0.01)
-    assert prices["A"][0] == pytest.approx(expected_first, rel=1e-9)
+    assert prices["A"][0] == pytest.approx(expected_first, rel=TOL_COMPOUNDING)
 
 
 def test_to_prices_default_base_is_1e5(simple_data):
     """Default base should be 1e5."""
     prices = simple_data.utils.to_prices()
-    assert prices["A"][0] == pytest.approx(1e5 * 1.01, rel=1e-9)
+    assert prices["A"][0] == pytest.approx(1e5 * 1.01, rel=TOL_COMPOUNDING)
 
 
 def test_to_prices_multi_asset(multi_asset_data):
@@ -150,7 +152,7 @@ def test_to_log_returns_values(simple_data):
     """Log return must equal ln(1 + r) for each observation."""
     log_rets = simple_data.utils.to_log_returns()
     for val in log_rets["A"].to_list():
-        assert val == pytest.approx(math.log(1.01), rel=1e-9)
+        assert val == pytest.approx(math.log(1.01), rel=TOL_COMPOUNDING)
 
 
 def test_log_returns_is_alias(simple_data):
@@ -174,13 +176,13 @@ def test_to_log_returns_less_than_simple(simple_data):
 def test_rebase_starts_at_base(simple_data):
     """Rebased series must start at exactly base."""
     rebased = simple_data.utils.rebase(base=100.0)
-    assert float(rebased["A"][0]) == pytest.approx(100.0, rel=1e-9)
+    assert float(rebased["A"][0]) == pytest.approx(100.0, rel=TOL_COMPOUNDING)
 
 
 def test_rebase_custom_base(simple_data):
     """Rebased series must start at the specified base."""
     rebased = simple_data.utils.rebase(base=1000.0)
-    assert float(rebased["A"][0]) == pytest.approx(1000.0, rel=1e-9)
+    assert float(rebased["A"][0]) == pytest.approx(1000.0, rel=TOL_COMPOUNDING)
 
 
 def test_rebase_preserves_shape(simple_data):
@@ -476,7 +478,7 @@ def test_exponential_cov_matches_pandas(multi_asset_data):
         for i, a in enumerate(assets):
             for j, b in enumerate(assets):
                 expected = pd_cov.xs(a, level=1)[b].iloc[t]
-                assert mat[i, j] == pytest.approx(expected, abs=1e-12)
+                assert mat[i, j] == pytest.approx(expected, abs=TOL_FLOAT64)
 
 
 def test_exponential_cov_warmup_excludes_early_rows(multi_asset_data):
@@ -570,7 +572,7 @@ def test_exponential_cov_matches_pandas_stock_prices():
                 if np.isnan(mat[i, j]):
                     assert pd.isna(expected), f"our NaN but pandas has {expected} at {key}, ({a},{b})"
                 else:
-                    assert mat[i, j] == pytest.approx(expected, abs=1e-10), (
+                    assert mat[i, j] == pytest.approx(expected, abs=TOL_PINNED), (
                         f"mismatch at date={key}, ({a}, {b}): got {mat[i, j]}, expected {expected}"
                     )
 
@@ -609,13 +611,13 @@ def test_portfolio_utils_to_log_returns(portfolio_pf):
     simple_rets = portfolio_pf.returns["returns"].to_list()
     log_list = log_rets["returns"].to_list()
     for s, log_r in zip(simple_rets, log_list, strict=False):
-        assert log_r == pytest.approx(math.log(1.0 + s), rel=1e-9)
+        assert log_r == pytest.approx(math.log(1.0 + s), rel=TOL_COMPOUNDING)
 
 
 def test_portfolio_utils_rebase(portfolio_pf):
     """portfolio.utils.rebase must start at exactly base."""
     rebased = portfolio_pf.utils.rebase(base=100.0)
-    assert float(rebased["returns"][0]) == pytest.approx(100.0, rel=1e-9)
+    assert float(rebased["returns"][0]) == pytest.approx(100.0, rel=TOL_COMPOUNDING)
 
 
 def test_portfolio_utils_group_returns(portfolio_pf):

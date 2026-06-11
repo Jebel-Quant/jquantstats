@@ -5,6 +5,8 @@ import pytest
 
 from jquantstats import Data
 
+from .tolerances import TOL_COMPOUNDING
+
 
 @pytest.fixture
 def prices() -> pl.DataFrame:
@@ -34,7 +36,7 @@ def test_from_prices_correct_returns(prices: pl.DataFrame) -> None:
     """Returns computed from prices match manual pct_change calculation."""
     data = Data.from_prices(prices=prices)
     expected_asset1 = prices["Asset1"].pct_change().drop_nulls()
-    assert data.returns["Asset1"].to_list() == pytest.approx(expected_asset1.to_list(), rel=1e-9)
+    assert data.returns["Asset1"].to_list() == pytest.approx(expected_asset1.to_list(), rel=TOL_COMPOUNDING)
 
 
 def test_from_prices_max_drawdown(prices: pl.DataFrame) -> None:

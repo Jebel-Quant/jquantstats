@@ -31,6 +31,8 @@ import pytest
 
 from jquantstats import Data
 
+from ..tolerances import TOL_COMPOUNDING, TOL_PINNED
+
 # ── Module-level synthetic fixtures ───────────────────────────────────────────
 
 
@@ -95,7 +97,7 @@ class TestBasicStats:
         result = sample_stats.compsum()  # type: ignore[attr-defined]
         final = result["strategy"][-1]
         expected = sample_stats.comp()["strategy"]  # type: ignore[attr-defined]
-        assert final == pytest.approx(expected, rel=1e-10)
+        assert final == pytest.approx(expected, rel=TOL_PINNED)
 
     def test_exposure(self, sample_stats: object) -> None:
         """exposure() is in [0, 1]."""
@@ -142,7 +144,7 @@ class TestRiskMetrics:
         periods = 252
         raw = sample_stats.volatility(periods=periods, annualize=False)["strategy"]  # type: ignore[attr-defined]
         ann = sample_stats.volatility(periods=periods, annualize=True)["strategy"]  # type: ignore[attr-defined]
-        assert ann / raw == pytest.approx(np.sqrt(periods), rel=1e-9)
+        assert ann / raw == pytest.approx(np.sqrt(periods), rel=TOL_COMPOUNDING)
 
     def test_max_drawdown_in_range(self, sample_stats: object) -> None:
         """max_drawdown() is in [-1, 0]."""

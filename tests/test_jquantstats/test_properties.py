@@ -28,6 +28,8 @@ import pytest
 
 from jquantstats import Data, Portfolio
 
+from .tolerances import TOL_PARITY, TOL_PINNED
+
 hypothesis = pytest.importorskip("hypothesis")
 assume = hypothesis.assume
 given = hypothesis.given
@@ -125,7 +127,7 @@ def test_max_drawdown_zero_for_nonnegative_returns(returns: list[float]) -> None
     df = _make_returns_df(returns)
     data = Data.from_returns(returns=df)
     max_dd = data.stats.max_drawdown()["Asset"]
-    assert max_dd == pytest.approx(0.0, abs=1e-10), (
+    assert max_dd == pytest.approx(0.0, abs=TOL_PINNED), (
         f"Expected max_drawdown == 0 for all-non-negative returns, got {max_dd}"
     )
 
@@ -214,7 +216,7 @@ def test_sharpe_scale_invariance(returns: list[float], scale: float) -> None:
             f"Sharpe NaN-handling not scale-invariant: original={sharpe_original}, scaled={sharpe_scaled} (k={scale})"
         )
     else:
-        assert sharpe_scaled == pytest.approx(sharpe_original, rel=1e-6), (
+        assert sharpe_scaled == pytest.approx(sharpe_original, rel=TOL_PARITY), (
             f"Sharpe not scale-invariant: original={sharpe_original}, scaled={sharpe_scaled} (k={scale})"
         )
 
@@ -304,7 +306,7 @@ def test_volatility_scale_linearity(returns: list[float], scale: float) -> None:
     data_scaled = Data.from_returns(returns=df_scaled)
     vol_scaled = data_scaled.stats.volatility()["Asset"]
 
-    assert vol_scaled == pytest.approx(vol_original * scale, rel=1e-6), (
+    assert vol_scaled == pytest.approx(vol_original * scale, rel=TOL_PARITY), (
         f"Volatility not linearly scaled: vol(r)={vol_original}, vol({scale}·r)={vol_scaled}"
     )
 
