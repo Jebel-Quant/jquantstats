@@ -233,6 +233,13 @@ def test_stats_works_without_date_column(int_portfolio):
     assert np.isfinite(sharpe)
 
 
+def test_tilt_timing_decomp_dated_portfolio_keeps_date_column(portfolio):
+    """For dated portfolios the decomposition joins on and retains the date column."""
+    decomp = portfolio.tilt_timing_decomp
+    assert decomp.columns == ["date", "portfolio", "tilt", "timing"]
+    assert decomp.height == portfolio.prices.height
+
+
 def test_tilt_timing_decomp_works_without_date_column(int_portfolio):
     """tilt_timing_decomp returns portfolio/tilt/timing columns for integer-indexed data."""
     decomp = int_portfolio.tilt_timing_decomp

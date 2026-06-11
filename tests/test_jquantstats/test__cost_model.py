@@ -43,8 +43,21 @@ def test_cost_model_zero():
 
 def test_cost_model_direct_construction():
     """CostModel rejects simultaneous non-zero cost_per_unit and cost_bps."""
-    with pytest.raises(ValueError, match="Only one cost model"):
+    with pytest.raises(
+        ValueError,
+        match=(
+            r"^Only one cost model may be active at a time: "
+            r"got cost_per_unit=0\.02 and cost_bps=3\.0\. "
+            r"Use CostModel\.per_unit\(\) or CostModel\.turnover_bps\(\) to make intent explicit\.$"
+        ),
+    ):
         CostModel(cost_per_unit=0.02, cost_bps=3.0)
+
+
+def test_cost_model_rejects_fractional_bps_alongside_per_unit():
+    """The both-models-active check triggers for any positive cost_bps, including values below 1."""
+    with pytest.raises(ValueError, match="Only one cost model"):
+        CostModel(cost_per_unit=0.02, cost_bps=0.5)
 
 
 def test_cost_model_direct_construction_single_field():
@@ -60,13 +73,13 @@ def test_cost_model_direct_construction_single_field():
 
 def test_cost_model_negative_cost_per_unit_raises():
     """CostModel rejects negative cost_per_unit."""
-    with pytest.raises(ValueError, match="non-negative"):
+    with pytest.raises(ValueError, match=r"^cost_per_unit must be non-negative, got -0\.01$"):
         CostModel(cost_per_unit=-0.01)
 
 
 def test_cost_model_negative_cost_bps_raises():
     """CostModel rejects negative cost_bps."""
-    with pytest.raises(ValueError, match="non-negative"):
+    with pytest.raises(ValueError, match=r"^cost_bps must be non-negative, got -1\.0$"):
         CostModel(cost_bps=-1.0)
 
 
