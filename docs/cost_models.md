@@ -127,3 +127,23 @@ CostModel(cost_per_unit=0.01, cost_bps=5.0)
 ## API Reference
 
 ::: jquantstats.CostModel
+
+---
+
+## Precedence: `cost_model` vs raw parameters
+
+The Portfolio factories accept costs two ways — a `CostModel` object or the
+raw `cost_per_unit` / `cost_bps` floats. **When `cost_model` is passed, it
+wins**: its values replace whatever was given for `cost_per_unit`/`cost_bps`
+in the same call. Pass one or the other, not both:
+
+```python
+# ❌ cost_per_unit=0.05 is silently replaced by the cost model's 0.01
+pf = Portfolio.from_cash_position(..., cost_per_unit=0.05, cost_model=CostModel.per_unit(0.01))
+
+# ✅ pick one channel
+pf = Portfolio.from_cash_position(..., cost_model=CostModel.per_unit(0.01))
+```
+
+Note that a `CostModel` itself is exclusive: it carries *either* a per-unit
+cost *or* a turnover-bps cost, never both.

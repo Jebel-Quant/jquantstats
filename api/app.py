@@ -2,11 +2,13 @@
 
 import logging
 import os
+import secrets
 import time
 from collections import defaultdict, deque
+from collections.abc import Awaitable, Callable
 
 import polars as pl
-from fastapi import FastAPI, Form, HTTPException, Request, UploadFile
+from fastapi import FastAPI, Form, HTTPException, Request, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 
@@ -15,6 +17,24 @@ from jquantstats import Portfolio
 logger = logging.getLogger("jquantstats.api")
 
 app = FastAPI(title="jquantstats API")
+
+# Optional API-key auth: set JQS_API_KEY to require clients to send the same
+# value in the X-API-Key header. Empty (default) leaves the API open.
+API_KEY = os.environ.get("JQS_API_KEY", "")
+
+
+@app.middleware("http")
+async def _log_requests(request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
+    """Log every request with method, path, status, duration, and client IP."""
+    start = time.perf_counter()
+    response = await call_next(request)
+    duration_ms = (time.perf_counter() - start) * 1000.0
+    client = request.client.host if request.client else "unknown"
+    logger.info(
+        "%s %s -> %d (%.1f ms, client=%s)", request.method, request.url.path, response.status_code, duration_ms, client
+    )
+    return response
+
 
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MiB per CSV upload
 MAX_ROWS = 100_000  # max rows per parsed CSV
@@ -38,6 +58,47 @@ RATE_LIMIT_MAX_REQUESTS = int(os.environ.get("JQS_RATE_LIMIT_MAX_REQUESTS", "30"
 RATE_LIMIT_WINDOW_SECONDS = float(os.environ.get("JQS_RATE_LIMIT_WINDOW_SECONDS", "60"))
 
 _request_log: dict[str, deque[float]] = defaultdict(deque)
+
+
+def _require_api_key(request: Request) -> None:
+    """Reject the request with 401 when JQS_API_KEY is set and the header doesn't match.
+
+    Args:
+        request: The incoming request; the key is read from the ``X-API-Key`` header.
+
+    Raises:
+        HTTPException: 401 when authentication is enabled and the key is wrong or absent.
+
+    """
+    if API_KEY and not secrets.compare_digest(request.headers.get("x-api-key", ""), API_KEY):
+        raise HTTPException(status_code=401, detail="invalid or missing API key")
+
+
+def _validate_date_alignment(prices_df: pl.DataFrame, positions_df: pl.DataFrame) -> None:
+    """Reject the request with 422 when prices and positions dates don't line up.
+
+    Portfolio construction validates row counts but aligns rows by position —
+    two frames with matching row counts but different dates would silently
+    produce nonsensical analytics.
+
+    Args:
+        prices_df: Parsed prices upload.
+        positions_df: Parsed positions upload.
+
+    Raises:
+        HTTPException: 422 when only one frame has a ``date`` column, or both
+            have one but the date values differ.
+
+    """
+    has_prices_date = "date" in prices_df.columns
+    has_positions_date = "date" in positions_df.columns
+    if has_prices_date != has_positions_date:
+        raise HTTPException(
+            status_code=422,
+            detail="prices and positions must both have a 'date' column, or neither",
+        )
+    if has_prices_date and prices_df["date"].to_list() != positions_df["date"].to_list():
+        raise HTTPException(status_code=422, detail="prices and positions must cover the same dates")
 
 
 def _enforce_rate_limit(request: Request) -> None:
@@ -98,6 +159,7 @@ async def _read_csv(upload: UploadFile, label: str) -> pl.DataFrame:
             status_code=413,
             detail=f"{label}: CSV exceeds {MAX_ROWS} rows or {MAX_COLUMNS} columns",
         )
+    logger.info("%s upload accepted: %d bytes, %d rows, %d columns", label, len(raw), frame.height, frame.width)
     return frame
 
 
@@ -115,9 +177,11 @@ async def generate_report(
     aum: float = Form(default=1_000_000, gt=0, le=MAX_AUM, allow_inf_nan=False),
 ) -> str:
     """Accept prices and positions CSVs and return a full HTML analytics report."""
+    _require_api_key(request)
     _enforce_rate_limit(request)
     prices_df = await _read_csv(prices, "prices")
     positions_df = await _read_csv(positions, "positions")
+    _validate_date_alignment(prices_df, positions_df)
     try:
         pf = Portfolio.from_cash_position(
             prices=prices_df,

@@ -188,7 +188,7 @@ class PortfolioPlots:
             fig.update_yaxes(type="log", row=1, col=1)
             # Ensure the first y-axis is explicitly set for environments
             # where subplot updates may not propagate to layout alias.
-            if hasattr(fig.layout, "yaxis"):
+            if hasattr(fig.layout, "yaxis"):  # pragma: no branch — plotly figures always have .yaxis
                 fig.layout.yaxis.type = "log"
 
         return fig
@@ -212,7 +212,7 @@ class PortfolioPlots:
 
         if log_scale:
             fig.update_yaxes(type="log")
-            if hasattr(fig.layout, "yaxis"):
+            if hasattr(fig.layout, "yaxis"):  # pragma: no branch — plotly figures always have .yaxis
                 fig.layout.yaxis.type = "log"
 
     def lagged_performance_plot(self, lags: list[int] | None = None, log_scale: bool = False) -> go.Figure:

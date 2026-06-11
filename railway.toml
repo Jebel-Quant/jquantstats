@@ -6,6 +6,7 @@ buildCommand = "pip install '.[web]'"
 startCommand = "uvicorn api.app:app --host 0.0.0.0 --port $PORT"
 
 # Optional hardening env vars (see api/app.py):
+#   JQS_API_KEY                      require this value in the X-API-Key header (default: auth off)
 #   JQS_CORS_ORIGINS                 comma-separated allowed origins (default: deny all cross-origin)
 #   JQS_RATE_LIMIT_MAX_REQUESTS      requests allowed per client per window (default: 30)
 #   JQS_RATE_LIMIT_WINDOW_SECONDS    sliding-window length in seconds (default: 60)

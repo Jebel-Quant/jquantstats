@@ -66,3 +66,18 @@ def test_result_create_reports_without_mu_no_signal_csv(tmp_path, simple_portfol
     result = Result(portfolio=simple_portfolio, mu=None)
     result.create_reports(output_dir=tmp_path)
     assert not (tmp_path / "data" / "signal.csv").exists()
+
+
+def test_result_rejects_non_dataframe_mu(simple_portfolio):
+    """Result must raise TypeError when mu is not a polars DataFrame."""
+    with pytest.raises(TypeError, match="mu must be a polars DataFrame"):
+        Result(portfolio=simple_portfolio, mu={"A": [0.001]})
+
+
+def test_result_rejects_mu_missing_asset_columns(simple_portfolio):
+    """Result must raise MuSchemaError naming the asset columns mu lacks."""
+    from jquantstats.exceptions import MuSchemaError
+
+    mu = pl.DataFrame({"OTHER": [0.001] * 20})
+    with pytest.raises(MuSchemaError, match=r"missing expected-return columns.*'A'"):
+        Result(portfolio=simple_portfolio, mu=mu)
