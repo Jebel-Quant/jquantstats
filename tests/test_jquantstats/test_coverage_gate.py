@@ -9,19 +9,20 @@ green — this test makes such a regression fail CI loudly instead.
 
 import re
 import shutil
-import subprocess
+import subprocess  # nosec B404 — invokes the repo's own Makefile with a fixed argv, no untrusted input
 from pathlib import Path
 
 import pytest
 
 _REPO_ROOT = Path(__file__).parents[2]
+_MAKE = shutil.which("make")  # absolute path, avoids partial-path process start (B607)
 
 
-@pytest.mark.skipif(shutil.which("make") is None, reason="make not available")
+@pytest.mark.skipif(_MAKE is None, reason="make not available")
 def test_coverage_gate_is_100():
     """`make print-COVERAGE_FAIL_UNDER` must resolve to 100, not the template default of 90."""
-    proc = subprocess.run(
-        ["make", "-s", "print-COVERAGE_FAIL_UNDER"],
+    proc = subprocess.run(  # nosec B603 — fixed argv, absolute executable, repo-controlled Makefile
+        [_MAKE, "-s", "print-COVERAGE_FAIL_UNDER"],
         cwd=_REPO_ROOT,
         capture_output=True,
         text=True,
