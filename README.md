@@ -305,6 +305,40 @@ with open("report.html", "w") as f:
     f.write(html)
 ```
 
+### Hosted report API
+
+The `[web]` extra ships a small FastAPI service (`api/app.py`) that turns
+uploaded prices and positions CSVs into the full HTML report:
+
+```bash
+pip install 'jquantstats[web]'
+uvicorn api.app:app --host 0.0.0.0 --port 8000
+```
+
+Hardening is built in (upload size/row/column limits, sliding-window rate
+limiting, deny-by-default CORS) and configured via environment variables:
+
+| Variable | Effect | Default |
+|---|---|---|
+| `JQS_API_KEY` | require this value in the `X-API-Key` header | unset (auth off) |
+| `JQS_CORS_ORIGINS` | comma-separated allowed origins | deny all cross-origin |
+| `JQS_RATE_LIMIT_MAX_REQUESTS` | requests per client per window | 30 |
+| `JQS_RATE_LIMIT_WINDOW_SECONDS` | sliding-window length in seconds | 60 |
+
+With auth enabled, clients pass the key as a header:
+
+```bash
+export JQS_API_KEY="change-me"
+curl -H "X-API-Key: change-me" \
+  -F "prices=@prices.csv" -F "positions=@positions.csv" -F "aum=1000000" \
+  http://localhost:8000/report
+```
+
+The built-in rate limiter is per-process; if you scale beyond one instance,
+put a shared limiter in front — see the
+[deployment FAQ](https://jebel-quant.github.io/jquantstats/book/faq/#how-do-i-deploy-the-web-api-safely)
+for a reverse-proxy recipe.
+
 ## Features
 
 **Performance Metrics** — Sharpe, Sortino, Calmar, Omega, Treynor, Information Ratio,

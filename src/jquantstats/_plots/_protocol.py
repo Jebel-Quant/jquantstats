@@ -2,14 +2,43 @@
 
 from __future__ import annotations
 
-from typing import Any, Protocol, runtime_checkable
+from typing import Protocol, runtime_checkable
 
 import polars as pl
 
 from jquantstats._cost_model import CostModel
 from jquantstats._protocol import DataLike
 
-__all__ = ["DataLike", "PortfolioLike"]
+__all__ = ["DataLike", "PortfolioLike", "PortfolioStatsLike"]
+
+
+class PortfolioStatsLike(Protocol):  # pragma: no cover
+    """Structural interface for the stats facade used by `PortfolioPlots`."""
+
+    def sharpe(self) -> dict[str, float]:
+        """Annualised Sharpe ratio per asset column."""
+        ...
+
+    def rolling_sharpe(
+        self,
+        rolling_period: int = 126,
+        periods_per_year: int | float | None = None,
+    ) -> pl.DataFrame:
+        """Rolling Sharpe ratio series."""
+        ...
+
+    def rolling_volatility(
+        self,
+        rolling_period: int = 126,
+        periods_per_year: int | float | None = None,
+        annualize: bool = True,
+    ) -> pl.DataFrame:
+        """Rolling volatility series."""
+        ...
+
+    def annual_breakdown(self) -> pl.DataFrame:
+        """Per-year metric breakdown."""
+        ...
 
 
 @runtime_checkable
@@ -65,7 +94,7 @@ class PortfolioLike(Protocol):  # pragma: no cover
         ...
 
     @property
-    def stats(self) -> Any:
+    def stats(self) -> PortfolioStatsLike:
         """Statistics facade (rolling_sharpe, rolling_volatility, annual_breakdown, sharpe)."""
         ...
 

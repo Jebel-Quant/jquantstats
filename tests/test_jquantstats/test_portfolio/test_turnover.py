@@ -10,6 +10,8 @@ import pytest
 
 from jquantstats import Portfolio
 
+from ..tolerances import TOL_FLOAT64, TOL_PINNED
+
 
 def test_turnover_columns_and_length(turnover_portfolio):
     """Turnover DataFrame should have 'date' and 'turnover' columns with same row count as portfolio."""
@@ -22,14 +24,14 @@ def test_turnover_columns_and_length(turnover_portfolio):
 def test_turnover_first_row_is_zero(turnover_portfolio):
     """The first row of daily turnover must be 0.0 (no prior position)."""
     to = turnover_portfolio.turnover
-    assert float(to["turnover"][0]) == pytest.approx(0.0, abs=1e-12)
+    assert float(to["turnover"][0]) == pytest.approx(0.0, abs=TOL_FLOAT64)
 
 
 def test_turnover_subsequent_rows_correct(turnover_portfolio):
     """Daily turnover from row 1 onward: (|ΔA| + |ΔB|) / AUM = 0.015."""
     to = turnover_portfolio.turnover
     expected = 0.015  # (100 + 50) / 10_000
-    assert np.allclose(to["turnover"][1:].to_numpy(), expected, rtol=1e-12, atol=1e-12)
+    assert np.allclose(to["turnover"][1:].to_numpy(), expected, rtol=TOL_FLOAT64, atol=TOL_FLOAT64)
 
 
 def test_turnover_nonnegative(turnover_portfolio):
@@ -44,7 +46,7 @@ def test_turnover_without_date_column(int_portfolio):
     assert "date" not in to.columns
     assert "turnover" in to.columns
     assert to.height == int_portfolio.prices.height
-    assert float(to["turnover"][0]) == pytest.approx(0.0, abs=1e-12)
+    assert float(to["turnover"][0]) == pytest.approx(0.0, abs=TOL_FLOAT64)
 
 
 def test_turnover_constant_positions_are_zero():
@@ -58,7 +60,7 @@ def test_turnover_constant_positions_are_zero():
         aum=1e4,
     )
     to = pf.turnover
-    assert np.allclose(to["turnover"].to_numpy(), 0.0, atol=1e-12)
+    assert np.allclose(to["turnover"].to_numpy(), 0.0, atol=TOL_FLOAT64)
 
 
 def test_turnover_weekly_columns_when_date_present(turnover_portfolio):
@@ -72,7 +74,7 @@ def test_turnover_weekly_sums_daily(turnover_portfolio):
     """Weekly turnover must equal the sum of daily turnovers within the same week."""
     daily = turnover_portfolio.turnover
     weekly = turnover_portfolio.turnover_weekly
-    assert np.isclose(float(daily["turnover"].sum()), float(weekly["turnover"].sum()), rtol=1e-10)
+    assert np.isclose(float(daily["turnover"].sum()), float(weekly["turnover"].sum()), rtol=TOL_PINNED)
 
 
 def test_turnover_weekly_without_date_uses_rolling(int_portfolio):
@@ -99,7 +101,7 @@ def test_turnover_summary_mean_daily_matches_manual(turnover_portfolio):
     summary = turnover_portfolio.turnover_summary()
     manual_mean = float(turnover_portfolio.turnover["turnover"].mean())
     row = summary.filter(pl.col("metric") == "mean_daily_turnover")
-    assert float(row["value"][0]) == pytest.approx(manual_mean, rel=1e-10)
+    assert float(row["value"][0]) == pytest.approx(manual_mean, rel=TOL_PINNED)
 
 
 def test_turnover_summary_std_matches_manual(turnover_portfolio):
@@ -107,7 +109,7 @@ def test_turnover_summary_std_matches_manual(turnover_portfolio):
     summary = turnover_portfolio.turnover_summary()
     manual_std = float(turnover_portfolio.turnover["turnover"].std())
     row = summary.filter(pl.col("metric") == "turnover_std")
-    assert float(row["value"][0]) == pytest.approx(manual_std, rel=1e-10)
+    assert float(row["value"][0]) == pytest.approx(manual_std, rel=TOL_PINNED)
 
 
 def test_turnover_summary_mean_weekly_positive(turnover_portfolio):

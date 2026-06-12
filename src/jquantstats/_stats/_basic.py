@@ -155,6 +155,10 @@ class _BasicStatsMixin:
         Returns:
             float: The geometric mean return.
 
+
+        Returns NaN when:
+            ``float("nan")`` when the series has no non-null observations or the
+            compounded return ``product(1 + r)`` is non-positive.
         """
         clean = series.drop_nulls().cast(pl.Float64)
         n = clean.len()
@@ -225,6 +229,9 @@ class _BasicStatsMixin:
         Returns:
             float: The profit ratio value.
 
+
+        Returns NaN when:
+            ``float("nan")`` when the series has no wins or no losses.
         """
         wins = series.filter(series >= 0)
         losses = self._negative(series)
@@ -382,6 +389,9 @@ class _BasicStatsMixin:
         Returns:
             float: Ulcer Performance Index.
 
+
+        Returns NaN when:
+            ``float("nan")`` when the ulcer index is zero (no drawdowns).
         """
         comp = _comp_return(series)
         ui = self._ulcer_index_series(series)
@@ -402,6 +412,10 @@ class _BasicStatsMixin:
         Returns:
             float: Serenity Index.
 
+
+        Returns NaN when:
+            ``float("nan")`` when the returns have zero (or undefined) standard
+            deviation or the denominator ``ulcer_index * pitfall`` is zero.
         """
         std_val = cast(float, series.std())
         if not std_val:
@@ -536,6 +550,10 @@ class _BasicStatsMixin:
         Returns:
             float: Tail ratio.
 
+
+        Returns NaN when:
+            ``float("nan")`` when either quantile is missing or the lower quantile
+            is zero.
         """
         upper = cast(float, series.quantile(cutoff, interpolation="linear"))
         lower = cast(float, series.quantile(1 - cutoff, interpolation="linear"))
@@ -614,6 +632,9 @@ class _BasicStatsMixin:
         Returns:
             float: Outlier win ratio.
 
+
+        Returns NaN when:
+            ``float("nan")`` when the mean of non-negative returns is zero.
         """
         positive_mean = _mean(series.filter(series >= 0))
         if positive_mean == 0:
@@ -635,6 +656,9 @@ class _BasicStatsMixin:
         Returns:
             float: Outlier loss ratio.
 
+
+        Returns NaN when:
+            ``float("nan")`` when the mean of negative returns is zero.
         """
         negative_mean = self._mean_negative_expr(series)
         if negative_mean == 0:  # pragma: no cover
@@ -654,6 +678,9 @@ class _BasicStatsMixin:
         Returns:
             float: The gain to pain ratio value.
 
+
+        Returns NaN when:
+            ``float("nan")`` when there are no losses (the denominator is zero).
         """
         total_gain = series.sum()
         total_pain = self._negative(series).abs().sum()

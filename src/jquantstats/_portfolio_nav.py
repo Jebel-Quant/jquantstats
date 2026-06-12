@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
+from ._cache import cached_in_slot
 from .exceptions import MissingDateColumnError, NoAssetColumnsError
 
 
@@ -25,6 +26,7 @@ class PortfolioNavMixin:
             ...
 
     @property
+    @cached_in_slot("_profits_cache")
     def profits(self) -> pl.DataFrame:
         """Compute per-asset daily cash profits, preserving non-numeric columns.
 
@@ -49,10 +51,6 @@ class PortfolioNavMixin:
             >>> pf.profits.columns
             ['A']
         """
-        cache = getattr(self, "_profits_cache", None)
-        if cache is not None:
-            return cache
-
         assets = [c for c in self.prices.columns if self.prices[c].dtype.is_numeric()]
 
         result = self.prices.with_columns(
@@ -67,9 +65,6 @@ class PortfolioNavMixin:
                 pl.when(pl.col(c).is_finite()).then(pl.col(c)).otherwise(0.0).fill_null(0.0).alias(c) for c in assets
             )
 
-        # Direct write is safe: Portfolio is a frozen, slotted dataclass that
-        # declares every cache field, so object.__setattr__ cannot fail here.
-        object.__setattr__(self, "_profits_cache", result)
         return result
 
     @property
@@ -102,6 +97,7 @@ class PortfolioNavMixin:
         return self.profit.with_columns((pl.col("profit").cum_sum() + self.aum).alias("NAV_accumulated"))
 
     @property
+    @cached_in_slot("_returns_cache")
     def returns(self) -> pl.DataFrame:
         """Return daily returns as profit scaled by AUM, preserving ``'date'``.
 
@@ -118,15 +114,9 @@ class PortfolioNavMixin:
             incorrect results because each thread stores the same deterministic
             value.
         """
-        cache = getattr(self, "_returns_cache", None)
-        if cache is not None:
-            return cache
-        result = self.nav_accumulated.with_columns(
+        return self.nav_accumulated.with_columns(
             (pl.col("profit") / self.aum).alias("returns"),
         )
-        # Direct write is safe: see the comment on the profits cache above.
-        object.__setattr__(self, "_returns_cache", result)
-        return result
 
     @property
     def monthly(self) -> pl.DataFrame:

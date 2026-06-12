@@ -16,13 +16,18 @@ nav:
     - Migration from QuantStats: MIGRATION.md
     - QuantStats Parity Benchmark: benchmark.md
     - FAQ & Troubleshooting: faq.md
+  - Examples: examples.md
   - API Reference: api.md
   - Reference:
+    - Architecture: ARCHITECTURE.md
     - API Stability: STABILITY.md
     - Changelog: changelog.md
   - Notebooks:
     - Analytics Demo: notebooks/analytics_demo.html
     - Plots and Reports: notebooks/plots_and_reports.html
+    - Portfolio Construction: notebooks/portfolio_construction.html
+    - Risk Metrics: notebooks/risk_metrics.html
+    - Monte Carlo: notebooks/monte_carlo.html
   - Reports:
     - Test Report: reports/html-report/report.html
     - Coverage Report: reports/html-coverage/index.html

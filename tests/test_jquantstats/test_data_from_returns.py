@@ -2,9 +2,11 @@
 
 import narwhals as nw
 import polars as pl
+import pytest
 from polars.testing import assert_frame_equal, assert_series_equal
 
 from jquantstats import Data
+from jquantstats.exceptions import MissingDateColumnError
 
 
 def test_no_rf(returns):
@@ -190,3 +192,27 @@ def test_from_returns_rf_dataframe_nonstandard_column_warns(returns):
         d = Data.from_returns(returns=returns, rf=rf_df)
     assert any("risk_free" in str(w.message) and "rf" in str(w.message) for w in caught)
     assert_series_equal(d.returns["Meta"], returns["Meta"] - rf_scalar)
+
+
+def test_from_returns_missing_date_col_in_returns(returns):
+    """Data.from_returns raises MissingDateColumnError when date_col is absent from returns."""
+    with pytest.raises(MissingDateColumnError, match="'returns' has no column 'date'") as exc_info:
+        Data.from_returns(returns=returns, date_col="date")
+    assert exc_info.value.frame_name == "returns"
+    assert exc_info.value.column == "date"
+    assert "Date" in (exc_info.value.available or [])
+
+
+def test_from_returns_missing_date_col_in_benchmark(returns, benchmark_frame):
+    """Data.from_returns raises MissingDateColumnError when date_col is absent from benchmark."""
+    bad_benchmark = benchmark_frame.rename({"Date": "timestamp"})
+    with pytest.raises(MissingDateColumnError, match="'benchmark' has no column 'Date'") as exc_info:
+        Data.from_returns(returns=returns, benchmark=bad_benchmark, date_col="Date")
+    assert exc_info.value.frame_name == "benchmark"
+
+
+def test_from_returns_missing_date_col_in_rf_frame(returns):
+    """Data.from_returns raises MissingDateColumnError when date_col is absent from a DataFrame rf."""
+    rf_df = returns.select([pl.col("Date").alias("timestamp"), pl.lit(0.001).alias("rf")])
+    with pytest.raises(MissingDateColumnError, match="'rf' has no column 'Date'"):
+        Data.from_returns(returns=returns, rf=rf_df, date_col="Date")

@@ -42,6 +42,10 @@ make install
 
 ## Contributing code
 
+Before diving in, skim [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) for a
+short tour of the codebase: the two entry points (`Portfolio` vs `Data`), the
+mixin composition, the facade accessors, and the protocol layering.
+
 To contribute to the project, send us pull requests.
 For those new to contributing, check out GitHub's
 [guide](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests).

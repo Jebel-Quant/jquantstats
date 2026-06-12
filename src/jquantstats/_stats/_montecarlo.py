@@ -103,6 +103,10 @@ class _MonteCarloStatsMixin:
             pl.DataFrame: Shape ``(n, n_assets)`` — one simulated terminal
             cumulative return per path and asset.
 
+
+        Returns NaN when:
+            Entries are NaN for assets with no usable (non-null, non-NaN)
+            observations.
         """
         paths = self._simulate_distribution(n=n, period=period)
         result = {col: np.prod(1.0 + arr, axis=1) - 1.0 for col, arr in paths.items()}
@@ -126,6 +130,10 @@ class _MonteCarloStatsMixin:
             pl.DataFrame: Shape ``(n, n_assets)`` — one simulated annualised
             Sharpe ratio per path and asset.
 
+
+        Returns NaN when:
+            Entries are NaN when a path's standard deviation is zero or the asset
+            has no usable observations.
         """
         ppy = self._data._periods_per_year if periods_per_year is None else periods_per_year
         if ppy <= 0:
@@ -151,6 +159,10 @@ class _MonteCarloStatsMixin:
             pl.DataFrame: Shape ``(n, n_assets)`` — one simulated maximum
             drawdown per path and asset (values in ``[-1, 0]``).
 
+
+        Returns NaN when:
+            Entries are NaN for assets with no usable (non-null, non-NaN)
+            observations.
         """
         paths = self._simulate_distribution(n=n, period=period)
         result: dict[str, np.ndarray] = {}
@@ -178,6 +190,10 @@ class _MonteCarloStatsMixin:
             pl.DataFrame: Shape ``(n, n_assets)`` — one simulated annualised
             CAGR per path and asset.
 
+
+        Returns NaN when:
+            Entries are NaN when a path's terminal compound return is non-positive
+            or the asset has no usable observations.
         """
         ppy = self._data._periods_per_year if periods_per_year is None else periods_per_year
         if ppy <= 0:

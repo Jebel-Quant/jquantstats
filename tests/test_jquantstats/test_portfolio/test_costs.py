@@ -18,6 +18,8 @@ import pytest
 
 from jquantstats import CostModel, Portfolio
 
+from ..tolerances import TOL_COMPOUNDING, TOL_FLOAT64
+
 # ─── Fixtures ────────────────────────────────────────────────────────────────
 
 
@@ -232,7 +234,7 @@ def test_position_delta_costs_columns(cost_portfolio):
 
 def test_position_delta_costs_first_row_is_zero(cost_portfolio):
     """First row of position_delta_costs must be 0.0 (no prior position)."""
-    assert float(cost_portfolio.position_delta_costs["cost"][0]) == pytest.approx(0.0, abs=1e-12)
+    assert float(cost_portfolio.position_delta_costs["cost"][0]) == pytest.approx(0.0, abs=TOL_FLOAT64)
 
 
 def test_position_delta_costs_analytical_values(cost_portfolio):
@@ -241,9 +243,9 @@ def test_position_delta_costs_analytical_values(cost_portfolio):
     Position changes: 0, 1000, 300  → costs: 0*0.01, 1000*0.01, 300*0.01.
     """
     costs = cost_portfolio.position_delta_costs["cost"].to_list()
-    assert costs[0] == pytest.approx(0.0, abs=1e-12)
-    assert costs[1] == pytest.approx(10.0, rel=1e-9)
-    assert costs[2] == pytest.approx(3.0, rel=1e-9)
+    assert costs[0] == pytest.approx(0.0, abs=TOL_FLOAT64)
+    assert costs[1] == pytest.approx(10.0, rel=TOL_COMPOUNDING)
+    assert costs[2] == pytest.approx(3.0, rel=TOL_COMPOUNDING)
 
 
 def test_position_delta_costs_zero_cost_per_unit_all_zeros():
@@ -258,7 +260,7 @@ def test_position_delta_costs_zero_cost_per_unit_all_zeros():
         cost_per_unit=0.0,
     )
     costs = pf.position_delta_costs["cost"].to_list()
-    assert all(c == pytest.approx(0.0, abs=1e-12) for c in costs)
+    assert all(c == pytest.approx(0.0, abs=TOL_FLOAT64) for c in costs)
 
 
 def test_position_delta_costs_two_assets():
@@ -279,9 +281,9 @@ def test_position_delta_costs_two_assets():
         cost_per_unit=0.005,
     )
     costs = pf.position_delta_costs["cost"].to_list()
-    assert costs[0] == pytest.approx(0.0, abs=1e-12)
-    assert costs[1] == pytest.approx(3.5, rel=1e-9)
-    assert costs[2] == pytest.approx(2.5, rel=1e-9)
+    assert costs[0] == pytest.approx(0.0, abs=TOL_FLOAT64)
+    assert costs[1] == pytest.approx(3.5, rel=TOL_COMPOUNDING)
+    assert costs[2] == pytest.approx(2.5, rel=TOL_COMPOUNDING)
 
 
 def test_position_delta_costs_without_date_column():
@@ -298,8 +300,8 @@ def test_position_delta_costs_without_date_column():
     assert df.height == 3
     costs = df["cost"].to_list()
     assert costs[0] == pytest.approx(0.0)
-    assert costs[1] == pytest.approx(1.0, rel=1e-9)
-    assert costs[2] == pytest.approx(0.3, rel=1e-9)
+    assert costs[1] == pytest.approx(1.0, rel=TOL_COMPOUNDING)
+    assert costs[2] == pytest.approx(0.3, rel=TOL_COMPOUNDING)
 
 
 def test_position_delta_costs_nan_warmup_rows_produce_zero_cost():
@@ -321,11 +323,11 @@ def test_position_delta_costs_nan_warmup_rows_produce_zero_cost():
     )
     costs = pf.position_delta_costs["cost"].to_list()
     assert all(c == c for c in costs), "NaN found in cost column"  # NaN != NaN
-    assert costs[0] == pytest.approx(0.0, abs=1e-12)
-    assert costs[1] == pytest.approx(0.0, abs=1e-12)
-    assert costs[2] == pytest.approx(0.0, abs=1e-12)  # 1000 - NaN → NaN → 0
-    assert costs[3] == pytest.approx(2.0, rel=1e-9)  # |1200 - 1000| * 0.01
-    assert costs[4] == pytest.approx(3.0, rel=1e-9)  # |900 - 1200| * 0.01
+    assert costs[0] == pytest.approx(0.0, abs=TOL_FLOAT64)
+    assert costs[1] == pytest.approx(0.0, abs=TOL_FLOAT64)
+    assert costs[2] == pytest.approx(0.0, abs=TOL_FLOAT64)  # 1000 - NaN → NaN → 0
+    assert costs[3] == pytest.approx(2.0, rel=TOL_COMPOUNDING)  # |1200 - 1000| * 0.01
+    assert costs[4] == pytest.approx(3.0, rel=TOL_COMPOUNDING)  # |900 - 1200| * 0.01
 
 
 # ─── net_cost_nav ─────────────────────────────────────────────────────────────
@@ -353,7 +355,7 @@ def test_net_cost_nav_zero_cost_equals_nav_accumulated():
     net_nav = pf.net_cost_nav["NAV_accumulated_net"].to_list()
     gross_nav = pf.nav_accumulated["NAV_accumulated"].to_list()
     for net, gross in zip(net_nav, gross_nav, strict=False):
-        assert net == pytest.approx(gross, rel=1e-9)
+        assert net == pytest.approx(gross, rel=TOL_COMPOUNDING)
 
 
 def test_net_cost_nav_positive_cost_lower_than_gross(cost_portfolio):
@@ -376,9 +378,9 @@ def test_net_cost_nav_analytical_values(cost_portfolio):
     """
     df = cost_portfolio.net_cost_nav
     nav = df["NAV_accumulated_net"].to_list()
-    assert nav[0] == pytest.approx(1e5, rel=1e-9)
-    assert nav[1] == pytest.approx(1e5 - 10.0, rel=1e-9)
-    assert nav[2] == pytest.approx(1e5 - 10.0 + 97.0, rel=1e-9)
+    assert nav[0] == pytest.approx(1e5, rel=TOL_COMPOUNDING)
+    assert nav[1] == pytest.approx(1e5 - 10.0, rel=TOL_COMPOUNDING)
+    assert nav[2] == pytest.approx(1e5 - 10.0 + 97.0, rel=TOL_COMPOUNDING)
 
 
 # ─── Portfolio.cost_per_unit field ────────────────────────────────────────────

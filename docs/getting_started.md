@@ -26,6 +26,33 @@ Both routes expose the same stats, plots, and report API.
 
 ---
 
+## First five minutes
+
+A complete, runnable example — returns in, Sharpe out:
+
+```python
+import polars as pl
+from jquantstats import Data
+
+returns = pl.DataFrame(
+    {
+        "Date": ["2024-01-02", "2024-01-03", "2024-01-04", "2024-01-05"],
+        "Fund": [0.011, -0.004, 0.007, 0.002],
+    }
+).with_columns(pl.col("Date").str.to_date())
+
+data = Data.from_returns(returns)
+print(data.stats.sharpe())        # {'Fund': ...} — annualised
+data.plots.snapshot().show()      # interactive Plotly chart
+```
+
+Swap the inline frame for your own returns (pandas works too — any
+narwhals-compatible frame is accepted) and you have a full tear sheet via
+`data.reports.full()`. The rest of this page covers the two entry points in
+depth; runnable notebooks live under [Examples](examples.md).
+
+---
+
 ## Installation
 
 ```bash

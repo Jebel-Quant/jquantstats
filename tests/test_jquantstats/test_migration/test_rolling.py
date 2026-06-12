@@ -6,6 +6,8 @@ import quantstats as qs
 
 from jquantstats._stats._performance import _RiskStatsMixin
 
+from ..tolerances import TOL_FLOAT64
+
 
 @pytest.mark.parametrize(
     ("method", "kwargs", "atol"),
@@ -46,4 +48,4 @@ def test_pct_rank(stats):
     common = jqs_pd.index.intersection(qs_clean.index)
 
     assert len(common) > 0
-    np.testing.assert_allclose(jqs_pd[common].values, qs_clean[common].values, atol=1e-12)
+    np.testing.assert_allclose(jqs_pd[common].values, qs_clean[common].values, atol=TOL_FLOAT64)

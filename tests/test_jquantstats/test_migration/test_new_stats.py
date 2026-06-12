@@ -11,6 +11,8 @@ import quantstats as qs
 
 from jquantstats import Data
 
+from ..tolerances import TOL_ESTIMATE, TOL_FLOAT64, TOL_PARITY, TOL_PINNED
+
 
 @pytest.fixture
 def aligned(pandas_frame):
@@ -25,7 +27,7 @@ def test_r_squared(stats, aligned):
     """r_squared() matches quantstats."""
     x = stats.r_squared()
     y = qs.stats.r2(aligned["AAPL"], aligned["SPY -- Benchmark"])
-    assert x["AAPL"] == pytest.approx(y, abs=1e-6)
+    assert x["AAPL"] == pytest.approx(y, abs=TOL_PARITY)
 
 
 # ── outliers / remove_outliers ────────────────────────────────────────────────
@@ -42,7 +44,7 @@ def test_outliers_values(stats, aapl):
     """outliers() values match quantstats."""
     jqs = stats.outliers()["AAPL"].sort().to_list()
     qs_vals = sorted(qs.stats.outliers(aapl, quantile=0.95).tolist())
-    np.testing.assert_allclose(jqs, qs_vals, atol=1e-12)
+    np.testing.assert_allclose(jqs, qs_vals, atol=TOL_FLOAT64)
 
 
 def test_remove_outliers_count(stats, aapl):
@@ -56,7 +58,7 @@ def test_remove_outliers_values(stats, aapl):
     """remove_outliers() values match quantstats."""
     jqs = stats.remove_outliers()["AAPL"].sort().to_list()
     qs_vals = sorted(qs.stats.remove_outliers(aapl, quantile=0.95).tolist())
-    np.testing.assert_allclose(jqs, qs_vals, atol=1e-12)
+    np.testing.assert_allclose(jqs, qs_vals, atol=TOL_FLOAT64)
 
 
 # ── expected_return ───────────────────────────────────────────────────────────
@@ -66,7 +68,7 @@ def test_expected_return_no_aggregate(stats, aapl):
     """expected_return() without aggregate matches quantstats geometric mean."""
     jqs = stats.expected_return()["AAPL"]
     qs_val = qs.stats.expected_return(aapl)
-    assert jqs == pytest.approx(qs_val, abs=1e-12)
+    assert jqs == pytest.approx(qs_val, abs=TOL_FLOAT64)
 
 
 # ── drawdown_details ──────────────────────────────────────────────────────────
@@ -112,7 +114,7 @@ def test_drawdown_details_max_drawdown(stats, aapl):
     # jqs returns fraction; qs returns percentage — multiply jqs by 100
     jqs_vals = (jqs_df["max_drawdown"] * 100).to_list()
     qs_vals = qs_df["max drawdown"].tolist()
-    np.testing.assert_allclose(jqs_vals, qs_vals, atol=1e-4)
+    np.testing.assert_allclose(jqs_vals, qs_vals, atol=TOL_ESTIMATE)
 
 
 # ── rolling_greeks ────────────────────────────────────────────────────────────
@@ -128,7 +130,7 @@ def test_rolling_greeks_beta(stats, aapl, benchmark_pd):
     common = jqs_pd.index.intersection(qs_beta.index)
 
     assert len(common) > 100
-    np.testing.assert_allclose(jqs_pd[common].values, qs_beta[common].values, atol=1e-4)
+    np.testing.assert_allclose(jqs_pd[common].values, qs_beta[common].values, atol=TOL_ESTIMATE)
 
 
 # NOTE: rolling_greeks alpha is intentionally NOT compared against quantstats.
@@ -187,7 +189,7 @@ def test_hhi_positive_near_zero_for_uniform_returns():
     n = 200
     returns = pl.DataFrame({"Date": [date(2020, 1, 1) + timedelta(days=i) for i in range(n)], "asset": [0.01] * n})
     val = Data.from_returns(returns=returns).stats.hhi_positive()["asset"]
-    assert val == pytest.approx(0.0, abs=1e-10)
+    assert val == pytest.approx(0.0, abs=TOL_PINNED)
 
 
 def test_hhi_negative_nan_fewer_than_three():
@@ -343,7 +345,7 @@ def test_expected_return_yearly_equals_annual(stats):
     """'yearly' is an alias for 'annual' in expected_return()."""
     annual = stats.expected_return(aggregate="annual")["AAPL"]
     yearly = stats.expected_return(aggregate="yearly")["AAPL"]
-    assert annual == pytest.approx(yearly, abs=1e-12)
+    assert annual == pytest.approx(yearly, abs=TOL_FLOAT64)
 
 
 def test_expected_return_invalid_aggregate_raises(stats):
@@ -411,7 +413,7 @@ def test_worst_n_periods_matches_bottom_n(stats):
     n = 5
     worst_jqs = stats.worst_n_periods(n=n)["AAPL"]
     expected = stats.returns["AAPL"].drop_nulls().sort().head(n).to_list()
-    np.testing.assert_allclose(worst_jqs, expected, atol=1e-12)
+    np.testing.assert_allclose(worst_jqs, expected, atol=TOL_FLOAT64)
 
 
 def test_worst_n_periods_returns_dict(stats):

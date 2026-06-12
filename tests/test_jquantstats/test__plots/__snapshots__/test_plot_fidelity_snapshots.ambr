@@ -1,0 +1,7709 @@
+# serializer version: 1
+# name: test_distribution_full_figure_json
+  dict({
+    'data': list([
+      dict({
+        'boxpoints': 'outliers',
+        'hovertemplate': 'Daily: %{y:.2%}<extra></extra>',
+        'legendgroup': 'Daily',
+        'marker': dict({
+          'color': '#636EFA',
+        }),
+        'name': 'Daily',
+        'showlegend': True,
+        'type': 'box',
+        'xaxis': 'x',
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            -0.000100984714862,
+            -0.000104945743051,
+            -0.000105351440511,
+          ]),
+          'tail': list([
+            9.93576163137e-05,
+            9.95837604318e-05,
+          ]),
+        }),
+        'yaxis': 'y',
+      }),
+      dict({
+        'boxpoints': 'outliers',
+        'hovertemplate': 'Weekly: %{y:.2%}<extra></extra>',
+        'legendgroup': 'Weekly',
+        'marker': dict({
+          'color': '#636EFA',
+        }),
+        'name': 'Weekly',
+        'showlegend': True,
+        'type': 'box',
+        'xaxis': 'x',
+        'y': dict({
+          '__len__': 1683,
+          'head': list([
+            -0.000319192057924,
+            -0.000445595878313,
+            -0.000880986815393,
+          ]),
+          'tail': list([
+            5.52881875513e-05,
+            5.8686740273e-05,
+          ]),
+        }),
+        'yaxis': 'y',
+      }),
+      dict({
+        'boxpoints': 'outliers',
+        'hovertemplate': 'Monthly: %{y:.2%}<extra></extra>',
+        'legendgroup': 'Monthly',
+        'marker': dict({
+          'color': '#636EFA',
+        }),
+        'name': 'Monthly',
+        'showlegend': True,
+        'type': 'box',
+        'xaxis': 'x',
+        'y': dict({
+          '__len__': 388,
+          'head': list([
+            -0.00128763486843,
+            -0.00161843799924,
+            -0.00257003011102,
+          ]),
+          'tail': list([
+            0.395228130453,
+            0.453782176689,
+          ]),
+        }),
+        'yaxis': 'y',
+      }),
+      dict({
+        'boxpoints': 'outliers',
+        'hovertemplate': 'Quarterly: %{y:.2%}<extra></extra>',
+        'legendgroup': 'Quarterly',
+        'marker': dict({
+          'color': '#636EFA',
+        }),
+        'name': 'Quarterly',
+        'showlegend': True,
+        'type': 'box',
+        'xaxis': 'x',
+        'y': dict({
+          '__len__': 130,
+          'head': list([
+            -0.0045261846762,
+            -0.0117254482612,
+            -0.0132591000647,
+          ]),
+          'tail': list([
+            0.661936294958,
+            1.09523080148,
+          ]),
+        }),
+        'yaxis': 'y',
+      }),
+      dict({
+        'boxpoints': 'outliers',
+        'hovertemplate': 'Yearly: %{y:.2%}<extra></extra>',
+        'legendgroup': 'Yearly',
+        'marker': dict({
+          'color': '#636EFA',
+        }),
+        'name': 'Yearly',
+        'showlegend': True,
+        'type': 'box',
+        'xaxis': 'x',
+        'y': dict({
+          '__len__': 33,
+          'head': list([
+            -0.0301374076873,
+            -0.0539018378602,
+            -0.163365165257,
+          ]),
+          'tail': list([
+            2.01357124771,
+            2.11903008887,
+          ]),
+        }),
+        'yaxis': 'y',
+      }),
+      dict({
+        'boxpoints': 'outliers',
+        'hovertemplate': 'Daily: %{y:.2%}<extra></extra>',
+        'legendgroup': 'Daily',
+        'marker': dict({
+          'color': '#EF553B',
+        }),
+        'name': 'Daily',
+        'showlegend': False,
+        'type': 'box',
+        'xaxis': 'x2',
+        'y': dict({
+          '__len__': 3252,
+          'head': list([
+            -0.000142339377714,
+            -0.000159696529265,
+            -0.000160180688727,
+          ]),
+          'tail': list([
+            6.08327982128e-05,
+            8.76021068004e-05,
+          ]),
+        }),
+        'yaxis': 'y2',
+      }),
+      dict({
+        'boxpoints': 'outliers',
+        'hovertemplate': 'Weekly: %{y:.2%}<extra></extra>',
+        'legendgroup': 'Weekly',
+        'marker': dict({
+          'color': '#EF553B',
+        }),
+        'name': 'Weekly',
+        'showlegend': False,
+        'type': 'box',
+        'xaxis': 'x2',
+        'y': dict({
+          '__len__': 1683,
+          'head': list([
+            -0.000462054810803,
+            -0.000703505537443,
+            -0.000755899750792,
+          ]),
+          'tail': list([
+            0.314142211082,
+            2.22044604925e-16,
+          ]),
+        }),
+        'yaxis': 'y2',
+      }),
+      dict({
+        'boxpoints': 'outliers',
+        'hovertemplate': 'Monthly: %{y:.2%}<extra></extra>',
+        'legendgroup': 'Monthly',
+        'marker': dict({
+          'color': '#EF553B',
+        }),
+        'name': 'Monthly',
+        'showlegend': False,
+        'type': 'box',
+        'xaxis': 'x2',
+        'y': dict({
+          '__len__': 388,
+          'head': list([
+            -0.000398070308969,
+            -0.0027485241089,
+            -0.00316918198767,
+          ]),
+          'tail': list([
+            0.326385586814,
+            0.479099746316,
+          ]),
+        }),
+        'yaxis': 'y2',
+      }),
+      dict({
+        'boxpoints': 'outliers',
+        'hovertemplate': 'Quarterly: %{y:.2%}<extra></extra>',
+        'legendgroup': 'Quarterly',
+        'marker': dict({
+          'color': '#EF553B',
+        }),
+        'name': 'Quarterly',
+        'showlegend': False,
+        'type': 'box',
+        'xaxis': 'x2',
+        'y': dict({
+          '__len__': 130,
+          'head': list([
+            -0.00895729717795,
+            -0.0129049257836,
+            -0.014751677949,
+          ]),
+          'tail': list([
+            0.761176706044,
+            1.01889056355,
+          ]),
+        }),
+        'yaxis': 'y2',
+      }),
+      dict({
+        'boxpoints': 'outliers',
+        'hovertemplate': 'Yearly: %{y:.2%}<extra></extra>',
+        'legendgroup': 'Yearly',
+        'marker': dict({
+          'color': '#EF553B',
+        }),
+        'name': 'Yearly',
+        'showlegend': False,
+        'type': 'box',
+        'xaxis': 'x2',
+        'y': dict({
+          '__len__': 33,
+          'head': list([
+            -0.0644790024361,
+            -0.257112149067,
+            -0.303688261015,
+          ]),
+          'tail': list([
+            1.05296766745,
+            1.94133273169,
+          ]),
+        }),
+        'yaxis': 'y2',
+      }),
+      dict({
+        'boxpoints': 'outliers',
+        'hovertemplate': 'Daily: %{y:.2%}<extra></extra>',
+        'legendgroup': 'Daily',
+        'marker': dict({
+          'color': '#00CC96',
+        }),
+        'name': 'Daily',
+        'showlegend': False,
+        'type': 'box',
+        'xaxis': 'x3',
+        'y': dict({
+          '__len__': 8115,
+          'head': list([
+            -0.000108311751499,
+            -0.000108314742744,
+            -0.000109879173179,
+          ]),
+          'tail': list([
+            9.67567831496e-05,
+            9.70387485693e-05,
+          ]),
+        }),
+        'yaxis': 'y3',
+      }),
+      dict({
+        'boxpoints': 'outliers',
+        'hovertemplate': 'Weekly: %{y:.2%}<extra></extra>',
+        'legendgroup': 'Weekly',
+        'marker': dict({
+          'color': '#00CC96',
+        }),
+        'name': 'Weekly',
+        'showlegend': False,
+        'type': 'box',
+        'xaxis': 'x3',
+        'y': dict({
+          '__len__': 1683,
+          'head': list([
+            -0.000118069340753,
+            -0.000187163827066,
+            -0.000224766492588,
+          ]),
+          'tail': list([
+            0.132922888706,
+            5.07281632243e-05,
+          ]),
+        }),
+        'yaxis': 'y3',
+      }),
+      dict({
+        'boxpoints': 'outliers',
+        'hovertemplate': 'Monthly: %{y:.2%}<extra></extra>',
+        'legendgroup': 'Monthly',
+        'marker': dict({
+          'color': '#00CC96',
+        }),
+        'name': 'Monthly',
+        'showlegend': False,
+        'type': 'box',
+        'xaxis': 'x3',
+        'y': dict({
+          '__len__': 388,
+          'head': list([
+            -0.000403947732569,
+            -0.000655332582116,
+            -0.000825705933888,
+          ]),
+          'tail': list([
+            0.126983494317,
+            5.80211944763e-05,
+          ]),
+        }),
+        'yaxis': 'y3',
+      }),
+      dict({
+        'boxpoints': 'outliers',
+        'hovertemplate': 'Quarterly: %{y:.2%}<extra></extra>',
+        'legendgroup': 'Quarterly',
+        'marker': dict({
+          'color': '#00CC96',
+        }),
+        'name': 'Quarterly',
+        'showlegend': False,
+        'type': 'box',
+        'xaxis': 'x3',
+        'y': dict({
+          '__len__': 130,
+          'head': list([
+            -0.00382028877054,
+            -0.00532983333243,
+            -0.00891645989781,
+          ]),
+          'tail': list([
+            0.201617472132,
+            0.215943171121,
+          ]),
+        }),
+        'yaxis': 'y3',
+      }),
+      dict({
+        'boxpoints': 'outliers',
+        'hovertemplate': 'Yearly: %{y:.2%}<extra></extra>',
+        'legendgroup': 'Yearly',
+        'marker': dict({
+          'color': '#00CC96',
+        }),
+        'name': 'Yearly',
+        'showlegend': False,
+        'type': 'box',
+        'xaxis': 'x3',
+        'y': dict({
+          '__len__': 33,
+          'head': list([
+            -0.0456899893222,
+            -0.0576091216453,
+            -0.0974147067066,
+          ]),
+          'tail': list([
+            0.334751531582,
+            0.380489189983,
+          ]),
+        }),
+        'yaxis': 'y3',
+      }),
+    ]),
+    'layout': dict({
+      'annotations': list([
+        dict({
+          'font': dict({
+            'size': 16,
+          }),
+          'showarrow': False,
+          'text': 'AAPL',
+          'x': 0.144444444444,
+          'xanchor': 'center',
+          'xref': 'paper',
+          'y': 1.0,
+          'yanchor': 'bottom',
+          'yref': 'paper',
+        }),
+        dict({
+          'font': dict({
+            'size': 16,
+          }),
+          'showarrow': False,
+          'text': 'META',
+          'x': 0.5,
+          'xanchor': 'center',
+          'xref': 'paper',
+          'y': 1.0,
+          'yanchor': 'bottom',
+          'yref': 'paper',
+        }),
+        dict({
+          'font': dict({
+            'size': 16,
+          }),
+          'showarrow': False,
+          'text': 'SPY -- Benchmark',
+          'x': 0.855555555556,
+          'xanchor': 'center',
+          'xref': 'paper',
+          'y': 1.0,
+          'yanchor': 'bottom',
+          'yref': 'paper',
+        }),
+      ]),
+      'height': 500,
+      'legend': dict({
+        'orientation': 'h',
+        'x': 1,
+        'xanchor': 'right',
+        'y': 1.05,
+        'yanchor': 'bottom',
+      }),
+      'plot_bgcolor': 'white',
+      'title': dict({
+        'text': 'Return Distribution by Period',
+      }),
+      'xaxis': dict({
+        'anchor': 'y',
+        'domain': list([
+          0.0,
+          0.288888888889,
+        ]),
+        'showgrid': False,
+      }),
+      'xaxis2': dict({
+        'anchor': 'y2',
+        'domain': list([
+          0.355555555556,
+          0.644444444444,
+        ]),
+        'showgrid': False,
+      }),
+      'xaxis3': dict({
+        'anchor': 'y3',
+        'domain': list([
+          0.711111111111,
+          1.0,
+        ]),
+        'showgrid': False,
+      }),
+      'yaxis': dict({
+        'anchor': 'x',
+        'domain': list([
+          0.0,
+          1.0,
+        ]),
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'tickformat': '.1%',
+      }),
+      'yaxis2': dict({
+        'anchor': 'x2',
+        'domain': list([
+          0.0,
+          1.0,
+        ]),
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'matches': 'y',
+        'showgrid': True,
+        'showticklabels': False,
+        'tickformat': '.1%',
+      }),
+      'yaxis3': dict({
+        'anchor': 'x3',
+        'domain': list([
+          0.0,
+          1.0,
+        ]),
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'matches': 'y',
+        'showgrid': True,
+        'showticklabels': False,
+        'tickformat': '.1%',
+      }),
+    }),
+  })
+# ---
+# name: test_log_scale_full_figure_json[returns]
+  dict({
+    'data': list([
+      dict({
+        'hovertemplate': '<b>%{x|%b %Y}</b><br>AAPL: %{y:.2f}x',
+        'line': dict({
+          'color': '#636EFA',
+          'width': 2,
+        }),
+        'mode': 'lines',
+        'name': 'AAPL',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            0.993737174555,
+            1.02296515875,
+            1.00626289414,
+          ]),
+          'tail': list([
+            480.284600769,
+            482.382123233,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': '<b>%{x|%b %Y}</b><br>META: %{y:.2f}x',
+        'line': dict({
+          'color': '#EF553B',
+          'width': 2,
+        }),
+        'mode': 'lines',
+        'name': 'META',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            'nan',
+            'nan',
+            'nan',
+          ]),
+          'tail': list([
+            14.0115802343,
+            14.3826642359,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': '<b>%{x|%b %Y}</b><br>SPY -- Benchmark: %{y:.2f}x',
+        'line': dict({
+          'color': '#00CC96',
+          'width': 2,
+        }),
+        'mode': 'lines',
+        'name': 'SPY -- Benchmark',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            'nan',
+            1.00711325364,
+            1.00924661352,
+          ]),
+          'tail': list([
+            22.3572221018,
+            22.5195764824,
+          ]),
+        }),
+      }),
+    ]),
+    'layout': dict({
+      'height': 600,
+      'hovermode': 'x unified',
+      'legend': dict({
+        'orientation': 'h',
+        'x': 1,
+        'xanchor': 'right',
+        'y': 1.02,
+        'yanchor': 'bottom',
+      }),
+      'plot_bgcolor': 'white',
+      'title': dict({
+        'text': 'Cumulative Returns',
+      }),
+      'xaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'rangeselector': dict({
+          'buttons': list([
+            dict({
+              'count': 6,
+              'label': '6m',
+              'step': 'month',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 1,
+              'label': '1y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 3,
+              'label': '3y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'label': 'YTD',
+              'step': 'year',
+              'stepmode': 'todate',
+            }),
+            dict({
+              'label': 'All',
+              'step': 'all',
+            }),
+          ]),
+        }),
+        'rangeslider': dict({
+          'visible': False,
+        }),
+        'showgrid': True,
+        'type': 'date',
+      }),
+      'yaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'tickformat': '.2f',
+        'title': dict({
+          'text': 'Cumulative Return',
+        }),
+        'type': 'log',
+      }),
+    }),
+  })
+# ---
+# name: test_log_scale_full_figure_json[snapshot]
+  dict({
+    'data': list([
+      dict({
+        'hovertemplate': '<b>%{x|%b %Y}</b><br>AAPL: %{y:.2f}x',
+        'legendgroup': 'AAPL',
+        'line': dict({
+          'color': '#636EFA',
+          'width': 2,
+        }),
+        'mode': 'lines',
+        'name': 'AAPL',
+        'showlegend': True,
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'xaxis': 'x',
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            0.993737174555,
+            1.02296515875,
+            1.00626289414,
+          ]),
+          'tail': list([
+            480.284600769,
+            482.382123233,
+          ]),
+        }),
+        'yaxis': 'y',
+      }),
+      dict({
+        'hovertemplate': '<b>%{x|%b %Y}</b><br>META: %{y:.2f}x',
+        'legendgroup': 'META',
+        'line': dict({
+          'color': '#EF553B',
+          'width': 2,
+        }),
+        'mode': 'lines',
+        'name': 'META',
+        'showlegend': True,
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'xaxis': 'x',
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            'nan',
+            'nan',
+            'nan',
+          ]),
+          'tail': list([
+            14.0115802343,
+            14.3826642359,
+          ]),
+        }),
+        'yaxis': 'y',
+      }),
+      dict({
+        'hovertemplate': '<b>%{x|%b %Y}</b><br>SPY -- Benchmark: %{y:.2f}x',
+        'legendgroup': 'SPY -- Benchmark',
+        'line': dict({
+          'color': '#00CC96',
+          'width': 2,
+        }),
+        'mode': 'lines',
+        'name': 'SPY -- Benchmark',
+        'showlegend': True,
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'xaxis': 'x',
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            'nan',
+            1.00711325364,
+            1.00924661352,
+          ]),
+          'tail': list([
+            22.3572221018,
+            22.5195764824,
+          ]),
+        }),
+        'yaxis': 'y',
+      }),
+      dict({
+        'fill': 'tozeroy',
+        'fillcolor': 'rgba(99, 110, 250, 0.5)',
+        'hovertemplate': 'AAPL Drawdown: %{y:.2%}',
+        'legendgroup': 'AAPL',
+        'line': dict({
+          'color': '#636EFA',
+          'width': 1,
+        }),
+        'mode': 'lines',
+        'name': 'AAPL',
+        'showlegend': False,
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'xaxis': 'x2',
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            0.0,
+            0.0,
+            -0.016327305453,
+          ]),
+          'tail': list([
+            -0.194660215646,
+            -0.191143096242,
+          ]),
+        }),
+        'yaxis': 'y2',
+      }),
+      dict({
+        'fill': 'tozeroy',
+        'fillcolor': 'rgba(239, 85, 59, 0.5)',
+        'hovertemplate': 'META Drawdown: %{y:.2%}',
+        'legendgroup': 'META',
+        'line': dict({
+          'color': '#EF553B',
+          'width': 1,
+        }),
+        'mode': 'lines',
+        'name': 'META',
+        'showlegend': False,
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'xaxis': 'x2',
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            None,
+            None,
+            None,
+          ]),
+          'tail': list([
+            -0.275626337552,
+            -0.256441957719,
+          ]),
+        }),
+        'yaxis': 'y2',
+      }),
+      dict({
+        'fill': 'tozeroy',
+        'fillcolor': 'rgba(0, 204, 150, 0.5)',
+        'hovertemplate': 'SPY -- Benchmark Drawdown: %{y:.2%}',
+        'legendgroup': 'SPY -- Benchmark',
+        'line': dict({
+          'color': '#00CC96',
+          'width': 1,
+        }),
+        'mode': 'lines',
+        'name': 'SPY -- Benchmark',
+        'showlegend': False,
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'xaxis': 'x2',
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            None,
+            0.0,
+            0.0,
+          ]),
+          'tail': list([
+            -0.105387906624,
+            -0.0988913843074,
+          ]),
+        }),
+        'yaxis': 'y2',
+      }),
+      dict({
+        'hovertemplate': 'AAPL Monthly Return: %{y:.2%}',
+        'legendgroup': 'AAPL',
+        'marker': dict({
+          'color': dict({
+            '__len__': 388,
+            'head': list([
+              '#636EFA',
+              'rgba(99, 110, 250, 0.5)',
+              'rgba(99, 110, 250, 0.5)',
+            ]),
+            'tail': list([
+              'rgba(99, 110, 250, 0.5)',
+              'rgba(99, 110, 250, 0.5)',
+            ]),
+          }),
+          'line': dict({
+            'width': 0,
+          }),
+        }),
+        'name': 'AAPL',
+        'opacity': 0.8,
+        'showlegend': False,
+        'type': 'bar',
+        'x': dict({
+          '__len__': 388,
+          'head': list([
+            '1993-02-01',
+            '1993-03-01',
+            '1993-04-01',
+          ]),
+          'tail': list([
+            '2025-04-01',
+            '2025-05-01',
+          ]),
+        }),
+        'xaxis': 'x3',
+        'y': dict({
+          '__len__': 388,
+          'head': list([
+            0.022965158753,
+            -0.128717531968,
+            -0.0281673185117,
+          ]),
+          'tail': list([
+            -0.0771170781463,
+            -0.0623235965319,
+          ]),
+        }),
+        'yaxis': 'y3',
+      }),
+      dict({
+        'hovertemplate': 'META Monthly Return: %{y:.2%}',
+        'legendgroup': 'META',
+        'marker': dict({
+          'color': dict({
+            '__len__': 388,
+            'head': list([
+              'rgba(239, 85, 59, 0.5)',
+              'rgba(239, 85, 59, 0.5)',
+              'rgba(239, 85, 59, 0.5)',
+            ]),
+            'tail': list([
+              'rgba(239, 85, 59, 0.5)',
+              'rgba(239, 85, 59, 0.5)',
+            ]),
+          }),
+          'line': dict({
+            'width': 0,
+          }),
+        }),
+        'name': 'META',
+        'opacity': 0.8,
+        'showlegend': False,
+        'type': 'bar',
+        'x': dict({
+          '__len__': 388,
+          'head': list([
+            '1993-02-01',
+            '1993-03-01',
+            '1993-04-01',
+          ]),
+          'tail': list([
+            '2025-04-01',
+            '2025-05-01',
+          ]),
+        }),
+        'xaxis': 'x3',
+        'y': dict({
+          '__len__': 388,
+          'head': list([
+            0.0,
+            0.0,
+            0.0,
+          ]),
+          'tail': list([
+            -0.122236872395,
+            -0.0660921168409,
+          ]),
+        }),
+        'yaxis': 'y3',
+      }),
+      dict({
+        'hovertemplate': 'SPY -- Benchmark Monthly Return: %{y:.2%}',
+        'legendgroup': 'SPY -- Benchmark',
+        'marker': dict({
+          'color': dict({
+            '__len__': 388,
+            'head': list([
+              '#00CC96',
+              '#00CC96',
+              '#00CC96',
+            ]),
+            'tail': list([
+              'rgba(0, 204, 150, 0.5)',
+              'rgba(0, 204, 150, 0.5)',
+            ]),
+          }),
+          'line': dict({
+            'width': 0,
+          }),
+        }),
+        'name': 'SPY -- Benchmark',
+        'opacity': 0.8,
+        'showlegend': False,
+        'type': 'bar',
+        'x': dict({
+          '__len__': 388,
+          'head': list([
+            '1993-02-01',
+            '1993-03-01',
+            '1993-04-01',
+          ]),
+          'tail': list([
+            '2025-04-01',
+            '2025-05-01',
+          ]),
+        }),
+        'xaxis': 'x3',
+        'y': dict({
+          '__len__': 388,
+          'head': list([
+            0.00711325364058,
+            0.000706200577383,
+            0.0217399313214,
+          ]),
+          'tail': list([
+            -0.0530521392876,
+            -0.0183788760487,
+          ]),
+        }),
+        'yaxis': 'y3',
+      }),
+    ]),
+    'layout': dict({
+      'annotations': list([
+        dict({
+          'font': dict({
+            'size': 16,
+          }),
+          'showarrow': False,
+          'text': 'Cumulative Returns',
+          'x': 0.5,
+          'xanchor': 'center',
+          'xref': 'paper',
+          'y': 1.0,
+          'yanchor': 'bottom',
+          'yref': 'paper',
+        }),
+        dict({
+          'font': dict({
+            'size': 16,
+          }),
+          'showarrow': False,
+          'text': 'Drawdowns',
+          'x': 0.5,
+          'xanchor': 'center',
+          'xref': 'paper',
+          'y': 0.5,
+          'yanchor': 'bottom',
+          'yref': 'paper',
+        }),
+        dict({
+          'font': dict({
+            'size': 16,
+          }),
+          'showarrow': False,
+          'text': 'Monthly Returns',
+          'x': 0.5,
+          'xanchor': 'center',
+          'xref': 'paper',
+          'y': 0.225,
+          'yanchor': 'bottom',
+          'yref': 'paper',
+        }),
+      ]),
+      'height': 1200,
+      'hovermode': 'x unified',
+      'legend': dict({
+        'orientation': 'h',
+        'x': 1,
+        'xanchor': 'right',
+        'y': 1.02,
+        'yanchor': 'bottom',
+      }),
+      'plot_bgcolor': 'white',
+      'shapes': list([
+        dict({
+          'line': dict({
+            'color': 'gray',
+            'width': 1,
+          }),
+          'type': 'line',
+          'x0': 0,
+          'x1': 1,
+          'xref': 'x2 domain',
+          'y0': 0,
+          'y1': 0,
+          'yref': 'y2',
+        }),
+      ]),
+      'title': dict({
+        'text': 'AAPL vs META vs SPY -- Benchmark Performance Dashboard',
+      }),
+      'xaxis': dict({
+        'anchor': 'y',
+        'domain': list([
+          0.0,
+          1.0,
+        ]),
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'matches': 'x3',
+        'rangeselector': dict({
+          'buttons': list([
+            dict({
+              'count': 6,
+              'label': '6m',
+              'step': 'month',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 1,
+              'label': '1y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 3,
+              'label': '3y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'label': 'YTD',
+              'step': 'year',
+              'stepmode': 'todate',
+            }),
+            dict({
+              'label': 'All',
+              'step': 'all',
+            }),
+          ]),
+        }),
+        'rangeslider': dict({
+          'visible': False,
+        }),
+        'showgrid': True,
+        'showticklabels': False,
+        'type': 'date',
+      }),
+      'xaxis2': dict({
+        'anchor': 'y2',
+        'domain': list([
+          0.0,
+          1.0,
+        ]),
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'matches': 'x3',
+        'showgrid': True,
+        'showticklabels': False,
+      }),
+      'xaxis3': dict({
+        'anchor': 'y3',
+        'domain': list([
+          0.0,
+          1.0,
+        ]),
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+      }),
+      'yaxis': dict({
+        'anchor': 'x',
+        'domain': list([
+          0.55,
+          1.0,
+        ]),
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'tickformat': '.2f',
+        'title': dict({
+          'text': 'Cumulative Return',
+        }),
+        'type': 'log',
+      }),
+      'yaxis2': dict({
+        'anchor': 'x2',
+        'domain': list([
+          0.275,
+          0.5,
+        ]),
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'tickformat': '.0%',
+        'title': dict({
+          'text': 'Drawdown',
+        }),
+      }),
+      'yaxis3': dict({
+        'anchor': 'x3',
+        'domain': list([
+          0.0,
+          0.225,
+        ]),
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'tickformat': '.0%',
+        'title': dict({
+          'text': 'Monthly Return',
+        }),
+      }),
+    }),
+  })
+# ---
+# name: test_montecarlo_distribution_full_figure_json
+  dict({
+    'data': list([
+      dict({
+        'hovertemplate': 'AAPL: %{x:.4f}<extra></extra>',
+        'marker': dict({
+          'color': '#636EFA',
+        }),
+        'name': 'AAPL',
+        'opacity': 0.6,
+        'type': 'histogram',
+        'x': dict({
+          '__len__': 20,
+          'head': list([
+            -5.78301308684,
+            -0.288778951294,
+            1.43062458897,
+          ]),
+          'tail': list([
+            -2.43848909903,
+            2.3358181136,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'META: %{x:.4f}<extra></extra>',
+        'marker': dict({
+          'color': '#EF553B',
+        }),
+        'name': 'META',
+        'opacity': 0.6,
+        'type': 'histogram',
+        'x': dict({
+          '__len__': 20,
+          'head': list([
+            -1.08848197813,
+            -3.07858657831,
+            1.16172103717,
+          ]),
+          'tail': list([
+            -6.88046344806,
+            5.49710770199,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'SPY -- Benchmark: %{x:.4f}<extra></extra>',
+        'marker': dict({
+          'color': '#00CC96',
+        }),
+        'name': 'SPY -- Benchmark',
+        'opacity': 0.6,
+        'type': 'histogram',
+        'x': dict({
+          '__len__': 20,
+          'head': list([
+            -1.1137427825,
+            -4.69437704037,
+            5.05342579781,
+          ]),
+          'tail': list([
+            5.28315341938,
+            -4.78912612065,
+          ]),
+        }),
+      }),
+    ]),
+    'layout': dict({
+      'annotations': list([
+        dict({
+          'font': dict({
+            'size': 10,
+          }),
+          'showarrow': False,
+          'text': 'AAPL observed',
+          'x': 0.293234538887,
+          'xanchor': 'left',
+          'xref': 'x',
+          'y': 1,
+          'yanchor': 'top',
+          'yref': 'y domain',
+        }),
+        dict({
+          'font': dict({
+            'size': 10,
+          }),
+          'showarrow': False,
+          'text': 'META observed',
+          'x': -0.62474478955,
+          'xanchor': 'left',
+          'xref': 'x',
+          'y': 1,
+          'yanchor': 'top',
+          'yref': 'y domain',
+        }),
+        dict({
+          'font': dict({
+            'size': 10,
+          }),
+          'showarrow': False,
+          'text': 'SPY -- Benchmark observed',
+          'x': 0.245141648395,
+          'xanchor': 'left',
+          'xref': 'x',
+          'y': 1,
+          'yanchor': 'top',
+          'yref': 'y domain',
+        }),
+      ]),
+      'barmode': 'overlay',
+      'height': 600,
+      'hovermode': 'x unified',
+      'legend': dict({
+        'orientation': 'h',
+        'x': 1,
+        'xanchor': 'right',
+        'y': 1.02,
+        'yanchor': 'bottom',
+      }),
+      'plot_bgcolor': 'white',
+      'shapes': list([
+        dict({
+          'line': dict({
+            'color': '#636EFA',
+            'dash': 'dash',
+            'width': 2,
+          }),
+          'type': 'line',
+          'x0': 0.293234538887,
+          'x1': 0.293234538887,
+          'xref': 'x',
+          'y0': 0,
+          'y1': 1,
+          'yref': 'y domain',
+        }),
+        dict({
+          'line': dict({
+            'color': '#EF553B',
+            'dash': 'dash',
+            'width': 2,
+          }),
+          'type': 'line',
+          'x0': -0.62474478955,
+          'x1': -0.62474478955,
+          'xref': 'x',
+          'y0': 0,
+          'y1': 1,
+          'yref': 'y domain',
+        }),
+        dict({
+          'line': dict({
+            'color': '#00CC96',
+            'dash': 'dash',
+            'width': 2,
+          }),
+          'type': 'line',
+          'x0': 0.245141648395,
+          'x1': 0.245141648395,
+          'xref': 'x',
+          'y0': 0,
+          'y1': 1,
+          'yref': 'y domain',
+        }),
+      ]),
+      'title': dict({
+        'text': 'Monte Carlo Distribution',
+      }),
+      'xaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'title': dict({
+          'text': 'Sharpe Ratio',
+        }),
+      }),
+      'yaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'title': dict({
+          'text': 'Count',
+        }),
+      }),
+    }),
+  })
+# ---
+# name: test_montecarlo_full_figure_json
+  dict({
+    'data': list([
+      dict({
+        'hovertemplate': 'AAPL Sim: %{y:.2f}x<extra></extra>',
+        'legendgroup': 'AAPL_sim',
+        'line': dict({
+          'color': 'rgba(99, 110, 250, 0.12)',
+          'width': 1,
+        }),
+        'mode': 'lines',
+        'name': 'AAPL Sim',
+        'showlegend': True,
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 30,
+          'head': list([
+            '2025-03-14',
+            '2025-03-17',
+            '2025-03-18',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 30,
+          'head': list([
+            1.0,
+            1.01198929438,
+            0.97258912208,
+          ]),
+          'tail': list([
+            0.668085039568,
+            0.643543436793,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'AAPL Sim: %{y:.2f}x<extra></extra>',
+        'legendgroup': 'AAPL_sim',
+        'line': dict({
+          'color': 'rgba(99, 110, 250, 0.12)',
+          'width': 1,
+        }),
+        'mode': 'lines',
+        'name': 'AAPL Sim',
+        'showlegend': False,
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 30,
+          'head': list([
+            '2025-03-14',
+            '2025-03-17',
+            '2025-03-18',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 30,
+          'head': list([
+            1.0,
+            1.00313632753,
+            0.910390251439,
+          ]),
+          'tail': list([
+            0.743531395889,
+            0.758013060864,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'AAPL Sim: %{y:.2f}x<extra></extra>',
+        'legendgroup': 'AAPL_sim',
+        'line': dict({
+          'color': 'rgba(99, 110, 250, 0.12)',
+          'width': 1,
+        }),
+        'mode': 'lines',
+        'name': 'AAPL Sim',
+        'showlegend': False,
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 30,
+          'head': list([
+            '2025-03-14',
+            '2025-03-17',
+            '2025-03-18',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 30,
+          'head': list([
+            1.0,
+            0.998123618039,
+            1.03864190066,
+          ]),
+          'tail': list([
+            0.86944478366,
+            0.879868813122,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'AAPL Sim: %{y:.2f}x<extra></extra>',
+        'legendgroup': 'AAPL_sim',
+        'line': dict({
+          'color': 'rgba(99, 110, 250, 0.12)',
+          'width': 1,
+        }),
+        'mode': 'lines',
+        'name': 'AAPL Sim',
+        'showlegend': False,
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 30,
+          'head': list([
+            '2025-03-14',
+            '2025-03-17',
+            '2025-03-18',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 30,
+          'head': list([
+            1.0,
+            0.973419646885,
+            0.93552112165,
+          ]),
+          'tail': list([
+            0.693180751252,
+            0.658647742971,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'AAPL Sim: %{y:.2f}x<extra></extra>',
+        'legendgroup': 'AAPL_sim',
+        'line': dict({
+          'color': 'rgba(99, 110, 250, 0.12)',
+          'width': 1,
+        }),
+        'mode': 'lines',
+        'name': 'AAPL Sim',
+        'showlegend': False,
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 30,
+          'head': list([
+            '2025-03-14',
+            '2025-03-17',
+            '2025-03-18',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 30,
+          'head': list([
+            1.0,
+            0.993878516081,
+            1.01323615958,
+          ]),
+          'tail': list([
+            0.811338815834,
+            0.814882134503,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'AAPL Observed: %{y:.2f}x<extra></extra>',
+        'legendgroup': 'AAPL_obs',
+        'line': dict({
+          'color': '#636EFA',
+          'width': 2.5,
+        }),
+        'mode': 'lines',
+        'name': 'AAPL Observed',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 30,
+          'head': list([
+            '2025-03-14',
+            '2025-03-17',
+            '2025-03-18',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 30,
+          'head': list([
+            1.0,
+            1.00238884488,
+            0.996252737687,
+          ]),
+          'tail': list([
+            0.976017564082,
+            0.980280075856,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'META Sim: %{y:.2f}x<extra></extra>',
+        'legendgroup': 'META_sim',
+        'line': dict({
+          'color': 'rgba(239, 85, 59, 0.12)',
+          'width': 1,
+        }),
+        'mode': 'lines',
+        'name': 'META Sim',
+        'showlegend': True,
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 30,
+          'head': list([
+            '2025-03-14',
+            '2025-03-17',
+            '2025-03-18',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 30,
+          'head': list([
+            1.0,
+            0.966459266659,
+            0.930446655081,
+          ]),
+          'tail': list([
+            0.751828075632,
+            0.735105994755,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'META Sim: %{y:.2f}x<extra></extra>',
+        'legendgroup': 'META_sim',
+        'line': dict({
+          'color': 'rgba(239, 85, 59, 0.12)',
+          'width': 1,
+        }),
+        'mode': 'lines',
+        'name': 'META Sim',
+        'showlegend': False,
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 30,
+          'head': list([
+            '2025-03-14',
+            '2025-03-17',
+            '2025-03-18',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 30,
+          'head': list([
+            1.0,
+            0.977758105318,
+            0.89016794084,
+          ]),
+          'tail': list([
+            0.885154398595,
+            0.840382215551,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'META Sim: %{y:.2f}x<extra></extra>',
+        'legendgroup': 'META_sim',
+        'line': dict({
+          'color': 'rgba(239, 85, 59, 0.12)',
+          'width': 1,
+        }),
+        'mode': 'lines',
+        'name': 'META Sim',
+        'showlegend': False,
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 30,
+          'head': list([
+            '2025-03-14',
+            '2025-03-17',
+            '2025-03-18',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 30,
+          'head': list([
+            1.0,
+            0.977758105318,
+            0.89016794084,
+          ]),
+          'tail': list([
+            0.57412388731,
+            0.554867351101,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'META Sim: %{y:.2f}x<extra></extra>',
+        'legendgroup': 'META_sim',
+        'line': dict({
+          'color': 'rgba(239, 85, 59, 0.12)',
+          'width': 1,
+        }),
+        'mode': 'lines',
+        'name': 'META Sim',
+        'showlegend': False,
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 30,
+          'head': list([
+            '2025-03-14',
+            '2025-03-17',
+            '2025-03-18',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 30,
+          'head': list([
+            1.0,
+            0.995556367215,
+            0.976899591997,
+          ]),
+          'tail': list([
+            0.777412787973,
+            0.776128238236,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'META Sim: %{y:.2f}x<extra></extra>',
+        'legendgroup': 'META_sim',
+        'line': dict({
+          'color': 'rgba(239, 85, 59, 0.12)',
+          'width': 1,
+        }),
+        'mode': 'lines',
+        'name': 'META Sim',
+        'showlegend': False,
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 30,
+          'head': list([
+            '2025-03-14',
+            '2025-03-17',
+            '2025-03-18',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 30,
+          'head': list([
+            1.0,
+            1.01749146758,
+            1.00350264415,
+          ]),
+          'tail': list([
+            1.00420514899,
+            0.914245788188,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'META Observed: %{y:.2f}x<extra></extra>',
+        'legendgroup': 'META_obs',
+        'line': dict({
+          'color': '#EF553B',
+          'width': 2.5,
+        }),
+        'mode': 'lines',
+        'name': 'META Observed',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 30,
+          'head': list([
+            '2025-03-14',
+            '2025-03-17',
+            '2025-03-18',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 30,
+          'head': list([
+            1.0,
+            0.995556367215,
+            0.958459527241,
+          ]),
+          'tail': list([
+            0.877468804866,
+            0.900707770772,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'SPY -- Benchmark Sim: %{y:.2f}x<extra></extra>',
+        'legendgroup': 'SPY -- Benchmark_sim',
+        'line': dict({
+          'color': 'rgba(0, 204, 150, 0.12)',
+          'width': 1,
+        }),
+        'mode': 'lines',
+        'name': 'SPY -- Benchmark Sim',
+        'showlegend': True,
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 30,
+          'head': list([
+            '2025-03-14',
+            '2025-03-17',
+            '2025-03-18',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 30,
+          'head': list([
+            1.0,
+            1.00142677784,
+            0.989471478058,
+          ]),
+          'tail': list([
+            1.0018047114,
+            1.02289163199,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'SPY -- Benchmark Sim: %{y:.2f}x<extra></extra>',
+        'legendgroup': 'SPY -- Benchmark_sim',
+        'line': dict({
+          'color': 'rgba(0, 204, 150, 0.12)',
+          'width': 1,
+        }),
+        'mode': 'lines',
+        'name': 'SPY -- Benchmark Sim',
+        'showlegend': False,
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 30,
+          'head': list([
+            '2025-03-14',
+            '2025-03-17',
+            '2025-03-18',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 30,
+          'head': list([
+            1.0,
+            0.977771967537,
+            0.958081273981,
+          ]),
+          'tail': list([
+            0.888117257947,
+            0.906811178911,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'SPY -- Benchmark Sim: %{y:.2f}x<extra></extra>',
+        'legendgroup': 'SPY -- Benchmark_sim',
+        'line': dict({
+          'color': 'rgba(0, 204, 150, 0.12)',
+          'width': 1,
+        }),
+        'mode': 'lines',
+        'name': 'SPY -- Benchmark Sim',
+        'showlegend': False,
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 30,
+          'head': list([
+            '2025-03-14',
+            '2025-03-17',
+            '2025-03-18',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 30,
+          'head': list([
+            1.0,
+            1.01790850202,
+            1.01824427118,
+          ]),
+          'tail': list([
+            1.04110860741,
+            1.03819258838,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'SPY -- Benchmark Sim: %{y:.2f}x<extra></extra>',
+        'legendgroup': 'SPY -- Benchmark_sim',
+        'line': dict({
+          'color': 'rgba(0, 204, 150, 0.12)',
+          'width': 1,
+        }),
+        'mode': 'lines',
+        'name': 'SPY -- Benchmark Sim',
+        'showlegend': False,
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 30,
+          'head': list([
+            '2025-03-14',
+            '2025-03-17',
+            '2025-03-18',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 30,
+          'head': list([
+            1.0,
+            0.997199121199,
+            1.00001563695,
+          ]),
+          'tail': list([
+            1.1110621581,
+            1.04601727803,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'SPY -- Benchmark Sim: %{y:.2f}x<extra></extra>',
+        'legendgroup': 'SPY -- Benchmark_sim',
+        'line': dict({
+          'color': 'rgba(0, 204, 150, 0.12)',
+          'width': 1,
+        }),
+        'mode': 'lines',
+        'name': 'SPY -- Benchmark Sim',
+        'showlegend': False,
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 30,
+          'head': list([
+            '2025-03-14',
+            '2025-03-17',
+            '2025-03-18',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 30,
+          'head': list([
+            1.0,
+            1.00632841153,
+            1.00666036085,
+          ]),
+          'tail': list([
+            1.08144288585,
+            1.08828670147,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'SPY -- Benchmark Observed: %{y:.2f}x<extra></extra>',
+        'legendgroup': 'SPY -- Benchmark_obs',
+        'line': dict({
+          'color': '#00CC96',
+          'width': 2.5,
+        }),
+        'mode': 'lines',
+        'name': 'SPY -- Benchmark Observed',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 30,
+          'head': list([
+            '2025-03-14',
+            '2025-03-17',
+            '2025-03-18',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 30,
+          'head': list([
+            1.0,
+            1.00771138237,
+            0.996819574167,
+          ]),
+          'tail': list([
+            0.974280091322,
+            0.981355149219,
+          ]),
+        }),
+      }),
+    ]),
+    'layout': dict({
+      'height': 600,
+      'hovermode': 'x unified',
+      'legend': dict({
+        'orientation': 'h',
+        'x': 1,
+        'xanchor': 'right',
+        'y': 1.02,
+        'yanchor': 'bottom',
+      }),
+      'plot_bgcolor': 'white',
+      'title': dict({
+        'text': 'Monte Carlo Simulation',
+      }),
+      'xaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'rangeselector': dict({
+          'buttons': list([
+            dict({
+              'count': 6,
+              'label': '6m',
+              'step': 'month',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 1,
+              'label': '1y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 3,
+              'label': '3y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'label': 'YTD',
+              'step': 'year',
+              'stepmode': 'todate',
+            }),
+            dict({
+              'label': 'All',
+              'step': 'all',
+            }),
+          ]),
+        }),
+        'rangeslider': dict({
+          'visible': False,
+        }),
+        'showgrid': True,
+        'type': 'date',
+      }),
+      'yaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'tickformat': '.2f',
+        'title': dict({
+          'text': 'Cumulative Return',
+        }),
+      }),
+    }),
+  })
+# ---
+# name: test_plot_full_figure_json[compare]
+  dict({
+    'data': list([
+      dict({
+        'hovertemplate': '<b>%{x|%b %Y}</b><br>AAPL: %{y:.2f}x',
+        'line': dict({
+          'color': '#636EFA',
+          'width': 2,
+        }),
+        'mode': 'lines',
+        'name': 'AAPL',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            0.993737174555,
+            1.02296515875,
+            1.00626289414,
+          ]),
+          'tail': list([
+            480.284600769,
+            482.382123233,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': '<b>%{x|%b %Y}</b><br>META: %{y:.2f}x',
+        'line': dict({
+          'color': '#EF553B',
+          'width': 2,
+        }),
+        'mode': 'lines',
+        'name': 'META',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            'nan',
+            'nan',
+            'nan',
+          ]),
+          'tail': list([
+            14.0115802343,
+            14.3826642359,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': '<b>%{x|%b %Y}</b><br>SPY -- Benchmark: %{y:.2f}x',
+        'line': dict({
+          'color': '#00CC96',
+          'dash': 'dash',
+          'width': 2.5,
+        }),
+        'mode': 'lines',
+        'name': 'SPY -- Benchmark',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            'nan',
+            1.00711325364,
+            1.00924661352,
+          ]),
+          'tail': list([
+            22.3572221018,
+            22.5195764824,
+          ]),
+        }),
+      }),
+    ]),
+    'layout': dict({
+      'height': 600,
+      'hovermode': 'x unified',
+      'legend': dict({
+        'orientation': 'h',
+        'x': 1,
+        'xanchor': 'right',
+        'y': 1.02,
+        'yanchor': 'bottom',
+      }),
+      'plot_bgcolor': 'white',
+      'title': dict({
+        'text': 'Comparison vs Benchmark',
+      }),
+      'xaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'rangeselector': dict({
+          'buttons': list([
+            dict({
+              'count': 6,
+              'label': '6m',
+              'step': 'month',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 1,
+              'label': '1y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 3,
+              'label': '3y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'label': 'YTD',
+              'step': 'year',
+              'stepmode': 'todate',
+            }),
+            dict({
+              'label': 'All',
+              'step': 'all',
+            }),
+          ]),
+        }),
+        'rangeslider': dict({
+          'visible': False,
+        }),
+        'showgrid': True,
+        'type': 'date',
+      }),
+      'yaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'tickformat': '.2f',
+        'title': dict({
+          'text': 'Cumulative Return',
+        }),
+      }),
+    }),
+  })
+# ---
+# name: test_plot_full_figure_json[daily_returns]
+  dict({
+    'data': list([
+      dict({
+        'hovertemplate': 'AAPL: %{y:.2%}',
+        'marker': dict({
+          'color': dict({
+            '__len__': 8116,
+            'head': list([
+              'rgba(99, 110, 250, 0.4)',
+              '#636EFA',
+              'rgba(99, 110, 250, 0.4)',
+            ]),
+            'tail': list([
+              '#636EFA',
+              '#636EFA',
+            ]),
+          }),
+          'line': dict({
+            'width': 0,
+          }),
+        }),
+        'name': 'AAPL',
+        'opacity': 0.85,
+        'type': 'bar',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            -0.00626282544508,
+            0.029412187595,
+            -0.016327305453,
+          ]),
+          'tail': list([
+            0.0184261432122,
+            0.00436724904465,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'META: %{y:.2%}',
+        'marker': dict({
+          'color': dict({
+            '__len__': 8116,
+            'head': list([
+              'rgba(239, 85, 59, 0.4)',
+              'rgba(239, 85, 59, 0.4)',
+              'rgba(239, 85, 59, 0.4)',
+            ]),
+            'tail': list([
+              '#EF553B',
+              '#EF553B',
+            ]),
+          }),
+          'line': dict({
+            'width': 0,
+          }),
+        }),
+        'name': 'META',
+        'opacity': 0.85,
+        'type': 'bar',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            'nan',
+            'nan',
+            'nan',
+          ]),
+          'tail': list([
+            0.0247563849526,
+            0.0264840935395,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'SPY -- Benchmark: %{y:.2%}',
+        'marker': dict({
+          'color': dict({
+            '__len__': 8116,
+            'head': list([
+              'rgba(0, 204, 150, 0.4)',
+              '#00CC96',
+              '#00CC96',
+            ]),
+            'tail': list([
+              '#00CC96',
+              '#00CC96',
+            ]),
+          }),
+          'line': dict({
+            'width': 0,
+          }),
+        }),
+        'name': 'SPY -- Benchmark',
+        'opacity': 0.85,
+        'type': 'bar',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            'nan',
+            0.00711325364058,
+            0.00211829192712,
+          ]),
+          'tail': list([
+            0.0210489333439,
+            0.00726183154145,
+          ]),
+        }),
+      }),
+    ]),
+    'layout': dict({
+      'height': 600,
+      'hovermode': 'x unified',
+      'legend': dict({
+        'orientation': 'h',
+        'x': 1,
+        'xanchor': 'right',
+        'y': 1.02,
+        'yanchor': 'bottom',
+      }),
+      'plot_bgcolor': 'white',
+      'title': dict({
+        'text': 'Daily Returns',
+      }),
+      'xaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'rangeselector': dict({
+          'buttons': list([
+            dict({
+              'count': 6,
+              'label': '6m',
+              'step': 'month',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 1,
+              'label': '1y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 3,
+              'label': '3y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'label': 'YTD',
+              'step': 'year',
+              'stepmode': 'todate',
+            }),
+            dict({
+              'label': 'All',
+              'step': 'all',
+            }),
+          ]),
+        }),
+        'rangeslider': dict({
+          'visible': False,
+        }),
+        'showgrid': True,
+        'type': 'date',
+      }),
+      'yaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'tickformat': '.1%',
+        'title': dict({
+          'text': 'Return',
+        }),
+      }),
+    }),
+  })
+# ---
+# name: test_plot_full_figure_json[drawdown]
+  dict({
+    'data': list([
+      dict({
+        'fill': 'tozeroy',
+        'fillcolor': 'rgba(99, 110, 250, 0.3)',
+        'hovertemplate': 'AAPL: %{y:.2%}',
+        'line': dict({
+          'color': '#636EFA',
+          'width': 1.5,
+        }),
+        'mode': 'lines',
+        'name': 'AAPL',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            0.0,
+            0.0,
+            -0.016327305453,
+          ]),
+          'tail': list([
+            -0.194660215646,
+            -0.191143096242,
+          ]),
+        }),
+      }),
+      dict({
+        'fill': 'tozeroy',
+        'fillcolor': 'rgba(239, 85, 59, 0.3)',
+        'hovertemplate': 'META: %{y:.2%}',
+        'line': dict({
+          'color': '#EF553B',
+          'width': 1.5,
+        }),
+        'mode': 'lines',
+        'name': 'META',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            None,
+            None,
+            None,
+          ]),
+          'tail': list([
+            -0.275626337552,
+            -0.256441957719,
+          ]),
+        }),
+      }),
+      dict({
+        'fill': 'tozeroy',
+        'fillcolor': 'rgba(0, 204, 150, 0.3)',
+        'hovertemplate': 'SPY -- Benchmark: %{y:.2%}',
+        'line': dict({
+          'color': '#00CC96',
+          'width': 1.5,
+        }),
+        'mode': 'lines',
+        'name': 'SPY -- Benchmark',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            None,
+            0.0,
+            0.0,
+          ]),
+          'tail': list([
+            -0.105387906624,
+            -0.0988913843074,
+          ]),
+        }),
+      }),
+    ]),
+    'layout': dict({
+      'height': 600,
+      'hovermode': 'x unified',
+      'legend': dict({
+        'orientation': 'h',
+        'x': 1,
+        'xanchor': 'right',
+        'y': 1.02,
+        'yanchor': 'bottom',
+      }),
+      'plot_bgcolor': 'white',
+      'shapes': list([
+        dict({
+          'line': dict({
+            'color': 'gray',
+            'width': 1,
+          }),
+          'type': 'line',
+          'x0': 0,
+          'x1': 1,
+          'xref': 'x domain',
+          'y0': 0,
+          'y1': 0,
+          'yref': 'y',
+        }),
+      ]),
+      'title': dict({
+        'text': 'Drawdowns',
+      }),
+      'xaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'rangeselector': dict({
+          'buttons': list([
+            dict({
+              'count': 6,
+              'label': '6m',
+              'step': 'month',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 1,
+              'label': '1y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 3,
+              'label': '3y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'label': 'YTD',
+              'step': 'year',
+              'stepmode': 'todate',
+            }),
+            dict({
+              'label': 'All',
+              'step': 'all',
+            }),
+          ]),
+        }),
+        'rangeslider': dict({
+          'visible': False,
+        }),
+        'showgrid': True,
+        'type': 'date',
+      }),
+      'yaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'tickformat': '.0%',
+        'title': dict({
+          'text': 'Drawdown',
+        }),
+      }),
+    }),
+  })
+# ---
+# name: test_plot_full_figure_json[drawdowns_periods]
+  dict({
+    'data': list([
+      dict({
+        'hovertemplate': '<b>%{x|%b %Y}</b><br>AAPL: %{y:.2f}x',
+        'line': dict({
+          'color': '#1f77b4',
+          'width': 2,
+        }),
+        'mode': 'lines',
+        'name': 'AAPL',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            0.993737174555,
+            1.02296515875,
+            1.00626289414,
+          ]),
+          'tail': list([
+            480.284600769,
+            482.382123233,
+          ]),
+        }),
+      }),
+    ]),
+    'layout': dict({
+      'annotations': list([
+        dict({
+          'font': dict({
+            'size': 10,
+          }),
+          'showarrow': False,
+          'text': '#1 -81.8%',
+          'x': '2000-03-23',
+          'xanchor': 'left',
+          'xref': 'x',
+          'y': 1,
+          'yanchor': 'top',
+          'yref': 'y domain',
+        }),
+        dict({
+          'font': dict({
+            'size': 10,
+          }),
+          'showarrow': False,
+          'text': '#2 -78.1%',
+          'x': '1993-02-02',
+          'xanchor': 'left',
+          'xref': 'x',
+          'y': 1,
+          'yanchor': 'top',
+          'yref': 'y domain',
+        }),
+        dict({
+          'font': dict({
+            'size': 10,
+          }),
+          'showarrow': False,
+          'text': '#3 -60.9%',
+          'x': '2007-12-31',
+          'xanchor': 'left',
+          'xref': 'x',
+          'y': 1,
+          'yanchor': 'top',
+          'yref': 'y domain',
+        }),
+        dict({
+          'font': dict({
+            'size': 10,
+          }),
+          'showarrow': False,
+          'text': '#4 -43.8%',
+          'x': '2012-09-20',
+          'xanchor': 'left',
+          'xref': 'x',
+          'y': 1,
+          'yanchor': 'top',
+          'yref': 'y domain',
+        }),
+        dict({
+          'font': dict({
+            'size': 10,
+          }),
+          'showarrow': False,
+          'text': '#5 -40.8%',
+          'x': '2006-01-17',
+          'xanchor': 'left',
+          'xref': 'x',
+          'y': 1,
+          'yanchor': 'top',
+          'yref': 'y domain',
+        }),
+      ]),
+      'height': 600,
+      'hovermode': 'x unified',
+      'legend': dict({
+        'orientation': 'h',
+        'x': 1,
+        'xanchor': 'right',
+        'y': 1.02,
+        'yanchor': 'bottom',
+      }),
+      'plot_bgcolor': 'white',
+      'shapes': list([
+        dict({
+          'fillcolor': 'rgba(99, 110, 250, 0.2)',
+          'line': dict({
+            'width': 0,
+          }),
+          'type': 'rect',
+          'x0': '2000-03-23',
+          'x1': '2005-01-26',
+          'xref': 'x',
+          'y0': 0,
+          'y1': 1,
+          'yref': 'y domain',
+        }),
+        dict({
+          'fillcolor': 'rgba(239, 85, 59, 0.2)',
+          'line': dict({
+            'width': 0,
+          }),
+          'type': 'rect',
+          'x0': '1993-02-02',
+          'x1': '1999-08-11',
+          'xref': 'x',
+          'y0': 0,
+          'y1': 1,
+          'yref': 'y domain',
+        }),
+        dict({
+          'fillcolor': 'rgba(0, 204, 150, 0.2)',
+          'line': dict({
+            'width': 0,
+          }),
+          'type': 'rect',
+          'x0': '2007-12-31',
+          'x1': '2009-10-21',
+          'xref': 'x',
+          'y0': 0,
+          'y1': 1,
+          'yref': 'y domain',
+        }),
+        dict({
+          'fillcolor': 'rgba(171, 99, 250, 0.2)',
+          'line': dict({
+            'width': 0,
+          }),
+          'type': 'rect',
+          'x0': '2012-09-20',
+          'x1': '2014-07-14',
+          'xref': 'x',
+          'y0': 0,
+          'y1': 1,
+          'yref': 'y domain',
+        }),
+        dict({
+          'fillcolor': 'rgba(255, 161, 90, 0.2)',
+          'line': dict({
+            'width': 0,
+          }),
+          'type': 'rect',
+          'x0': '2006-01-17',
+          'x1': '2006-11-16',
+          'xref': 'x',
+          'y0': 0,
+          'y1': 1,
+          'yref': 'y domain',
+        }),
+      ]),
+      'title': dict({
+        'text': 'Top Drawdown Periods — AAPL',
+      }),
+      'xaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'rangeselector': dict({
+          'buttons': list([
+            dict({
+              'count': 6,
+              'label': '6m',
+              'step': 'month',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 1,
+              'label': '1y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 3,
+              'label': '3y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'label': 'YTD',
+              'step': 'year',
+              'stepmode': 'todate',
+            }),
+            dict({
+              'label': 'All',
+              'step': 'all',
+            }),
+          ]),
+        }),
+        'rangeslider': dict({
+          'visible': False,
+        }),
+        'showgrid': True,
+        'type': 'date',
+      }),
+      'yaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'tickformat': '.2f',
+        'title': dict({
+          'text': 'Cumulative Return',
+        }),
+      }),
+    }),
+  })
+# ---
+# name: test_plot_full_figure_json[earnings]
+  dict({
+    'data': list([
+      dict({
+        'hovertemplate': '<b>%{x|%b %Y}</b><br>AAPL: $%{y:,.0f}',
+        'line': dict({
+          'color': '#636EFA',
+          'width': 2,
+        }),
+        'mode': 'lines',
+        'name': 'AAPL',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            99373.7174555,
+            102296.515875,
+            100626.289414,
+          ]),
+          'tail': list([
+            48028460.0769,
+            48238212.3233,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': '<b>%{x|%b %Y}</b><br>META: $%{y:,.0f}',
+        'line': dict({
+          'color': '#EF553B',
+          'width': 2,
+        }),
+        'mode': 'lines',
+        'name': 'META',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            'nan',
+            'nan',
+            'nan',
+          ]),
+          'tail': list([
+            1401158.02343,
+            1438266.42359,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': '<b>%{x|%b %Y}</b><br>SPY -- Benchmark: $%{y:,.0f}',
+        'line': dict({
+          'color': '#00CC96',
+          'width': 2,
+        }),
+        'mode': 'lines',
+        'name': 'SPY -- Benchmark',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            'nan',
+            100711.325364,
+            100924.661352,
+          ]),
+          'tail': list([
+            2235722.21018,
+            2251957.64824,
+          ]),
+        }),
+      }),
+    ]),
+    'layout': dict({
+      'height': 600,
+      'hovermode': 'x unified',
+      'legend': dict({
+        'orientation': 'h',
+        'x': 1,
+        'xanchor': 'right',
+        'y': 1.02,
+        'yanchor': 'bottom',
+      }),
+      'plot_bgcolor': 'white',
+      'title': dict({
+        'text': 'Portfolio Earnings',
+      }),
+      'xaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'rangeselector': dict({
+          'buttons': list([
+            dict({
+              'count': 6,
+              'label': '6m',
+              'step': 'month',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 1,
+              'label': '1y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 3,
+              'label': '3y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'label': 'YTD',
+              'step': 'year',
+              'stepmode': 'todate',
+            }),
+            dict({
+              'label': 'All',
+              'step': 'all',
+            }),
+          ]),
+        }),
+        'rangeslider': dict({
+          'visible': False,
+        }),
+        'showgrid': True,
+        'type': 'date',
+      }),
+      'yaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'tickformat': ',.0f',
+        'tickprefix': '$',
+        'title': dict({
+          'text': 'Portfolio Value (starting $100,000)',
+        }),
+      }),
+    }),
+  })
+# ---
+# name: test_plot_full_figure_json[histogram]
+  dict({
+    'data': list([
+      dict({
+        'hovertemplate': 'AAPL: %{x:.2%}<extra></extra>',
+        'marker': dict({
+          'color': '#636EFA',
+        }),
+        'name': 'AAPL',
+        'nbinsx': 50,
+        'opacity': 0.6,
+        'type': 'histogram',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            -0.00626282544508,
+            0.029412187595,
+            -0.016327305453,
+          ]),
+          'tail': list([
+            0.0184261432122,
+            0.00436724904465,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'META: %{x:.2%}<extra></extra>',
+        'marker': dict({
+          'color': '#EF553B',
+        }),
+        'name': 'META',
+        'nbinsx': 50,
+        'opacity': 0.6,
+        'type': 'histogram',
+        'x': dict({
+          '__len__': 3252,
+          'head': list([
+            -0.109861545472,
+            -0.0890389961023,
+            0.0322580884454,
+          ]),
+          'tail': list([
+            0.0247563849526,
+            0.0264840935395,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'SPY -- Benchmark: %{x:.2%}<extra></extra>',
+        'marker': dict({
+          'color': '#00CC96',
+        }),
+        'name': 'SPY -- Benchmark',
+        'nbinsx': 50,
+        'opacity': 0.6,
+        'type': 'histogram',
+        'x': dict({
+          '__len__': 8115,
+          'head': list([
+            0.00711325364058,
+            0.00211829192712,
+            0.0105710034458,
+          ]),
+          'tail': list([
+            0.0210489333439,
+            0.00726183154145,
+          ]),
+        }),
+      }),
+    ]),
+    'layout': dict({
+      'barmode': 'overlay',
+      'height': 600,
+      'hovermode': 'x unified',
+      'legend': dict({
+        'orientation': 'h',
+        'x': 1,
+        'xanchor': 'right',
+        'y': 1.02,
+        'yanchor': 'bottom',
+      }),
+      'plot_bgcolor': 'white',
+      'title': dict({
+        'text': 'Returns Distribution',
+      }),
+      'xaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'tickformat': '.1%',
+        'title': dict({
+          'text': 'Return',
+        }),
+      }),
+      'yaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'title': dict({
+          'text': 'Count',
+        }),
+      }),
+    }),
+  })
+# ---
+# name: test_plot_full_figure_json[log_returns]
+  dict({
+    'data': list([
+      dict({
+        'hovertemplate': '<b>%{x|%b %Y}</b><br>AAPL: %{y:.4f}',
+        'line': dict({
+          'color': '#636EFA',
+          'width': 2,
+        }),
+        'mode': 'lines',
+        'name': 'AAPL',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            -0.00628251920514,
+            0.0227054284746,
+            0.00624336371898,
+          ]),
+          'tail': list([
+            6.17437884646,
+            6.17873658675,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': '<b>%{x|%b %Y}</b><br>META: %{y:.4f}',
+        'line': dict({
+          'color': '#EF553B',
+          'width': 2,
+        }),
+        'mode': 'lines',
+        'name': 'META',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            'nan',
+            'nan',
+            'nan',
+          ]),
+          'tail': list([
+            2.6398841473,
+            2.66602360884,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': '<b>%{x|%b %Y}</b><br>SPY -- Benchmark: %{y:.4f}',
+        'line': dict({
+          'color': '#00CC96',
+          'width': 2,
+        }),
+        'mode': 'lines',
+        'name': 'SPY -- Benchmark',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            'nan',
+            0.0070880737885,
+            0.00920412529862,
+          ]),
+          'tail': list([
+            3.10714940541,
+            3.11438499681,
+          ]),
+        }),
+      }),
+    ]),
+    'layout': dict({
+      'height': 600,
+      'hovermode': 'x unified',
+      'legend': dict({
+        'orientation': 'h',
+        'x': 1,
+        'xanchor': 'right',
+        'y': 1.02,
+        'yanchor': 'bottom',
+      }),
+      'plot_bgcolor': 'white',
+      'title': dict({
+        'text': 'Log Returns',
+      }),
+      'xaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'rangeselector': dict({
+          'buttons': list([
+            dict({
+              'count': 6,
+              'label': '6m',
+              'step': 'month',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 1,
+              'label': '1y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 3,
+              'label': '3y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'label': 'YTD',
+              'step': 'year',
+              'stepmode': 'todate',
+            }),
+            dict({
+              'label': 'All',
+              'step': 'all',
+            }),
+          ]),
+        }),
+        'rangeslider': dict({
+          'visible': False,
+        }),
+        'showgrid': True,
+        'type': 'date',
+      }),
+      'yaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'title': dict({
+          'text': 'Log Return',
+        }),
+      }),
+    }),
+  })
+# ---
+# name: test_plot_full_figure_json[monthly_heatmap]
+  dict({
+    'data': list([
+      dict({
+        'colorbar': dict({
+          'title': dict({
+            'text': 'Return (%)',
+          }),
+        }),
+        'colorscale': list([
+          list([
+            0,
+            '#d62728',
+          ]),
+          list([
+            0.5,
+            '#ffffff',
+          ]),
+          list([
+            1,
+            '#2ca02c',
+          ]),
+        ]),
+        'hovertemplate': '<b>%{y} %{x}</b><br>Return: %{text}<extra></extra>',
+        'showscale': True,
+        'text': list([
+          list([
+            '-0.6%',
+            '-10.7%',
+            '-2.8%',
+            '-0.5%',
+            '10.7%',
+            '-30.2%',
+            '-29.7%',
+            '-4.1%',
+            '-11.8%',
+            '31.6%',
+            '2.8%',
+            '-7.1%',
+          ]),
+          list([
+            '12.0%',
+            '11.9%',
+            '-8.9%',
+            '-9.8%',
+            '-2.1%',
+            '-9.4%',
+            '27.1%',
+            '7.8%',
+            '-6.9%',
+            '28.2%',
+            '-13.5%',
+            '4.7%',
+          ]),
+          list([
+            '3.5%',
+            '-1.9%',
+            '-10.8%',
+            '8.5%',
+            '9.0%',
+            '11.7%',
+            '-3.1%',
+            '-4.2%',
+            '-13.4%',
+            '-2.5%',
+            '5.3%',
+            '-16.4%',
+          ]),
+          list([
+            '-13.3%',
+            '-0.5%',
+            '-10.7%',
+            '-0.8%',
+            '7.2%',
+            '-19.6%',
+            '4.8%',
+            '10.2%',
+            '-8.5%',
+            '3.7%',
+            '4.9%',
+            '-13.5%',
+          ]),
+          list([
+            '-20.4%',
+            '-2.3%',
+            '12.3%',
+            '-6.8%',
+            '-2.2%',
+            '-14.3%',
+            '22.8%',
+            '24.3%',
+            '-0.3%',
+            '-21.5%',
+            '4.2%',
+            '-26.1%',
+          ]),
+          list([
+            '39.5%',
+            '29.0%',
+            '16.4%',
+            '-0.5%',
+            '-2.7%',
+            '7.7%',
+            '20.7%',
+            '-9.9%',
+            '22.2%',
+            '-2.6%',
+            '-14.0%',
+            '28.2%',
+          ]),
+          list([
+            '0.6%',
+            '-15.5%',
+            '3.2%',
+            '28.0%',
+            '-4.2%',
+            '5.1%',
+            '20.2%',
+            '17.2%',
+            '-3.0%',
+            '26.6%',
+            '22.2%',
+            '5.0%',
+          ]),
+          list([
+            '0.9%',
+            '10.5%',
+            '18.5%',
+            '-8.7%',
+            '-32.3%',
+            '24.7%',
+            '-3.0%',
+            '19.9%',
+            '-57.7%',
+            '-24.0%',
+            '-15.7%',
+            '-9.8%',
+          ]),
+          list([
+            '45.4%',
+            '-15.6%',
+            '20.9%',
+            '15.5%',
+            '-21.7%',
+            '16.5%',
+            '-19.2%',
+            '-1.3%',
+            '-16.4%',
+            '13.2%',
+            '21.3%',
+            '2.8%',
+          ]),
+          list([
+            '12.9%',
+            '-12.2%',
+            '9.1%',
+            '2.5%',
+            '-4.0%',
+            '-23.9%',
+            '-13.9%',
+            '-3.3%',
+            '-1.7%',
+            '10.8%',
+            '-3.5%',
+            '-7.5%',
+          ]),
+          list([
+            '0.2%',
+            '4.5%',
+            '-5.8%',
+            '0.6%',
+            '26.2%',
+            '6.2%',
+            '10.6%',
+            '7.3%',
+            '-8.4%',
+            '10.5%',
+            '-8.7%',
+            '2.2%',
+          ]),
+          list([
+            '5.6%',
+            '6.0%',
+            '13.0%',
+            '-4.7%',
+            '8.8%',
+            '16.0%',
+            '-0.6%',
+            '6.6%',
+            '12.4%',
+            '35.2%',
+            '28.0%',
+            '-4.0%',
+          ]),
+          list([
+            '19.4%',
+            '16.7%',
+            '-7.1%',
+            '-13.5%',
+            '10.3%',
+            '-7.4%',
+            '15.9%',
+            '9.9%',
+            '14.3%',
+            '7.4%',
+            '17.8%',
+            '6.0%',
+          ]),
+          list([
+            '5.0%',
+            '-9.3%',
+            '-8.4%',
+            '12.2%',
+            '-15.1%',
+            '-4.2%',
+            '18.7%',
+            '-0.2%',
+            '13.5%',
+            '5.3%',
+            '13.0%',
+            '-7.4%',
+          ]),
+          list([
+            '1.0%',
+            '-1.3%',
+            '9.8%',
+            '7.4%',
+            '21.4%',
+            '0.7%',
+            '8.0%',
+            '5.1%',
+            '10.8%',
+            '23.8%',
+            '-4.1%',
+            '8.7%',
+          ]),
+          list([
+            '-31.7%',
+            '-7.6%',
+            '14.8%',
+            '21.2%',
+            '8.5%',
+            '-11.3%',
+            '-5.1%',
+            '6.7%',
+            '-33.0%',
+            '-5.3%',
+            '-13.9%',
+            '-7.9%',
+          ]),
+          list([
+            '5.6%',
+            '-0.9%',
+            '17.7%',
+            '19.7%',
+            '7.9%',
+            '4.9%',
+            '14.7%',
+            '2.9%',
+            '10.2%',
+            '1.7%',
+            '6.1%',
+            '5.4%',
+          ]),
+          list([
+            '-8.9%',
+            '6.5%',
+            '14.8%',
+            '11.1%',
+            '-1.6%',
+            '-2.1%',
+            '2.3%',
+            '-5.5%',
+            '16.7%',
+            '6.1%',
+            '3.4%',
+            '3.7%',
+          ]),
+          list([
+            '5.2%',
+            '4.1%',
+            '-1.3%',
+            '0.5%',
+            '-0.7%',
+            '-3.5%',
+            '16.3%',
+            '-1.4%',
+            '-0.9%',
+            '6.2%',
+            '-5.6%',
+            '6.0%',
+          ]),
+          list([
+            '12.7%',
+            '18.8%',
+            '10.5%',
+            '-2.6%',
+            '-1.1%',
+            '1.1%',
+            '4.6%',
+            '9.4%',
+            '0.3%',
+            '-10.8%',
+            '-1.2%',
+            '-9.1%',
+          ]),
+          list([
+            '-14.4%',
+            '-2.5%',
+            '0.3%',
+            '0.0%',
+            '2.2%',
+            '-11.8%',
+            '14.1%',
+            '8.4%',
+            '-2.1%',
+            '9.6%',
+            '7.0%',
+            '0.9%',
+          ]),
+          list([
+            '-10.8%',
+            '5.8%',
+            '2.0%',
+            '9.9%',
+            '7.9%',
+            '2.8%',
+            '2.9%',
+            '7.8%',
+            '-1.7%',
+            '7.2%',
+            '10.6%',
+            '-7.2%',
+          ]),
+          list([
+            '6.1%',
+            '10.1%',
+            '-3.1%',
+            '0.6%',
+            '4.5%',
+            '-3.7%',
+            '-3.3%',
+            '-6.6%',
+            '-2.2%',
+            '8.3%',
+            '-0.6%',
+            '-11.0%',
+          ]),
+          list([
+            '-7.5%',
+            '-0.1%',
+            '12.7%',
+            '-14.0%',
+            '7.2%',
+            '-4.3%',
+            '9.0%',
+            '2.4%',
+            '6.6%',
+            '0.4%',
+            '-2.2%',
+            '4.8%',
+          ]),
+          list([
+            '4.8%',
+            '13.4%',
+            '4.9%',
+            '-0.0%',
+            '6.8%',
+            '-5.7%',
+            '3.3%',
+            '10.7%',
+            '-6.0%',
+            '9.7%',
+            '2.0%',
+            '-1.5%',
+          ]),
+          list([
+            '-1.1%',
+            '6.8%',
+            '-5.8%',
+            '-1.5%',
+            '13.5%',
+            '-0.9%',
+            '2.8%',
+            '20.0%',
+            '-0.8%',
+            '-3.0%',
+            '-18.1%',
+            '-11.7%',
+          ]),
+          list([
+            '5.5%',
+            '4.5%',
+            '9.7%',
+            '5.6%',
+            '-12.4%',
+            '13.1%',
+            '7.6%',
+            '-1.6%',
+            '7.3%',
+            '11.1%',
+            '7.8%',
+            '9.9%',
+          ]),
+          list([
+            '5.4%',
+            '-11.5%',
+            '-7.0%',
+            '15.5%',
+            '8.5%',
+            '14.7%',
+            '16.5%',
+            '21.7%',
+            '-10.3%',
+            '-6.0%',
+            '9.5%',
+            '11.5%',
+          ]),
+          list([
+            '-0.6%',
+            '-8.0%',
+            '0.7%',
+            '7.6%',
+            '-5.0%',
+            '9.9%',
+            '6.5%',
+            '4.2%',
+            '-6.8%',
+            '5.9%',
+            '10.5%',
+            '7.4%',
+          ]),
+          list([
+            '-1.6%',
+            '-5.4%',
+            '5.7%',
+            '-9.7%',
+            '-5.4%',
+            '-8.1%',
+            '18.9%',
+            '-3.1%',
+            '-12.1%',
+            '11.0%',
+            '-3.3%',
+            '-12.2%',
+          ]),
+          list([
+            '11.1%',
+            '2.3%',
+            '11.9%',
+            '2.9%',
+            '4.6%',
+            '9.4%',
+            '1.3%',
+            '-4.2%',
+            '-8.9%',
+            '-0.3%',
+            '11.4%',
+            '1.4%',
+          ]),
+          list([
+            '-4.2%',
+            '-1.9%',
+            '-5.1%',
+            '-0.7%',
+            '13.0%',
+            '9.6%',
+            '5.4%',
+            '3.2%',
+            '1.7%',
+            '-3.0%',
+            '5.2%',
+            '5.5%',
+          ]),
+          list([
+            '-5.8%',
+            '2.6%',
+            '-8.2%',
+            '-5.8%',
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+          ]),
+        ]),
+        'texttemplate': '%{text}',
+        'type': 'heatmap',
+        'x': list([
+          'Jan',
+          'Feb',
+          'Mar',
+          'Apr',
+          'May',
+          'Jun',
+          'Jul',
+          'Aug',
+          'Sep',
+          'Oct',
+          'Nov',
+          'Dec',
+        ]),
+        'y': dict({
+          '__len__': 33,
+          'head': list([
+            '1993',
+            '1994',
+            '1995',
+          ]),
+          'tail': list([
+            '2024',
+            '2025',
+          ]),
+        }),
+        'z': list([
+          list([
+            -0.626282544508,
+            -10.7301817546,
+            -2.83019569223,
+            -0.485410239469,
+            10.7187589914,
+            -30.2427281019,
+            -29.7468604451,
+            -4.08428828353,
+            -11.7925744018,
+            31.5512493884,
+            2.80693807518,
+            -7.14273138498,
+          ]),
+          list([
+            11.965806564,
+            11.8508187137,
+            -8.90414142011,
+            -9.77454750182,
+            -2.11483130781,
+            -9.40182929477,
+            27.122587694,
+            7.79344896758,
+            -6.90863298727,
+            28.2005444365,
+            -13.4889224237,
+            4.69802851732,
+          ]),
+          list([
+            3.52568649727,
+            -1.8980770454,
+            -10.7596427745,
+            8.51073645257,
+            8.96152737693,
+            11.7293428421,
+            -3.09560155176,
+            -4.18355048393,
+            -13.3722741894,
+            -2.51661323159,
+            5.31846419336,
+            -16.393578122,
+          ]),
+          list([
+            -13.333190002,
+            -0.452467892295,
+            -10.681937233,
+            -0.763284235705,
+            7.17947680358,
+            -19.6172271294,
+            4.76212213842,
+            10.2271016722,
+            -8.50509841332,
+            3.66174762939,
+            4.89146590693,
+            -13.4715318145,
+          ]),
+          list([
+            -20.3590449164,
+            -2.25618470456,
+            12.3076381153,
+            -6.84888258941,
+            -2.20574331421,
+            -14.2860921169,
+            22.8071214225,
+            24.2854578532,
+            -0.287325757763,
+            -21.4694779187,
+            4.2199401642,
+            -26.0559425281,
+          ]),
+          list([
+            39.5228130453,
+            29.010909378,
+            16.4019375953,
+            -0.454495660274,
+            -2.73998887369,
+            7.74643586302,
+            20.6974328837,
+            -9.92781829884,
+            22.2445366532,
+            -2.62311089758,
+            -13.9730427585,
+            28.1799750596,
+          ]),
+          list([
+            0.610940752188,
+            -15.4780939737,
+            3.2317014611,
+            27.9997478009,
+            -4.21194159203,
+            5.10632609209,
+            20.2430753471,
+            17.1716563125,
+            -2.96939756957,
+            26.5549549798,
+            22.1528629155,
+            5.04470917123,
+          ]),
+          list([
+            0.911762453058,
+            10.482039816,
+            18.4842036,
+            -8.65169226232,
+            -32.292172487,
+            24.7023614716,
+            -2.98330210317,
+            19.9262805578,
+            -57.7436666469,
+            -24.0291132383,
+            -15.6548719687,
+            -9.84847188974,
+          ]),
+          list([
+            45.3782176689,
+            -15.6069360985,
+            20.9313895199,
+            15.4962537405,
+            -21.7340638834,
+            16.5414791634,
+            -19.1828007187,
+            -1.27729678358,
+            -16.3883003616,
+            13.2172445036,
+            21.2985315819,
+            2.81684613957,
+          ]),
+          list([
+            12.8769712608,
+            -12.2169636638,
+            9.07848008236,
+            2.53477562747,
+            -3.99685610913,
+            -23.9482883448,
+            -13.8827211255,
+            -3.3420210292,
+            -1.69481727484,
+            10.8272560173,
+            -3.54683250342,
+            -7.54837748417,
+          ]),
+          list([
+            0.209446234577,
+            4.526415845,
+            -5.79620281861,
+            0.565911590269,
+            26.2305519241,
+            6.18373612793,
+            10.598276654,
+            7.25791638037,
+            -8.35912504493,
+            10.4730083028,
+            -8.65007300425,
+            2.19985725361,
+          ]),
+          list([
+            5.56857138302,
+            6.02839535058,
+            13.0434033784,
+            -4.65974838216,
+            8.84399995482,
+            15.9657968351,
+            -0.614529111385,
+            6.64813984727,
+            12.3513112086,
+            35.2258091425,
+            27.9579994841,
+            -3.95221761139,
+          ]),
+          list([
+            19.4098794054,
+            16.6710280305,
+            -7.11099227452,
+            -13.4629761099,
+            10.2607319724,
+            -7.41947812267,
+            15.8651588323,
+            9.94143519303,
+            14.3314350595,
+            7.42397453665,
+            17.7635081061,
+            6.00121069731,
+          ]),
+          list([
+            5.03540799338,
+            -9.29680186692,
+            -8.42451983361,
+            12.2289075891,
+            -15.0873339738,
+            -4.18274232653,
+            18.6659510946,
+            -0.161843799924,
+            13.4561773329,
+            5.32604844087,
+            13.0488257098,
+            -7.44054248251,
+          ]),
+          list([
+            1.04905876531,
+            -1.3064150248,
+            9.80966551244,
+            7.41579338046,
+            21.4328672619,
+            0.701381713281,
+            7.96462888602,
+            5.10014626924,
+            10.8246966762,
+            23.7701075088,
+            -4.06950137914,
+            8.70379088523,
+          ]),
+          list([
+            -31.6639974133,
+            -7.63884133357,
+            14.7816110805,
+            21.2195386957,
+            8.50815657594,
+            -11.2900727684,
+            -5.07047225019,
+            6.65619362428,
+            -32.9558294311,
+            -5.34049166628,
+            -13.8674485506,
+            -7.89898063301,
+          ]),
+          list([
+            5.60047021152,
+            -0.909816176768,
+            17.7024109232,
+            19.7013090021,
+            7.93127925472,
+            4.87451819099,
+            14.7159791396,
+            2.9499837272,
+            10.1896338852,
+            1.69947739689,
+            6.05306952678,
+            5.41243203043,
+          ]),
+          list([
+            -8.8596886314,
+            6.53963771677,
+            14.8470122102,
+            11.1021082259,
+            -1.61241859938,
+            -2.08272074392,
+            2.27408882424,
+            -5.50047689397,
+            16.721552148,
+            6.07221135477,
+            3.37894438483,
+            3.66703810951,
+          ]),
+          list([
+            5.19596373381,
+            4.09344463841,
+            -1.33063106283,
+            0.464847039491,
+            -0.656948788171,
+            -3.49592594479,
+            16.3285675349,
+            -1.44696802771,
+            -0.912086682286,
+            6.15235266125,
+            -5.57836450284,
+            5.96544052461,
+          ]),
+          list([
+            12.7111110416,
+            18.8310142069,
+            10.5284152823,
+            -2.59695832604,
+            -1.07023456381,
+            1.0853011511,
+            4.58218447077,
+            9.38767881813,
+            0.2796026309,
+            -10.7600167409,
+            -1.23747020603,
+            -9.07428246839,
+          ]),
+          list([
+            -14.4089196669,
+            -2.52859458588,
+            0.285443310902,
+            0.0271191223676,
+            2.24194729652,
+            -11.8293292422,
+            14.1224872686,
+            8.37666403432,
+            -2.14887449788,
+            9.63815067937,
+            7.00532031881,
+            0.890146332475,
+          ]),
+          list([
+            -10.7696886327,
+            5.75112152982,
+            1.99528155,
+            9.9396410606,
+            7.87090184412,
+            2.76621496988,
+            2.87311096318,
+            7.75089763507,
+            -1.70733912181,
+            7.19601809033,
+            10.5979064078,
+            -7.18910831,
+          ]),
+          list([
+            6.14240870883,
+            10.0776669969,
+            -3.13716497858,
+            0.578656586816,
+            4.53390569901,
+            -3.72275059296,
+            -3.29268993082,
+            -6.61961984148,
+            -2.18164791336,
+            8.34092371387,
+            -0.580428145997,
+            -11.0228502534,
+          ]),
+          list([
+            -7.52418825188,
+            -0.128763486843,
+            12.7210412044,
+            -13.9920995447,
+            7.17731370156,
+            -4.26600906201,
+            9.00629857667,
+            2.36517520797,
+            6.55041318569,
+            0.433436950216,
+            -2.16007330153,
+            4.79551955423,
+          ]),
+          list([
+            4.77464701981,
+            13.3777789286,
+            4.86896585292,
+            -0.0069963374402,
+            6.78074848213,
+            -5.72137540335,
+            3.27034654281,
+            10.6999796119,
+            -6.02440146438,
+            9.68076482237,
+            2.02779771985,
+            -1.52455690564,
+          ]),
+          list([
+            -1.06366538944,
+            6.81850287313,
+            -5.80506786164,
+            -1.50196912421,
+            13.5123715495,
+            -0.941795232686,
+            2.79829709575,
+            20.0422397673,
+            -0.830290003623,
+            -3.04775143302,
+            -18.1197645293,
+            -11.6698156525,
+          ]),
+          list([
+            5.51536483823,
+            4.47767948986,
+            9.7025524736,
+            5.6435686562,
+            -12.4212615531,
+            13.0518868288,
+            7.63946259091,
+            -1.64610374234,
+            7.29613158769,
+            11.0684455476,
+            7.75539101149,
+            9.87842708691,
+          ]),
+          list([
+            5.40098550947,
+            -11.4701341395,
+            -6.97616901924,
+            15.5373757034,
+            8.50943050175,
+            14.7386132129,
+            16.5131730881,
+            21.6569366127,
+            -10.2526423897,
+            -6.0012120426,
+            9.5493248746,
+            11.4573735965,
+          ]),
+          list([
+            -0.550160935995,
+            -7.97118828922,
+            0.73396800209,
+            7.62177668725,
+            -5.04971049131,
+            9.91090140234,
+            6.49826000271,
+            4.24894296071,
+            -6.80367214947,
+            5.86572117444,
+            10.508167555,
+            7.42286884322,
+          ]),
+          list([
+            -1.57121150837,
+            -5.40657844793,
+            5.74731867766,
+            -9.71307037038,
+            -5.44960720007,
+            -8.1429771893,
+            18.8633939611,
+            -3.12079982202,
+            -12.0976987162,
+            10.955104483,
+            -3.30275153501,
+            -12.2272412165,
+          ]),
+          list([
+            11.0520985242,
+            2.31831916645,
+            11.8648586763,
+            2.89872221584,
+            4.6058432987,
+            9.43299201376,
+            1.27853916062,
+            -4.23838473614,
+            -8.86782128675,
+            -0.257003011102,
+            11.3780341279,
+            1.35824577935,
+          ]),
+          list([
+            -4.22271979007,
+            -1.85431020381,
+            -5.12863400238,
+            -0.670630322053,
+            13.0222300308,
+            9.55526091907,
+            5.4410801343,
+            3.23534900561,
+            1.74672279123,
+            -3.04291302237,
+            5.17069125703,
+            5.51552636079,
+          ]),
+          list([
+            -5.75832459461,
+            2.58724063093,
+            -8.15001312998,
+            -5.78490335436,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+          ]),
+        ]),
+        'zmid': 0,
+      }),
+    ]),
+    'layout': dict({
+      'height': 1420,
+      'plot_bgcolor': 'white',
+      'title': dict({
+        'text': 'Monthly Returns Heatmap — AAPL',
+      }),
+      'xaxis': dict({
+        'side': 'top',
+      }),
+    }),
+  })
+# ---
+# name: test_plot_full_figure_json[monthly_returns]
+  dict({
+    'data': list([
+      dict({
+        'hovertemplate': 'AAPL: %{y:.2%}',
+        'marker': dict({
+          'color': dict({
+            '__len__': 388,
+            'head': list([
+              '#636EFA',
+              'rgba(99, 110, 250, 0.4)',
+              'rgba(99, 110, 250, 0.4)',
+            ]),
+            'tail': list([
+              'rgba(99, 110, 250, 0.4)',
+              'rgba(99, 110, 250, 0.4)',
+            ]),
+          }),
+          'line': dict({
+            'width': 0,
+          }),
+        }),
+        'name': 'AAPL',
+        'opacity': 0.85,
+        'type': 'bar',
+        'x': dict({
+          '__len__': 388,
+          'head': list([
+            '1993-02-01',
+            '1993-03-01',
+            '1993-04-01',
+          ]),
+          'tail': list([
+            '2025-04-01',
+            '2025-05-01',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 388,
+          'head': list([
+            0.022965158753,
+            -0.128717531968,
+            -0.0281673185117,
+          ]),
+          'tail': list([
+            -0.0771170781463,
+            -0.0623235965319,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'META: %{y:.2%}',
+        'marker': dict({
+          'color': dict({
+            '__len__': 388,
+            'head': list([
+              'rgba(239, 85, 59, 0.4)',
+              'rgba(239, 85, 59, 0.4)',
+              'rgba(239, 85, 59, 0.4)',
+            ]),
+            'tail': list([
+              'rgba(239, 85, 59, 0.4)',
+              'rgba(239, 85, 59, 0.4)',
+            ]),
+          }),
+          'line': dict({
+            'width': 0,
+          }),
+        }),
+        'name': 'META',
+        'opacity': 0.85,
+        'type': 'bar',
+        'x': dict({
+          '__len__': 388,
+          'head': list([
+            '1993-02-01',
+            '1993-03-01',
+            '1993-04-01',
+          ]),
+          'tail': list([
+            '2025-04-01',
+            '2025-05-01',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 388,
+          'head': list([
+            0.0,
+            0.0,
+            0.0,
+          ]),
+          'tail': list([
+            -0.122236872395,
+            -0.0660921168409,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'SPY -- Benchmark: %{y:.2%}',
+        'marker': dict({
+          'color': dict({
+            '__len__': 388,
+            'head': list([
+              '#00CC96',
+              '#00CC96',
+              '#00CC96',
+            ]),
+            'tail': list([
+              'rgba(0, 204, 150, 0.4)',
+              'rgba(0, 204, 150, 0.4)',
+            ]),
+          }),
+          'line': dict({
+            'width': 0,
+          }),
+        }),
+        'name': 'SPY -- Benchmark',
+        'opacity': 0.85,
+        'type': 'bar',
+        'x': dict({
+          '__len__': 388,
+          'head': list([
+            '1993-02-01',
+            '1993-03-01',
+            '1993-04-01',
+          ]),
+          'tail': list([
+            '2025-04-01',
+            '2025-05-01',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 388,
+          'head': list([
+            0.00711325364058,
+            0.000706200577383,
+            0.0217399313214,
+          ]),
+          'tail': list([
+            -0.0530521392876,
+            -0.0183788760487,
+          ]),
+        }),
+      }),
+    ]),
+    'layout': dict({
+      'height': 600,
+      'hovermode': 'x unified',
+      'legend': dict({
+        'orientation': 'h',
+        'x': 1,
+        'xanchor': 'right',
+        'y': 1.02,
+        'yanchor': 'bottom',
+      }),
+      'plot_bgcolor': 'white',
+      'title': dict({
+        'text': 'Monthly Returns',
+      }),
+      'xaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'rangeselector': dict({
+          'buttons': list([
+            dict({
+              'count': 6,
+              'label': '6m',
+              'step': 'month',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 1,
+              'label': '1y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 3,
+              'label': '3y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'label': 'YTD',
+              'step': 'year',
+              'stepmode': 'todate',
+            }),
+            dict({
+              'label': 'All',
+              'step': 'all',
+            }),
+          ]),
+        }),
+        'rangeslider': dict({
+          'visible': False,
+        }),
+        'showgrid': True,
+        'type': 'date',
+      }),
+      'yaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'tickformat': '.1%',
+        'title': dict({
+          'text': 'Monthly Return',
+        }),
+      }),
+    }),
+  })
+# ---
+# name: test_plot_full_figure_json[returns]
+  dict({
+    'data': list([
+      dict({
+        'hovertemplate': '<b>%{x|%b %Y}</b><br>AAPL: %{y:.2f}x',
+        'line': dict({
+          'color': '#636EFA',
+          'width': 2,
+        }),
+        'mode': 'lines',
+        'name': 'AAPL',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            0.993737174555,
+            1.02296515875,
+            1.00626289414,
+          ]),
+          'tail': list([
+            480.284600769,
+            482.382123233,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': '<b>%{x|%b %Y}</b><br>META: %{y:.2f}x',
+        'line': dict({
+          'color': '#EF553B',
+          'width': 2,
+        }),
+        'mode': 'lines',
+        'name': 'META',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            'nan',
+            'nan',
+            'nan',
+          ]),
+          'tail': list([
+            14.0115802343,
+            14.3826642359,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': '<b>%{x|%b %Y}</b><br>SPY -- Benchmark: %{y:.2f}x',
+        'line': dict({
+          'color': '#00CC96',
+          'width': 2,
+        }),
+        'mode': 'lines',
+        'name': 'SPY -- Benchmark',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            'nan',
+            1.00711325364,
+            1.00924661352,
+          ]),
+          'tail': list([
+            22.3572221018,
+            22.5195764824,
+          ]),
+        }),
+      }),
+    ]),
+    'layout': dict({
+      'height': 600,
+      'hovermode': 'x unified',
+      'legend': dict({
+        'orientation': 'h',
+        'x': 1,
+        'xanchor': 'right',
+        'y': 1.02,
+        'yanchor': 'bottom',
+      }),
+      'plot_bgcolor': 'white',
+      'title': dict({
+        'text': 'Cumulative Returns',
+      }),
+      'xaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'rangeselector': dict({
+          'buttons': list([
+            dict({
+              'count': 6,
+              'label': '6m',
+              'step': 'month',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 1,
+              'label': '1y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 3,
+              'label': '3y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'label': 'YTD',
+              'step': 'year',
+              'stepmode': 'todate',
+            }),
+            dict({
+              'label': 'All',
+              'step': 'all',
+            }),
+          ]),
+        }),
+        'rangeslider': dict({
+          'visible': False,
+        }),
+        'showgrid': True,
+        'type': 'date',
+      }),
+      'yaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'tickformat': '.2f',
+        'title': dict({
+          'text': 'Cumulative Return',
+        }),
+      }),
+    }),
+  })
+# ---
+# name: test_plot_full_figure_json[rolling_beta]
+  dict({
+    'data': list([
+      dict({
+        'hovertemplate': 'AAPL (126d): %{y:.2f}',
+        'line': dict({
+          'color': '#636EFA',
+          'dash': 'solid',
+          'width': 1.5,
+        }),
+        'mode': 'lines',
+        'name': 'AAPL (126d)',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            'nan',
+            'nan',
+            'nan',
+          ]),
+          'tail': list([
+            1.25556971221,
+            1.25448723515,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'AAPL (252d): %{y:.2f}',
+        'line': dict({
+          'color': '#636EFA',
+          'dash': 'dash',
+          'width': 1.5,
+        }),
+        'mode': 'lines',
+        'name': 'AAPL (252d)',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            'nan',
+            'nan',
+            'nan',
+          ]),
+          'tail': list([
+            1.22607315889,
+            1.22768881556,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'META (126d): %{y:.2f}',
+        'line': dict({
+          'color': '#EF553B',
+          'dash': 'solid',
+          'width': 1.5,
+        }),
+        'mode': 'lines',
+        'name': 'META (126d)',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            'nan',
+            'nan',
+            'nan',
+          ]),
+          'tail': list([
+            1.33505341826,
+            1.33910145224,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'META (252d): %{y:.2f}',
+        'line': dict({
+          'color': '#EF553B',
+          'dash': 'dash',
+          'width': 1.5,
+        }),
+        'mode': 'lines',
+        'name': 'META (252d)',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            'nan',
+            'nan',
+            'nan',
+          ]),
+          'tail': list([
+            1.33942078562,
+            1.33830114508,
+          ]),
+        }),
+      }),
+    ]),
+    'layout': dict({
+      'height': 600,
+      'hovermode': 'x unified',
+      'legend': dict({
+        'orientation': 'h',
+        'x': 1,
+        'xanchor': 'right',
+        'y': 1.02,
+        'yanchor': 'bottom',
+      }),
+      'plot_bgcolor': 'white',
+      'shapes': list([
+        dict({
+          'line': dict({
+            'color': 'gray',
+            'dash': 'dash',
+            'width': 1,
+          }),
+          'type': 'line',
+          'x0': 0,
+          'x1': 1,
+          'xref': 'x domain',
+          'y0': 1,
+          'y1': 1,
+          'yref': 'y',
+        }),
+      ]),
+      'title': dict({
+        'text': 'Rolling Beta',
+      }),
+      'xaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'rangeselector': dict({
+          'buttons': list([
+            dict({
+              'count': 6,
+              'label': '6m',
+              'step': 'month',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 1,
+              'label': '1y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 3,
+              'label': '3y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'label': 'YTD',
+              'step': 'year',
+              'stepmode': 'todate',
+            }),
+            dict({
+              'label': 'All',
+              'step': 'all',
+            }),
+          ]),
+        }),
+        'rangeslider': dict({
+          'visible': False,
+        }),
+        'showgrid': True,
+        'type': 'date',
+      }),
+      'yaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'title': dict({
+          'text': 'Beta',
+        }),
+      }),
+    }),
+  })
+# ---
+# name: test_plot_full_figure_json[rolling_sharpe]
+  dict({
+    'data': list([
+      dict({
+        'hovertemplate': 'AAPL: %{y:.2f}',
+        'line': dict({
+          'color': '#636EFA',
+          'width': 1.5,
+        }),
+        'mode': 'lines',
+        'name': 'AAPL',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            'nan',
+            'nan',
+            'nan',
+          ]),
+          'tail': list([
+            -0.453145015899,
+            -0.416964535845,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'META: %{y:.2f}',
+        'line': dict({
+          'color': '#EF553B',
+          'width': 1.5,
+        }),
+        'mode': 'lines',
+        'name': 'META',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            'nan',
+            'nan',
+            'nan',
+          ]),
+          'tail': list([
+            -0.151880826319,
+            -0.0816076008119,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'SPY -- Benchmark: %{y:.2f}',
+        'line': dict({
+          'color': '#00CC96',
+          'width': 1.5,
+        }),
+        'mode': 'lines',
+        'name': 'SPY -- Benchmark',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            'nan',
+            'nan',
+            'nan',
+          ]),
+          'tail': list([
+            -0.343988818855,
+            -0.281987282712,
+          ]),
+        }),
+      }),
+    ]),
+    'layout': dict({
+      'height': 600,
+      'hovermode': 'x unified',
+      'legend': dict({
+        'orientation': 'h',
+        'x': 1,
+        'xanchor': 'right',
+        'y': 1.02,
+        'yanchor': 'bottom',
+      }),
+      'plot_bgcolor': 'white',
+      'shapes': list([
+        dict({
+          'line': dict({
+            'color': 'gray',
+            'dash': 'dash',
+            'width': 1,
+          }),
+          'type': 'line',
+          'x0': 0,
+          'x1': 1,
+          'xref': 'x domain',
+          'y0': 0,
+          'y1': 0,
+          'yref': 'y',
+        }),
+      ]),
+      'title': dict({
+        'text': 'Rolling Sharpe Ratio',
+      }),
+      'xaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'rangeselector': dict({
+          'buttons': list([
+            dict({
+              'count': 6,
+              'label': '6m',
+              'step': 'month',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 1,
+              'label': '1y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 3,
+              'label': '3y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'label': 'YTD',
+              'step': 'year',
+              'stepmode': 'todate',
+            }),
+            dict({
+              'label': 'All',
+              'step': 'all',
+            }),
+          ]),
+        }),
+        'rangeslider': dict({
+          'visible': False,
+        }),
+        'showgrid': True,
+        'type': 'date',
+      }),
+      'yaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'title': dict({
+          'text': 'Sharpe (126-period rolling)',
+        }),
+      }),
+    }),
+  })
+# ---
+# name: test_plot_full_figure_json[rolling_sortino]
+  dict({
+    'data': list([
+      dict({
+        'hovertemplate': 'AAPL: %{y:.2f}',
+        'line': dict({
+          'color': '#636EFA',
+          'width': 1.5,
+        }),
+        'mode': 'lines',
+        'name': 'AAPL',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            'nan',
+            'nan',
+            'nan',
+          ]),
+          'tail': list([
+            -0.647963057048,
+            -0.596370109837,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'META: %{y:.2f}',
+        'line': dict({
+          'color': '#EF553B',
+          'width': 1.5,
+        }),
+        'mode': 'lines',
+        'name': 'META',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            'nan',
+            'nan',
+            'nan',
+          ]),
+          'tail': list([
+            -0.220625833535,
+            -0.118934128256,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'SPY -- Benchmark: %{y:.2f}',
+        'line': dict({
+          'color': '#00CC96',
+          'width': 1.5,
+        }),
+        'mode': 'lines',
+        'name': 'SPY -- Benchmark',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            'nan',
+            'nan',
+            'nan',
+          ]),
+          'tail': list([
+            -0.504688632263,
+            -0.414101173219,
+          ]),
+        }),
+      }),
+    ]),
+    'layout': dict({
+      'height': 600,
+      'hovermode': 'x unified',
+      'legend': dict({
+        'orientation': 'h',
+        'x': 1,
+        'xanchor': 'right',
+        'y': 1.02,
+        'yanchor': 'bottom',
+      }),
+      'plot_bgcolor': 'white',
+      'shapes': list([
+        dict({
+          'line': dict({
+            'color': 'gray',
+            'dash': 'dash',
+            'width': 1,
+          }),
+          'type': 'line',
+          'x0': 0,
+          'x1': 1,
+          'xref': 'x domain',
+          'y0': 0,
+          'y1': 0,
+          'yref': 'y',
+        }),
+      ]),
+      'title': dict({
+        'text': 'Rolling Sortino Ratio',
+      }),
+      'xaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'rangeselector': dict({
+          'buttons': list([
+            dict({
+              'count': 6,
+              'label': '6m',
+              'step': 'month',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 1,
+              'label': '1y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 3,
+              'label': '3y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'label': 'YTD',
+              'step': 'year',
+              'stepmode': 'todate',
+            }),
+            dict({
+              'label': 'All',
+              'step': 'all',
+            }),
+          ]),
+        }),
+        'rangeslider': dict({
+          'visible': False,
+        }),
+        'showgrid': True,
+        'type': 'date',
+      }),
+      'yaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'title': dict({
+          'text': 'Sortino (126-period rolling)',
+        }),
+      }),
+    }),
+  })
+# ---
+# name: test_plot_full_figure_json[rolling_volatility]
+  dict({
+    'data': list([
+      dict({
+        'hovertemplate': 'AAPL: %{y:.2%}',
+        'line': dict({
+          'color': '#636EFA',
+          'width': 1.5,
+        }),
+        'mode': 'lines',
+        'name': 'AAPL',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            'nan',
+            'nan',
+            'nan',
+          ]),
+          'tail': list([
+            0.386989054119,
+            0.387045152009,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'META: %{y:.2%}',
+        'line': dict({
+          'color': '#EF553B',
+          'width': 1.5,
+        }),
+        'mode': 'lines',
+        'name': 'META',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            'nan',
+            'nan',
+            'nan',
+          ]),
+          'tail': list([
+            0.41637854219,
+            0.417744568186,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'SPY -- Benchmark: %{y:.2%}',
+        'line': dict({
+          'color': '#00CC96',
+          'width': 1.5,
+        }),
+        'mode': 'lines',
+        'name': 'SPY -- Benchmark',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            'nan',
+            'nan',
+            'nan',
+          ]),
+          'tail': list([
+            0.252422089992,
+            0.252650964509,
+          ]),
+        }),
+      }),
+    ]),
+    'layout': dict({
+      'height': 600,
+      'hovermode': 'x unified',
+      'legend': dict({
+        'orientation': 'h',
+        'x': 1,
+        'xanchor': 'right',
+        'y': 1.02,
+        'yanchor': 'bottom',
+      }),
+      'plot_bgcolor': 'white',
+      'title': dict({
+        'text': 'Rolling Volatility',
+      }),
+      'xaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'rangeselector': dict({
+          'buttons': list([
+            dict({
+              'count': 6,
+              'label': '6m',
+              'step': 'month',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 1,
+              'label': '1y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 3,
+              'label': '3y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'label': 'YTD',
+              'step': 'year',
+              'stepmode': 'todate',
+            }),
+            dict({
+              'label': 'All',
+              'step': 'all',
+            }),
+          ]),
+        }),
+        'rangeslider': dict({
+          'visible': False,
+        }),
+        'showgrid': True,
+        'type': 'date',
+      }),
+      'yaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'tickformat': '.0%',
+        'title': dict({
+          'text': 'Volatility (126-period rolling)',
+        }),
+      }),
+    }),
+  })
+# ---
+# name: test_plot_full_figure_json[snapshot]
+  dict({
+    'data': list([
+      dict({
+        'hovertemplate': '<b>%{x|%b %Y}</b><br>AAPL: %{y:.2f}x',
+        'legendgroup': 'AAPL',
+        'line': dict({
+          'color': '#636EFA',
+          'width': 2,
+        }),
+        'mode': 'lines',
+        'name': 'AAPL',
+        'showlegend': True,
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'xaxis': 'x',
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            0.993737174555,
+            1.02296515875,
+            1.00626289414,
+          ]),
+          'tail': list([
+            480.284600769,
+            482.382123233,
+          ]),
+        }),
+        'yaxis': 'y',
+      }),
+      dict({
+        'hovertemplate': '<b>%{x|%b %Y}</b><br>META: %{y:.2f}x',
+        'legendgroup': 'META',
+        'line': dict({
+          'color': '#EF553B',
+          'width': 2,
+        }),
+        'mode': 'lines',
+        'name': 'META',
+        'showlegend': True,
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'xaxis': 'x',
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            'nan',
+            'nan',
+            'nan',
+          ]),
+          'tail': list([
+            14.0115802343,
+            14.3826642359,
+          ]),
+        }),
+        'yaxis': 'y',
+      }),
+      dict({
+        'hovertemplate': '<b>%{x|%b %Y}</b><br>SPY -- Benchmark: %{y:.2f}x',
+        'legendgroup': 'SPY -- Benchmark',
+        'line': dict({
+          'color': '#00CC96',
+          'width': 2,
+        }),
+        'mode': 'lines',
+        'name': 'SPY -- Benchmark',
+        'showlegend': True,
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'xaxis': 'x',
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            'nan',
+            1.00711325364,
+            1.00924661352,
+          ]),
+          'tail': list([
+            22.3572221018,
+            22.5195764824,
+          ]),
+        }),
+        'yaxis': 'y',
+      }),
+      dict({
+        'fill': 'tozeroy',
+        'fillcolor': 'rgba(99, 110, 250, 0.5)',
+        'hovertemplate': 'AAPL Drawdown: %{y:.2%}',
+        'legendgroup': 'AAPL',
+        'line': dict({
+          'color': '#636EFA',
+          'width': 1,
+        }),
+        'mode': 'lines',
+        'name': 'AAPL',
+        'showlegend': False,
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'xaxis': 'x2',
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            0.0,
+            0.0,
+            -0.016327305453,
+          ]),
+          'tail': list([
+            -0.194660215646,
+            -0.191143096242,
+          ]),
+        }),
+        'yaxis': 'y2',
+      }),
+      dict({
+        'fill': 'tozeroy',
+        'fillcolor': 'rgba(239, 85, 59, 0.5)',
+        'hovertemplate': 'META Drawdown: %{y:.2%}',
+        'legendgroup': 'META',
+        'line': dict({
+          'color': '#EF553B',
+          'width': 1,
+        }),
+        'mode': 'lines',
+        'name': 'META',
+        'showlegend': False,
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'xaxis': 'x2',
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            None,
+            None,
+            None,
+          ]),
+          'tail': list([
+            -0.275626337552,
+            -0.256441957719,
+          ]),
+        }),
+        'yaxis': 'y2',
+      }),
+      dict({
+        'fill': 'tozeroy',
+        'fillcolor': 'rgba(0, 204, 150, 0.5)',
+        'hovertemplate': 'SPY -- Benchmark Drawdown: %{y:.2%}',
+        'legendgroup': 'SPY -- Benchmark',
+        'line': dict({
+          'color': '#00CC96',
+          'width': 1,
+        }),
+        'mode': 'lines',
+        'name': 'SPY -- Benchmark',
+        'showlegend': False,
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 8116,
+          'head': list([
+            '1993-01-29',
+            '1993-02-01',
+            '1993-02-02',
+          ]),
+          'tail': list([
+            '2025-04-24',
+            '2025-04-25',
+          ]),
+        }),
+        'xaxis': 'x2',
+        'y': dict({
+          '__len__': 8116,
+          'head': list([
+            None,
+            0.0,
+            0.0,
+          ]),
+          'tail': list([
+            -0.105387906624,
+            -0.0988913843074,
+          ]),
+        }),
+        'yaxis': 'y2',
+      }),
+      dict({
+        'hovertemplate': 'AAPL Monthly Return: %{y:.2%}',
+        'legendgroup': 'AAPL',
+        'marker': dict({
+          'color': dict({
+            '__len__': 388,
+            'head': list([
+              '#636EFA',
+              'rgba(99, 110, 250, 0.5)',
+              'rgba(99, 110, 250, 0.5)',
+            ]),
+            'tail': list([
+              'rgba(99, 110, 250, 0.5)',
+              'rgba(99, 110, 250, 0.5)',
+            ]),
+          }),
+          'line': dict({
+            'width': 0,
+          }),
+        }),
+        'name': 'AAPL',
+        'opacity': 0.8,
+        'showlegend': False,
+        'type': 'bar',
+        'x': dict({
+          '__len__': 388,
+          'head': list([
+            '1993-02-01',
+            '1993-03-01',
+            '1993-04-01',
+          ]),
+          'tail': list([
+            '2025-04-01',
+            '2025-05-01',
+          ]),
+        }),
+        'xaxis': 'x3',
+        'y': dict({
+          '__len__': 388,
+          'head': list([
+            0.022965158753,
+            -0.128717531968,
+            -0.0281673185117,
+          ]),
+          'tail': list([
+            -0.0771170781463,
+            -0.0623235965319,
+          ]),
+        }),
+        'yaxis': 'y3',
+      }),
+      dict({
+        'hovertemplate': 'META Monthly Return: %{y:.2%}',
+        'legendgroup': 'META',
+        'marker': dict({
+          'color': dict({
+            '__len__': 388,
+            'head': list([
+              'rgba(239, 85, 59, 0.5)',
+              'rgba(239, 85, 59, 0.5)',
+              'rgba(239, 85, 59, 0.5)',
+            ]),
+            'tail': list([
+              'rgba(239, 85, 59, 0.5)',
+              'rgba(239, 85, 59, 0.5)',
+            ]),
+          }),
+          'line': dict({
+            'width': 0,
+          }),
+        }),
+        'name': 'META',
+        'opacity': 0.8,
+        'showlegend': False,
+        'type': 'bar',
+        'x': dict({
+          '__len__': 388,
+          'head': list([
+            '1993-02-01',
+            '1993-03-01',
+            '1993-04-01',
+          ]),
+          'tail': list([
+            '2025-04-01',
+            '2025-05-01',
+          ]),
+        }),
+        'xaxis': 'x3',
+        'y': dict({
+          '__len__': 388,
+          'head': list([
+            0.0,
+            0.0,
+            0.0,
+          ]),
+          'tail': list([
+            -0.122236872395,
+            -0.0660921168409,
+          ]),
+        }),
+        'yaxis': 'y3',
+      }),
+      dict({
+        'hovertemplate': 'SPY -- Benchmark Monthly Return: %{y:.2%}',
+        'legendgroup': 'SPY -- Benchmark',
+        'marker': dict({
+          'color': dict({
+            '__len__': 388,
+            'head': list([
+              '#00CC96',
+              '#00CC96',
+              '#00CC96',
+            ]),
+            'tail': list([
+              'rgba(0, 204, 150, 0.5)',
+              'rgba(0, 204, 150, 0.5)',
+            ]),
+          }),
+          'line': dict({
+            'width': 0,
+          }),
+        }),
+        'name': 'SPY -- Benchmark',
+        'opacity': 0.8,
+        'showlegend': False,
+        'type': 'bar',
+        'x': dict({
+          '__len__': 388,
+          'head': list([
+            '1993-02-01',
+            '1993-03-01',
+            '1993-04-01',
+          ]),
+          'tail': list([
+            '2025-04-01',
+            '2025-05-01',
+          ]),
+        }),
+        'xaxis': 'x3',
+        'y': dict({
+          '__len__': 388,
+          'head': list([
+            0.00711325364058,
+            0.000706200577383,
+            0.0217399313214,
+          ]),
+          'tail': list([
+            -0.0530521392876,
+            -0.0183788760487,
+          ]),
+        }),
+        'yaxis': 'y3',
+      }),
+    ]),
+    'layout': dict({
+      'annotations': list([
+        dict({
+          'font': dict({
+            'size': 16,
+          }),
+          'showarrow': False,
+          'text': 'Cumulative Returns',
+          'x': 0.5,
+          'xanchor': 'center',
+          'xref': 'paper',
+          'y': 1.0,
+          'yanchor': 'bottom',
+          'yref': 'paper',
+        }),
+        dict({
+          'font': dict({
+            'size': 16,
+          }),
+          'showarrow': False,
+          'text': 'Drawdowns',
+          'x': 0.5,
+          'xanchor': 'center',
+          'xref': 'paper',
+          'y': 0.5,
+          'yanchor': 'bottom',
+          'yref': 'paper',
+        }),
+        dict({
+          'font': dict({
+            'size': 16,
+          }),
+          'showarrow': False,
+          'text': 'Monthly Returns',
+          'x': 0.5,
+          'xanchor': 'center',
+          'xref': 'paper',
+          'y': 0.225,
+          'yanchor': 'bottom',
+          'yref': 'paper',
+        }),
+      ]),
+      'height': 1200,
+      'hovermode': 'x unified',
+      'legend': dict({
+        'orientation': 'h',
+        'x': 1,
+        'xanchor': 'right',
+        'y': 1.02,
+        'yanchor': 'bottom',
+      }),
+      'plot_bgcolor': 'white',
+      'shapes': list([
+        dict({
+          'line': dict({
+            'color': 'gray',
+            'width': 1,
+          }),
+          'type': 'line',
+          'x0': 0,
+          'x1': 1,
+          'xref': 'x2 domain',
+          'y0': 0,
+          'y1': 0,
+          'yref': 'y2',
+        }),
+      ]),
+      'title': dict({
+        'text': 'AAPL vs META vs SPY -- Benchmark Performance Dashboard',
+      }),
+      'xaxis': dict({
+        'anchor': 'y',
+        'domain': list([
+          0.0,
+          1.0,
+        ]),
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'matches': 'x3',
+        'rangeselector': dict({
+          'buttons': list([
+            dict({
+              'count': 6,
+              'label': '6m',
+              'step': 'month',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 1,
+              'label': '1y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 3,
+              'label': '3y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'label': 'YTD',
+              'step': 'year',
+              'stepmode': 'todate',
+            }),
+            dict({
+              'label': 'All',
+              'step': 'all',
+            }),
+          ]),
+        }),
+        'rangeslider': dict({
+          'visible': False,
+        }),
+        'showgrid': True,
+        'showticklabels': False,
+        'type': 'date',
+      }),
+      'xaxis2': dict({
+        'anchor': 'y2',
+        'domain': list([
+          0.0,
+          1.0,
+        ]),
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'matches': 'x3',
+        'showgrid': True,
+        'showticklabels': False,
+      }),
+      'xaxis3': dict({
+        'anchor': 'y3',
+        'domain': list([
+          0.0,
+          1.0,
+        ]),
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+      }),
+      'yaxis': dict({
+        'anchor': 'x',
+        'domain': list([
+          0.55,
+          1.0,
+        ]),
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'tickformat': '.2f',
+        'title': dict({
+          'text': 'Cumulative Return',
+        }),
+      }),
+      'yaxis2': dict({
+        'anchor': 'x2',
+        'domain': list([
+          0.275,
+          0.5,
+        ]),
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'tickformat': '.0%',
+        'title': dict({
+          'text': 'Drawdown',
+        }),
+      }),
+      'yaxis3': dict({
+        'anchor': 'x3',
+        'domain': list([
+          0.0,
+          0.225,
+        ]),
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'tickformat': '.0%',
+        'title': dict({
+          'text': 'Monthly Return',
+        }),
+      }),
+    }),
+  })
+# ---
+# name: test_plot_full_figure_json[yearly_returns]
+  dict({
+    'data': list([
+      dict({
+        'hovertemplate': 'AAPL: %{y:.2%}',
+        'marker': dict({
+          'color': dict({
+            '__len__': 33,
+            'head': list([
+              'rgba(99, 110, 250, 0.5)',
+              '#636EFA',
+              'rgba(99, 110, 250, 0.5)',
+            ]),
+            'tail': list([
+              '#636EFA',
+              'rgba(99, 110, 250, 0.5)',
+            ]),
+          }),
+          'line': dict({
+            'width': 0,
+          }),
+        }),
+        'name': 'AAPL',
+        'opacity': 0.85,
+        'type': 'bar',
+        'x': dict({
+          '__len__': 33,
+          'head': list([
+            1993,
+            1994,
+            1995,
+          ]),
+          'tail': list([
+            2024,
+            2025,
+          ]),
+        }),
+        'y': dict({
+          '__len__': 33,
+          'head': list([
+            -0.505462859077,
+            0.352113660123,
+            -0.173362090477,
+          ]),
+          'tail': list([
+            0.307052518018,
+            -0.163365165257,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'META: %{y:.2%}',
+        'marker': dict({
+          'color': dict({
+            '__len__': 33,
+            'head': list([
+              '#EF553B',
+              '#EF553B',
+              '#EF553B',
+            ]),
+            'tail': list([
+              '#EF553B',
+              'rgba(239, 85, 59, 0.5)',
+            ]),
+          }),
+          'line': dict({
+            'width': 0,
+          }),
+        }),
+        'name': 'META',
+        'opacity': 0.85,
+        'type': 'bar',
+        'x': dict({
+          '__len__': 33,
+          'head': list([
+            1993,
+            1994,
+            1995,
+          ]),
+          'tail': list([
+            2024,
+            2025,
+          ]),
+        }),
+        'y': dict({
+          '__len__': 33,
+          'head': list([
+            0.0,
+            0.0,
+            0.0,
+          ]),
+          'tail': list([
+            0.660488907242,
+            -0.0644790024361,
+          ]),
+        }),
+      }),
+      dict({
+        'hovertemplate': 'SPY -- Benchmark: %{y:.2%}',
+        'marker': dict({
+          'color': dict({
+            '__len__': 33,
+            'head': list([
+              '#00CC96',
+              '#00CC96',
+              '#00CC96',
+            ]),
+            'tail': list([
+              '#00CC96',
+              'rgba(0, 204, 150, 0.5)',
+            ]),
+          }),
+          'line': dict({
+            'width': 0,
+          }),
+        }),
+        'name': 'SPY -- Benchmark',
+        'opacity': 0.85,
+        'type': 'bar',
+        'x': dict({
+          '__len__': 33,
+          'head': list([
+            1993,
+            1994,
+            1995,
+          ]),
+          'tail': list([
+            2024,
+            2025,
+          ]),
+        }),
+        'y': dict({
+          '__len__': 33,
+          'head': list([
+            0.0870925643399,
+            0.00397339598426,
+            0.380489189983,
+          ]),
+          'tail': list([
+            0.248864729028,
+            -0.0576091216453,
+          ]),
+        }),
+      }),
+    ]),
+    'layout': dict({
+      'barmode': 'group',
+      'height': 600,
+      'hovermode': 'x unified',
+      'legend': dict({
+        'orientation': 'h',
+        'x': 1,
+        'xanchor': 'right',
+        'y': 1.02,
+        'yanchor': 'bottom',
+      }),
+      'plot_bgcolor': 'white',
+      'title': dict({
+        'text': 'Yearly Returns',
+      }),
+      'xaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'title': dict({
+          'text': 'Year',
+        }),
+      }),
+      'yaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'tickformat': '.1%',
+        'title': dict({
+          'text': 'Annual Return',
+        }),
+      }),
+    }),
+  })
+# ---
+# name: test_single_asset_full_figure_json[daily_returns]
+  dict({
+    'data': list([
+      dict({
+        'hovertemplate': 'ONLY: %{y:.2%}',
+        'marker': dict({
+          'color': dict({
+            '__len__': 420,
+            'head': list([
+              '#2ca02c',
+              '#d62728',
+              '#d62728',
+            ]),
+            'tail': list([
+              '#2ca02c',
+              '#d62728',
+            ]),
+          }),
+          'line': dict({
+            'width': 0,
+          }),
+        }),
+        'name': 'ONLY',
+        'opacity': 0.85,
+        'type': 'bar',
+        'x': dict({
+          '__len__': 420,
+          'head': list([
+            '2020-01-01',
+            '2020-01-02',
+            '2020-01-03',
+          ]),
+          'tail': list([
+            '2021-02-22',
+            '2021-02-23',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 420,
+          'head': list([
+            0.00755299172744,
+            -0.013551781825,
+            -0.00216255419494,
+          ]),
+          'tail': list([
+            0.00575444229749,
+            -0.001714647024,
+          ]),
+        }),
+      }),
+    ]),
+    'layout': dict({
+      'height': 600,
+      'hovermode': 'x unified',
+      'legend': dict({
+        'orientation': 'h',
+        'x': 1,
+        'xanchor': 'right',
+        'y': 1.02,
+        'yanchor': 'bottom',
+      }),
+      'plot_bgcolor': 'white',
+      'title': dict({
+        'text': 'Daily Returns',
+      }),
+      'xaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'rangeselector': dict({
+          'buttons': list([
+            dict({
+              'count': 6,
+              'label': '6m',
+              'step': 'month',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 1,
+              'label': '1y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 3,
+              'label': '3y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'label': 'YTD',
+              'step': 'year',
+              'stepmode': 'todate',
+            }),
+            dict({
+              'label': 'All',
+              'step': 'all',
+            }),
+          ]),
+        }),
+        'rangeslider': dict({
+          'visible': False,
+        }),
+        'showgrid': True,
+        'type': 'date',
+      }),
+      'yaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'tickformat': '.1%',
+        'title': dict({
+          'text': 'Return',
+        }),
+      }),
+    }),
+  })
+# ---
+# name: test_single_asset_full_figure_json[drawdown]
+  dict({
+    'data': list([
+      dict({
+        'fill': 'tozeroy',
+        'fillcolor': 'rgba(99, 110, 250, 0.3)',
+        'hovertemplate': 'ONLY: %{y:.2%}',
+        'line': dict({
+          'color': '#636EFA',
+          'width': 1.5,
+        }),
+        'mode': 'lines',
+        'name': 'ONLY',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 420,
+          'head': list([
+            '2020-01-01',
+            '2020-01-02',
+            '2020-01-03',
+          ]),
+          'tail': list([
+            '2021-02-22',
+            '2021-02-23',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 420,
+          'head': list([
+            0.0,
+            -0.013551781825,
+            -0.0156850295573,
+          ]),
+          'tail': list([
+            -0.478577215115,
+            -0.479471271142,
+          ]),
+        }),
+      }),
+    ]),
+    'layout': dict({
+      'height': 600,
+      'hovermode': 'x unified',
+      'legend': dict({
+        'orientation': 'h',
+        'x': 1,
+        'xanchor': 'right',
+        'y': 1.02,
+        'yanchor': 'bottom',
+      }),
+      'plot_bgcolor': 'white',
+      'shapes': list([
+        dict({
+          'line': dict({
+            'color': 'gray',
+            'width': 1,
+          }),
+          'type': 'line',
+          'x0': 0,
+          'x1': 1,
+          'xref': 'x domain',
+          'y0': 0,
+          'y1': 0,
+          'yref': 'y',
+        }),
+      ]),
+      'title': dict({
+        'text': 'Drawdowns',
+      }),
+      'xaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'rangeselector': dict({
+          'buttons': list([
+            dict({
+              'count': 6,
+              'label': '6m',
+              'step': 'month',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 1,
+              'label': '1y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 3,
+              'label': '3y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'label': 'YTD',
+              'step': 'year',
+              'stepmode': 'todate',
+            }),
+            dict({
+              'label': 'All',
+              'step': 'all',
+            }),
+          ]),
+        }),
+        'rangeslider': dict({
+          'visible': False,
+        }),
+        'showgrid': True,
+        'type': 'date',
+      }),
+      'yaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'tickformat': '.0%',
+        'title': dict({
+          'text': 'Drawdown',
+        }),
+      }),
+    }),
+  })
+# ---
+# name: test_single_asset_full_figure_json[drawdowns_periods]
+  dict({
+    'data': list([
+      dict({
+        'hovertemplate': '<b>%{x|%b %Y}</b><br>ONLY: %{y:.2f}x',
+        'line': dict({
+          'color': '#1f77b4',
+          'width': 2,
+        }),
+        'mode': 'lines',
+        'name': 'ONLY',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 420,
+          'head': list([
+            '2020-01-01',
+            '2020-01-02',
+            '2020-01-03',
+          ]),
+          'tail': list([
+            '2021-02-22',
+            '2021-02-23',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 420,
+          'head': list([
+            1.00755299173,
+            0.993898853406,
+            0.991749493272,
+          ]),
+          'tail': list([
+            0.542642315937,
+            0.541711875905,
+          ]),
+        }),
+      }),
+    ]),
+    'layout': dict({
+      'annotations': list([
+        dict({
+          'font': dict({
+            'size': 10,
+          }),
+          'showarrow': False,
+          'text': '#1 -60.1%',
+          'x': '2020-03-24',
+          'xanchor': 'left',
+          'xref': 'x',
+          'y': 1,
+          'yanchor': 'top',
+          'yref': 'y domain',
+        }),
+        dict({
+          'font': dict({
+            'size': 10,
+          }),
+          'showarrow': False,
+          'text': '#2 -5.9%',
+          'x': '2020-01-17',
+          'xanchor': 'left',
+          'xref': 'x',
+          'y': 1,
+          'yanchor': 'top',
+          'yref': 'y domain',
+        }),
+        dict({
+          'font': dict({
+            'size': 10,
+          }),
+          'showarrow': False,
+          'text': '#3 -4.7%',
+          'x': '2020-03-03',
+          'xanchor': 'left',
+          'xref': 'x',
+          'y': 1,
+          'yanchor': 'top',
+          'yref': 'y domain',
+        }),
+        dict({
+          'font': dict({
+            'size': 10,
+          }),
+          'showarrow': False,
+          'text': '#4 -3.2%',
+          'x': '2020-01-02',
+          'xanchor': 'left',
+          'xref': 'x',
+          'y': 1,
+          'yanchor': 'top',
+          'yref': 'y domain',
+        }),
+        dict({
+          'font': dict({
+            'size': 10,
+          }),
+          'showarrow': False,
+          'text': '#5 -0.2%',
+          'x': '2020-01-14',
+          'xanchor': 'left',
+          'xref': 'x',
+          'y': 1,
+          'yanchor': 'top',
+          'yref': 'y domain',
+        }),
+      ]),
+      'height': 600,
+      'hovermode': 'x unified',
+      'legend': dict({
+        'orientation': 'h',
+        'x': 1,
+        'xanchor': 'right',
+        'y': 1.02,
+        'yanchor': 'bottom',
+      }),
+      'plot_bgcolor': 'white',
+      'shapes': list([
+        dict({
+          'fillcolor': 'rgba(99, 110, 250, 0.2)',
+          'line': dict({
+            'width': 0,
+          }),
+          'type': 'rect',
+          'x0': '2020-03-24',
+          'x1': '2021-02-23',
+          'xref': 'x',
+          'y0': 0,
+          'y1': 1,
+          'yref': 'y domain',
+        }),
+        dict({
+          'fillcolor': 'rgba(239, 85, 59, 0.2)',
+          'line': dict({
+            'width': 0,
+          }),
+          'type': 'rect',
+          'x0': '2020-01-17',
+          'x1': '2020-03-02',
+          'xref': 'x',
+          'y0': 0,
+          'y1': 1,
+          'yref': 'y domain',
+        }),
+        dict({
+          'fillcolor': 'rgba(0, 204, 150, 0.2)',
+          'line': dict({
+            'width': 0,
+          }),
+          'type': 'rect',
+          'x0': '2020-03-03',
+          'x1': '2020-03-23',
+          'xref': 'x',
+          'y0': 0,
+          'y1': 1,
+          'yref': 'y domain',
+        }),
+        dict({
+          'fillcolor': 'rgba(171, 99, 250, 0.2)',
+          'line': dict({
+            'width': 0,
+          }),
+          'type': 'rect',
+          'x0': '2020-01-02',
+          'x1': '2020-01-13',
+          'xref': 'x',
+          'y0': 0,
+          'y1': 1,
+          'yref': 'y domain',
+        }),
+        dict({
+          'fillcolor': 'rgba(255, 161, 90, 0.2)',
+          'line': dict({
+            'width': 0,
+          }),
+          'type': 'rect',
+          'x0': '2020-01-14',
+          'x1': '2020-01-15',
+          'xref': 'x',
+          'y0': 0,
+          'y1': 1,
+          'yref': 'y domain',
+        }),
+      ]),
+      'title': dict({
+        'text': 'Top Drawdown Periods — ONLY',
+      }),
+      'xaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'rangeselector': dict({
+          'buttons': list([
+            dict({
+              'count': 6,
+              'label': '6m',
+              'step': 'month',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 1,
+              'label': '1y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 3,
+              'label': '3y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'label': 'YTD',
+              'step': 'year',
+              'stepmode': 'todate',
+            }),
+            dict({
+              'label': 'All',
+              'step': 'all',
+            }),
+          ]),
+        }),
+        'rangeslider': dict({
+          'visible': False,
+        }),
+        'showgrid': True,
+        'type': 'date',
+      }),
+      'yaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'tickformat': '.2f',
+        'title': dict({
+          'text': 'Cumulative Return',
+        }),
+      }),
+    }),
+  })
+# ---
+# name: test_single_asset_full_figure_json[earnings]
+  dict({
+    'data': list([
+      dict({
+        'hovertemplate': '<b>%{x|%b %Y}</b><br>ONLY: $%{y:,.0f}',
+        'line': dict({
+          'color': '#636EFA',
+          'width': 2,
+        }),
+        'mode': 'lines',
+        'name': 'ONLY',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 420,
+          'head': list([
+            '2020-01-01',
+            '2020-01-02',
+            '2020-01-03',
+          ]),
+          'tail': list([
+            '2021-02-22',
+            '2021-02-23',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 420,
+          'head': list([
+            100755.299173,
+            99389.8853406,
+            99174.9493272,
+          ]),
+          'tail': list([
+            54264.2315937,
+            54171.1875905,
+          ]),
+        }),
+      }),
+    ]),
+    'layout': dict({
+      'height': 600,
+      'hovermode': 'x unified',
+      'legend': dict({
+        'orientation': 'h',
+        'x': 1,
+        'xanchor': 'right',
+        'y': 1.02,
+        'yanchor': 'bottom',
+      }),
+      'plot_bgcolor': 'white',
+      'title': dict({
+        'text': 'Portfolio Earnings',
+      }),
+      'xaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'rangeselector': dict({
+          'buttons': list([
+            dict({
+              'count': 6,
+              'label': '6m',
+              'step': 'month',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 1,
+              'label': '1y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 3,
+              'label': '3y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'label': 'YTD',
+              'step': 'year',
+              'stepmode': 'todate',
+            }),
+            dict({
+              'label': 'All',
+              'step': 'all',
+            }),
+          ]),
+        }),
+        'rangeslider': dict({
+          'visible': False,
+        }),
+        'showgrid': True,
+        'type': 'date',
+      }),
+      'yaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'tickformat': ',.0f',
+        'tickprefix': '$',
+        'title': dict({
+          'text': 'Portfolio Value (starting $100,000)',
+        }),
+      }),
+    }),
+  })
+# ---
+# name: test_single_asset_full_figure_json[histogram]
+  dict({
+    'data': list([
+      dict({
+        'hovertemplate': 'ONLY: %{x:.2%}<extra></extra>',
+        'marker': dict({
+          'color': '#636EFA',
+        }),
+        'name': 'ONLY',
+        'nbinsx': 50,
+        'opacity': 0.6,
+        'type': 'histogram',
+        'x': dict({
+          '__len__': 420,
+          'head': list([
+            0.00755299172744,
+            -0.013551781825,
+            -0.00216255419494,
+          ]),
+          'tail': list([
+            0.00575444229749,
+            -0.001714647024,
+          ]),
+        }),
+      }),
+    ]),
+    'layout': dict({
+      'barmode': 'overlay',
+      'height': 600,
+      'hovermode': 'x unified',
+      'legend': dict({
+        'orientation': 'h',
+        'x': 1,
+        'xanchor': 'right',
+        'y': 1.02,
+        'yanchor': 'bottom',
+      }),
+      'plot_bgcolor': 'white',
+      'title': dict({
+        'text': 'Returns Distribution',
+      }),
+      'xaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'tickformat': '.1%',
+        'title': dict({
+          'text': 'Return',
+        }),
+      }),
+      'yaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'title': dict({
+          'text': 'Count',
+        }),
+      }),
+    }),
+  })
+# ---
+# name: test_single_asset_full_figure_json[monthly_heatmap]
+  dict({
+    'data': list([
+      dict({
+        'colorbar': dict({
+          'title': dict({
+            'text': 'Return (%)',
+          }),
+        }),
+        'colorscale': list([
+          list([
+            0,
+            '#d62728',
+          ]),
+          list([
+            0.5,
+            '#ffffff',
+          ]),
+          list([
+            1,
+            '#2ca02c',
+          ]),
+        ]),
+        'hovertemplate': '<b>%{y} %{x}</b><br>Return: %{text}<extra></extra>',
+        'showscale': True,
+        'text': list([
+          list([
+            '-2.9%',
+            '4.5%',
+            '-2.9%',
+            '-0.2%',
+            '-9.5%',
+            '-45.1%',
+            '3.4%',
+            '-14.3%',
+            '0.1%',
+            '14.8%',
+            '9.2%',
+            '-4.1%',
+          ]),
+          list([
+            '2.1%',
+            '1.9%',
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+          ]),
+        ]),
+        'texttemplate': '%{text}',
+        'type': 'heatmap',
+        'x': list([
+          'Jan',
+          'Feb',
+          'Mar',
+          'Apr',
+          'May',
+          'Jun',
+          'Jul',
+          'Aug',
+          'Sep',
+          'Oct',
+          'Nov',
+          'Dec',
+        ]),
+        'y': list([
+          '2020',
+          '2021',
+        ]),
+        'z': list([
+          list([
+            -2.91662760444,
+            4.4894672791,
+            -2.94015240346,
+            -0.153697764752,
+            -9.54984514679,
+            -45.0926997575,
+            3.35784218336,
+            -14.3079161108,
+            0.0898271304879,
+            14.769118895,
+            9.24429382904,
+            -4.10949167878,
+          ]),
+          list([
+            2.11607810883,
+            1.94650880224,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+          ]),
+        ]),
+        'zmid': 0,
+      }),
+    ]),
+    'layout': dict({
+      'height': 300,
+      'plot_bgcolor': 'white',
+      'title': dict({
+        'text': 'Monthly Returns Heatmap — ONLY',
+      }),
+      'xaxis': dict({
+        'side': 'top',
+      }),
+    }),
+  })
+# ---
+# name: test_single_asset_full_figure_json[monthly_returns]
+  dict({
+    'data': list([
+      dict({
+        'hovertemplate': 'ONLY: %{y:.2%}',
+        'marker': dict({
+          'color': list([
+            '#2ca02c',
+            '#d62728',
+            '#2ca02c',
+            '#d62728',
+            '#d62728',
+            '#d62728',
+            '#d62728',
+            '#2ca02c',
+            '#d62728',
+            '#2ca02c',
+            '#2ca02c',
+            '#2ca02c',
+            '#d62728',
+            '#2ca02c',
+            '#2ca02c',
+          ]),
+          'line': dict({
+            'width': 0,
+          }),
+        }),
+        'name': 'ONLY',
+        'opacity': 0.85,
+        'type': 'bar',
+        'x': list([
+          '2020-01-01',
+          '2020-02-01',
+          '2020-03-01',
+          '2020-04-01',
+          '2020-05-01',
+          '2020-06-01',
+          '2020-07-01',
+          '2020-08-01',
+          '2020-09-01',
+          '2020-10-01',
+          '2020-11-01',
+          '2020-12-01',
+          '2021-01-01',
+          '2021-02-01',
+          '2021-03-01',
+        ]),
+        'y': list([
+          0.00755299172744,
+          -0.0349273141383,
+          0.0495642431075,
+          -0.0305276869619,
+          -0.0228615893487,
+          -0.106229020462,
+          -0.445576695224,
+          0.0582239504991,
+          -0.153947007129,
+          0.0178091622298,
+          0.146405513384,
+          0.090223466164,
+          -0.041910658237,
+          0.0175411838798,
+          0.0184011509582,
+        ]),
+      }),
+    ]),
+    'layout': dict({
+      'height': 600,
+      'hovermode': 'x unified',
+      'legend': dict({
+        'orientation': 'h',
+        'x': 1,
+        'xanchor': 'right',
+        'y': 1.02,
+        'yanchor': 'bottom',
+      }),
+      'plot_bgcolor': 'white',
+      'title': dict({
+        'text': 'Monthly Returns',
+      }),
+      'xaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'rangeselector': dict({
+          'buttons': list([
+            dict({
+              'count': 6,
+              'label': '6m',
+              'step': 'month',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 1,
+              'label': '1y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 3,
+              'label': '3y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'label': 'YTD',
+              'step': 'year',
+              'stepmode': 'todate',
+            }),
+            dict({
+              'label': 'All',
+              'step': 'all',
+            }),
+          ]),
+        }),
+        'rangeslider': dict({
+          'visible': False,
+        }),
+        'showgrid': True,
+        'type': 'date',
+      }),
+      'yaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'tickformat': '.1%',
+        'title': dict({
+          'text': 'Monthly Return',
+        }),
+      }),
+    }),
+  })
+# ---
+# name: test_single_asset_full_figure_json[returns]
+  dict({
+    'data': list([
+      dict({
+        'hovertemplate': '<b>%{x|%b %Y}</b><br>ONLY: %{y:.2f}x',
+        'line': dict({
+          'color': '#636EFA',
+          'width': 2,
+        }),
+        'mode': 'lines',
+        'name': 'ONLY',
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 420,
+          'head': list([
+            '2020-01-01',
+            '2020-01-02',
+            '2020-01-03',
+          ]),
+          'tail': list([
+            '2021-02-22',
+            '2021-02-23',
+          ]),
+        }),
+        'y': dict({
+          '__len__': 420,
+          'head': list([
+            1.00755299173,
+            0.993898853406,
+            0.991749493272,
+          ]),
+          'tail': list([
+            0.542642315937,
+            0.541711875905,
+          ]),
+        }),
+      }),
+    ]),
+    'layout': dict({
+      'height': 600,
+      'hovermode': 'x unified',
+      'legend': dict({
+        'orientation': 'h',
+        'x': 1,
+        'xanchor': 'right',
+        'y': 1.02,
+        'yanchor': 'bottom',
+      }),
+      'plot_bgcolor': 'white',
+      'title': dict({
+        'text': 'Cumulative Returns',
+      }),
+      'xaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'rangeselector': dict({
+          'buttons': list([
+            dict({
+              'count': 6,
+              'label': '6m',
+              'step': 'month',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 1,
+              'label': '1y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 3,
+              'label': '3y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'label': 'YTD',
+              'step': 'year',
+              'stepmode': 'todate',
+            }),
+            dict({
+              'label': 'All',
+              'step': 'all',
+            }),
+          ]),
+        }),
+        'rangeslider': dict({
+          'visible': False,
+        }),
+        'showgrid': True,
+        'type': 'date',
+      }),
+      'yaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'tickformat': '.2f',
+        'title': dict({
+          'text': 'Cumulative Return',
+        }),
+      }),
+    }),
+  })
+# ---
+# name: test_single_asset_full_figure_json[snapshot]
+  dict({
+    'data': list([
+      dict({
+        'hovertemplate': '<b>%{x|%b %Y}</b><br>ONLY: %{y:.2f}x',
+        'legendgroup': 'ONLY',
+        'line': dict({
+          'color': '#636EFA',
+          'width': 2,
+        }),
+        'mode': 'lines',
+        'name': 'ONLY',
+        'showlegend': True,
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 420,
+          'head': list([
+            '2020-01-01',
+            '2020-01-02',
+            '2020-01-03',
+          ]),
+          'tail': list([
+            '2021-02-22',
+            '2021-02-23',
+          ]),
+        }),
+        'xaxis': 'x',
+        'y': dict({
+          '__len__': 420,
+          'head': list([
+            1.00755299173,
+            0.993898853406,
+            0.991749493272,
+          ]),
+          'tail': list([
+            0.542642315937,
+            0.541711875905,
+          ]),
+        }),
+        'yaxis': 'y',
+      }),
+      dict({
+        'fill': 'tozeroy',
+        'fillcolor': 'rgba(99, 110, 250, 0.5)',
+        'hovertemplate': 'ONLY Drawdown: %{y:.2%}',
+        'legendgroup': 'ONLY',
+        'line': dict({
+          'color': '#636EFA',
+          'width': 1,
+        }),
+        'mode': 'lines',
+        'name': 'ONLY',
+        'showlegend': False,
+        'type': 'scatter',
+        'x': dict({
+          '__len__': 420,
+          'head': list([
+            '2020-01-01',
+            '2020-01-02',
+            '2020-01-03',
+          ]),
+          'tail': list([
+            '2021-02-22',
+            '2021-02-23',
+          ]),
+        }),
+        'xaxis': 'x2',
+        'y': dict({
+          '__len__': 420,
+          'head': list([
+            0.0,
+            -0.013551781825,
+            -0.0156850295573,
+          ]),
+          'tail': list([
+            -0.478577215115,
+            -0.479471271142,
+          ]),
+        }),
+        'yaxis': 'y2',
+      }),
+      dict({
+        'hovertemplate': 'ONLY Monthly Return: %{y:.2%}',
+        'legendgroup': 'ONLY',
+        'marker': dict({
+          'color': list([
+            'green',
+            'red',
+            'green',
+            'red',
+            'red',
+            'red',
+            'red',
+            'green',
+            'red',
+            'green',
+            'green',
+            'green',
+            'red',
+            'green',
+            'green',
+          ]),
+          'line': dict({
+            'width': 0,
+          }),
+        }),
+        'name': 'ONLY',
+        'opacity': 0.8,
+        'showlegend': False,
+        'type': 'bar',
+        'x': list([
+          '2020-01-01',
+          '2020-02-01',
+          '2020-03-01',
+          '2020-04-01',
+          '2020-05-01',
+          '2020-06-01',
+          '2020-07-01',
+          '2020-08-01',
+          '2020-09-01',
+          '2020-10-01',
+          '2020-11-01',
+          '2020-12-01',
+          '2021-01-01',
+          '2021-02-01',
+          '2021-03-01',
+        ]),
+        'xaxis': 'x3',
+        'y': list([
+          0.00755299172744,
+          -0.0349273141383,
+          0.0495642431075,
+          -0.0305276869619,
+          -0.0228615893487,
+          -0.106229020462,
+          -0.445576695224,
+          0.0582239504991,
+          -0.153947007129,
+          0.0178091622298,
+          0.146405513384,
+          0.090223466164,
+          -0.041910658237,
+          0.0175411838798,
+          0.0184011509582,
+        ]),
+        'yaxis': 'y3',
+      }),
+    ]),
+    'layout': dict({
+      'annotations': list([
+        dict({
+          'font': dict({
+            'size': 16,
+          }),
+          'showarrow': False,
+          'text': 'Cumulative Returns',
+          'x': 0.5,
+          'xanchor': 'center',
+          'xref': 'paper',
+          'y': 1.0,
+          'yanchor': 'bottom',
+          'yref': 'paper',
+        }),
+        dict({
+          'font': dict({
+            'size': 16,
+          }),
+          'showarrow': False,
+          'text': 'Drawdowns',
+          'x': 0.5,
+          'xanchor': 'center',
+          'xref': 'paper',
+          'y': 0.5,
+          'yanchor': 'bottom',
+          'yref': 'paper',
+        }),
+        dict({
+          'font': dict({
+            'size': 16,
+          }),
+          'showarrow': False,
+          'text': 'Monthly Returns',
+          'x': 0.5,
+          'xanchor': 'center',
+          'xref': 'paper',
+          'y': 0.225,
+          'yanchor': 'bottom',
+          'yref': 'paper',
+        }),
+      ]),
+      'height': 1200,
+      'hovermode': 'x unified',
+      'legend': dict({
+        'orientation': 'h',
+        'x': 1,
+        'xanchor': 'right',
+        'y': 1.02,
+        'yanchor': 'bottom',
+      }),
+      'plot_bgcolor': 'white',
+      'shapes': list([
+        dict({
+          'line': dict({
+            'color': 'gray',
+            'width': 1,
+          }),
+          'type': 'line',
+          'x0': 0,
+          'x1': 1,
+          'xref': 'x2 domain',
+          'y0': 0,
+          'y1': 0,
+          'yref': 'y2',
+        }),
+      ]),
+      'title': dict({
+        'text': 'ONLY Performance Dashboard',
+      }),
+      'xaxis': dict({
+        'anchor': 'y',
+        'domain': list([
+          0.0,
+          1.0,
+        ]),
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'matches': 'x3',
+        'rangeselector': dict({
+          'buttons': list([
+            dict({
+              'count': 6,
+              'label': '6m',
+              'step': 'month',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 1,
+              'label': '1y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'count': 3,
+              'label': '3y',
+              'step': 'year',
+              'stepmode': 'backward',
+            }),
+            dict({
+              'label': 'YTD',
+              'step': 'year',
+              'stepmode': 'todate',
+            }),
+            dict({
+              'label': 'All',
+              'step': 'all',
+            }),
+          ]),
+        }),
+        'rangeslider': dict({
+          'visible': False,
+        }),
+        'showgrid': True,
+        'showticklabels': False,
+        'type': 'date',
+      }),
+      'xaxis2': dict({
+        'anchor': 'y2',
+        'domain': list([
+          0.0,
+          1.0,
+        ]),
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'matches': 'x3',
+        'showgrid': True,
+        'showticklabels': False,
+      }),
+      'xaxis3': dict({
+        'anchor': 'y3',
+        'domain': list([
+          0.0,
+          1.0,
+        ]),
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+      }),
+      'yaxis': dict({
+        'anchor': 'x',
+        'domain': list([
+          0.55,
+          1.0,
+        ]),
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'tickformat': '.2f',
+        'title': dict({
+          'text': 'Cumulative Return',
+        }),
+      }),
+      'yaxis2': dict({
+        'anchor': 'x2',
+        'domain': list([
+          0.275,
+          0.5,
+        ]),
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'tickformat': '.0%',
+        'title': dict({
+          'text': 'Drawdown',
+        }),
+      }),
+      'yaxis3': dict({
+        'anchor': 'x3',
+        'domain': list([
+          0.0,
+          0.225,
+        ]),
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'tickformat': '.0%',
+        'title': dict({
+          'text': 'Monthly Return',
+        }),
+      }),
+    }),
+  })
+# ---
+# name: test_single_asset_full_figure_json[yearly_returns]
+  dict({
+    'data': list([
+      dict({
+        'hovertemplate': 'ONLY: %{y:.2%}',
+        'marker': dict({
+          'color': list([
+            'rgba(99, 110, 250, 0.5)',
+            '#636EFA',
+          ]),
+          'line': dict({
+            'width': 0,
+          }),
+        }),
+        'name': 'ONLY',
+        'opacity': 0.85,
+        'type': 'bar',
+        'x': list([
+          2020,
+          2021,
+        ]),
+        'y': list([
+          -0.479642435829,
+          0.0410377655772,
+        ]),
+      }),
+    ]),
+    'layout': dict({
+      'barmode': 'group',
+      'height': 600,
+      'hovermode': 'x unified',
+      'legend': dict({
+        'orientation': 'h',
+        'x': 1,
+        'xanchor': 'right',
+        'y': 1.02,
+        'yanchor': 'bottom',
+      }),
+      'plot_bgcolor': 'white',
+      'title': dict({
+        'text': 'Yearly Returns',
+      }),
+      'xaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'title': dict({
+          'text': 'Year',
+        }),
+      }),
+      'yaxis': dict({
+        'gridcolor': 'lightgrey',
+        'gridwidth': 0.5,
+        'showgrid': True,
+        'tickformat': '.1%',
+        'title': dict({
+          'text': 'Annual Return',
+        }),
+      }),
+    }),
+  })
+# ---

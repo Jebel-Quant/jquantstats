@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import datetime
 import math
+import warnings
 from typing import TYPE_CHECKING, Any, cast
 
 import polars as pl
@@ -756,9 +757,11 @@ class Reports:
         # ── Period info for header ────────────────────────────────────────────
         all_df: pl.DataFrame | None = getattr(self._data, "all", None)
         period_info = ""
+        temporal_index = False
         if all_df is not None:  # pragma: no branch — Data always exposes .all; getattr default is defensive
             date_col = all_df.columns[0]
-            if all_df[date_col].dtype.is_temporal():
+            temporal_index = all_df[date_col].dtype.is_temporal()
+            if temporal_index:
                 start_dt = all_df[date_col].min()
                 end_dt = all_df[date_col].max()
                 n = len(all_df)
@@ -781,11 +784,22 @@ class Reports:
                 ("yearly_returns", {}),
                 ("histogram", {}),
             ]
-            for i, (method, kwargs) in enumerate(_chart_methods):
+            # These charts aggregate by calendar period (resample, dt.year/
+            # dt.month) and cannot be computed for an integer index.
+            _calendar_charts = {"snapshot", "monthly_heatmap", "yearly_returns"}
+            if not temporal_index:
+                skipped = ", ".join(m for m, _ in _chart_methods if m in _calendar_charts)
+                warnings.warn(
+                    f"Index is not temporal; skipping calendar-based charts: {skipped}.",
+                    stacklevel=2,
+                )
+            for method, kwargs in _chart_methods:
+                if not temporal_index and method in _calendar_charts:
+                    continue
                 fn = getattr(plots, method, None)
                 if fn is None:
                     continue
-                div = _try_plotly_div(fn(**kwargs), include_cdn=(i == 0))
+                div = _try_plotly_div(fn(**kwargs), include_cdn=not chart_parts)
                 if div:  # pragma: no branch — _try_plotly_div only returns falsy on render failure
                     chart_parts.append(f'<div style="margin-bottom:24px">{div}</div>')
 

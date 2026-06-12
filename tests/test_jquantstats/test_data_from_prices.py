@@ -5,6 +5,8 @@ import pytest
 
 from jquantstats import Data
 
+from .tolerances import TOL_COMPOUNDING
+
 
 @pytest.fixture
 def prices() -> pl.DataFrame:
@@ -34,7 +36,7 @@ def test_from_prices_correct_returns(prices: pl.DataFrame) -> None:
     """Returns computed from prices match manual pct_change calculation."""
     data = Data.from_prices(prices=prices)
     expected_asset1 = prices["Asset1"].pct_change().drop_nulls()
-    assert data.returns["Asset1"].to_list() == pytest.approx(expected_asset1.to_list(), rel=1e-9)
+    assert data.returns["Asset1"].to_list() == pytest.approx(expected_asset1.to_list(), rel=TOL_COMPOUNDING)
 
 
 def test_from_prices_max_drawdown(prices: pl.DataFrame) -> None:
@@ -69,3 +71,22 @@ def test_from_prices_with_benchmark(prices: pl.DataFrame) -> None:
     )
     data = Data.from_prices(prices=prices, benchmark=benchmark_prices)
     assert data.benchmark is not None
+
+
+def test_from_prices_missing_date_col_raises(prices):
+    """Data.from_prices raises MissingDateColumnError when date_col is absent from prices."""
+    from jquantstats.exceptions import MissingDateColumnError
+
+    with pytest.raises(MissingDateColumnError, match="'prices' has no column 'date'") as exc_info:
+        Data.from_prices(prices=prices, date_col="date")
+    assert exc_info.value.frame_name == "prices"
+    assert "Date" in (exc_info.value.available or [])
+
+
+def test_from_prices_missing_date_col_in_benchmark_raises(prices):
+    """Data.from_prices raises MissingDateColumnError when date_col is absent from benchmark."""
+    from jquantstats.exceptions import MissingDateColumnError
+
+    benchmark = prices.select(pl.col("Date").alias("timestamp"), pl.col("Asset1").alias("Market"))
+    with pytest.raises(MissingDateColumnError, match="'benchmark' has no column 'Date'"):
+        Data.from_prices(prices=prices, benchmark=benchmark, date_col="Date")

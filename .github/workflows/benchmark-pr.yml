@@ -1,0 +1,83 @@
+# Workflow: PR benchmark comparison
+#
+# Purpose: Catch performance regressions before merge. Runs the benchmark
+#          suite on the PR base commit to establish a baseline, then on the
+#          PR head, and compares the two with pytest-benchmark.
+#
+# The comparison step is non-blocking (continue-on-error) while we learn the
+# noise level of hosted runners; the threshold below flags mean-time
+# regressions above 25%. Once the signal proves stable, drop
+# continue-on-error to make it a required check.
+#
+# Trigger: pull requests that touch source, benchmarks, or dependencies.
+
+name: "BENCHMARK PR"
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    paths:
+      - "src/**"
+      - "tests/benchmarks/**"
+      - "pyproject.toml"
+      - "uv.lock"
+
+jobs:
+  benchmark-compare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout base commit
+        uses: actions/checkout@v6.0.3
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7.6.0
+        with:
+          enable-cache: true
+
+      - name: Run benchmarks on base (baseline)
+        run: |
+          uv sync --all-extras
+          uv pip install pytest-benchmark==5.2.3
+          uv run pytest tests/benchmarks --benchmark-only \
+            --benchmark-storage="file://${RUNNER_TEMP}/benchmarks" \
+            --benchmark-save=base -p no:cacheprovider
+
+      - name: Checkout PR head
+        uses: actions/checkout@v6.0.3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Run benchmarks on head and compare
+        id: compare
+        continue-on-error: true
+        run: |
+          uv sync --all-extras
+          uv pip install pytest-benchmark==5.2.3
+          uv run pytest tests/benchmarks --benchmark-only \
+            --benchmark-storage="file://${RUNNER_TEMP}/benchmarks" \
+            --benchmark-compare=0001 \
+            --benchmark-compare-fail=mean:25% \
+            -p no:cacheprovider | tee "${RUNNER_TEMP}/compare.txt"
+
+      - name: Publish comparison summary
+        if: always()
+        run: |
+          {
+            echo "## Benchmark comparison vs base"
+            echo
+            if [ "${{ steps.compare.outcome }}" = "failure" ]; then
+              echo "> ⚠️ At least one benchmark regressed by more than 25% (mean time)."
+            else
+              echo "> ✅ No benchmark regressed by more than 25% (mean time)."
+            fi
+            echo
+            echo '```'
+            grep -A 1000 "Comparing against" "${RUNNER_TEMP}/compare.txt" 2>/dev/null \
+              || tail -n 60 "${RUNNER_TEMP}/compare.txt" 2>/dev/null \
+              || echo "no comparison output captured"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

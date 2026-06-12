@@ -67,6 +67,10 @@ class _RiskStatsMixin:
         Returns:
             float: The Sharpe ratio value.
 
+
+        Returns NaN when:
+            ``float("nan")`` when the standard deviation is missing (fewer than two
+            observations) or numerically negligible.
         """
         periods = periods or self._data._periods_per_year
 
@@ -102,6 +106,10 @@ class _RiskStatsMixin:
             float: The asymptotic variance of the Sharpe ratio.
             If number of periods per year is provided or inferred from the data, the result is annualized.
 
+
+        Returns NaN when:
+            ``float("nan")`` when the standard deviation is zero/missing or
+            skewness/kurtosis cannot be computed.
         """
         t = series.count()
         mean_val = _mean(series)
@@ -137,6 +145,10 @@ class _RiskStatsMixin:
             PSR is the probability that the observed Sharpe ratio is greater than a
             given benchmark Sharpe ratio.
 
+
+        Returns NaN when:
+            ``float("nan")`` when the standard deviation is zero/missing, moments
+            are missing, or the estimated Sharpe variance is non-positive.
         """
         t = series.count()
 
@@ -242,6 +254,10 @@ class _RiskStatsMixin:
         Returns:
             float: The Sortino ratio value.
 
+
+        Returns NaN when:
+            ``float("nan")`` when both the mean return and the downside deviation
+            are zero.
         """
         periods = periods or self._data._periods_per_year
         downside_deviation = _downside_deviation(series)
@@ -512,6 +528,10 @@ class _RiskStatsMixin:
         Returns:
             float: Probabilistic ratio in [0, 1].
 
+
+        Returns NaN when:
+            ``float("nan")`` when moments are missing, there are fewer than two
+            observations, or the estimated variance is non-positive.
         """
         n = series.count()
         skew_val = series.skew(bias=False)
@@ -538,6 +558,10 @@ class _RiskStatsMixin:
         Returns:
             float: Probabilistic Sortino ratio in [0, 1].
 
+
+        Returns NaN when:
+            ``float("nan")`` when the downside deviation is zero, moments are
+            missing, or the estimated variance is non-positive.
         """
         downside_deviation = _downside_deviation(series)
         mean_f = _mean(series)
@@ -562,6 +586,10 @@ class _RiskStatsMixin:
         Returns:
             float: Probabilistic adjusted Sortino ratio in [0, 1].
 
+
+        Returns NaN when:
+            ``float("nan")`` when the downside deviation is zero, moments are
+            missing, or the estimated variance is non-positive.
         """
         downside_deviation = _downside_deviation(series)
         mean_f = _mean(series)
@@ -593,6 +621,11 @@ class _RiskStatsMixin:
         Raises:
             ValueError: If *base* is an unrecognised string.
 
+
+        Returns NaN when:
+            Entries are ``float("nan")`` when the base ratio is undefined (zero
+            standard deviation / zero downside deviation), moments are missing, or
+            the estimated variance is non-positive.
         """
 
         def _sharpe_base(s: pl.Series) -> float:
@@ -778,6 +811,10 @@ class _RiskStatsMixin:
         Returns:
             dict[str, float]: Dictionary containing alpha and beta values.
 
+
+        Returns NaN when:
+            Both alpha and beta are ``float("nan")`` when the benchmark variance
+            is zero.
         """
         ppy = periods_per_year or self._data._periods_per_year
 
@@ -830,6 +867,10 @@ class _RiskStatsMixin:
 
         Raises:
             AttributeError: If no benchmark data is attached.
+
+        Returns NaN when:
+            ``float("nan")`` when the benchmark variance or beta is zero, the
+            series is empty, or the compounded NAV is non-positive.
         """
         if self._data.benchmark is None:
             raise AttributeError("No benchmark data available")  # noqa: TRY003

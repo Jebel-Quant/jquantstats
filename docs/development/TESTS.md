@@ -286,3 +286,73 @@ If stress tests fail occasionally:
 - [Hypothesis Documentation](https://hypothesis.readthedocs.io/)
 - [pytest-benchmark Documentation](https://pytest-benchmark.readthedocs.io/)
 - [GitHub Actions Benchmark Action](https://github.com/benchmark-action/github-action-benchmark)
+
+## Mutation Testing
+
+Mutation testing (via [mutmut](https://mutmut.readthedocs.io/)) checks that
+the test suite actually *fails* when the source is deliberately broken.
+Every source module is covered and gated against a triaged baseline.
+
+### How the gate works
+
+`tests/mutation/baseline.json` maps each module in `src/jquantstats` to
+
+- **tests** — the focused pytest paths used as the mutmut runner for that
+  module (keeps per-mutant cost low), and
+- **max_survivors** — the triaged ceiling of acceptable surviving mutants
+  (typing-only, cosmetic strings, or numerically equivalent mutations).
+
+The gate fails as soon as a module produces *more* survivors than its
+ceiling — i.e. a new mutant survived that no test kills.
+
+### Running
+
+```bash
+make mutation-gate                                              # full gated sweep
+uv run python bin/mutation_gate.py --module src/jquantstats/data.py   # one module
+uv run python bin/mutation_gate.py --record                     # rewrite ceilings
+```
+
+The full sweep is slow (hours) and runs weekly in CI
+(`.github/workflows/mutation.yml`), not per-PR.
+
+### When the gate fails
+
+1. Inspect the survivors: `uv run mutmut results`, then `uv run mutmut show <id>`.
+2. Preferred fix: add a test that kills the mutant.
+3. If the mutant is genuinely acceptable (typing-only, cosmetic, or
+   numerically equivalent), raise the module's `max_survivors` ceiling —
+   and say why in the commit message.
+
+Survivor counts are relative to each module's focused runner, so the gate is
+self-consistent; a mutant only killable by an unrelated suite still counts
+as a survivor for its module.
+
+### Triaged-survivor categories (June 2026 full sweep)
+
+The first full sweep over `src/jquantstats` (#816) killed the bulk of the
+survivors with new tests (exact error-message assertions, default-argument
+pinning, null-fill sensitivity, report-content checks) and by widening the
+runners — the `_stats/*` modules are gated against the migration,
+numerical-edge, edge-case, and snapshot suites; protocol modules run
+`test_protocols.py` so `isinstance` checks see `@runtime_checkable`.
+
+The remaining non-zero ceilings cover only these categories:
+
+- **Typing-only mutants** — Protocol stub default arguments, `@property` on
+  protocol stubs, `TypeAlias`/`TypeVar` rewrites under lazy annotations, and
+  `if TYPE_CHECKING` stubs. Never executed at runtime.
+- **Equivalent mutants** — e.g. `warmup 0 -> 1` where
+  `min_samples = 1 if warmup == 0 else warmup` maps both to the same value,
+  or `plots.mkdir(parents=...)` after the sibling call already created the
+  parent.
+- **Unreachable defensive fallbacks** — e.g. `zip(..., strict=False)` over
+  always-equal-length iterables, numeric fallbacks behind `isinstance`
+  guards that polars cannot trigger.
+- **mutmut artifacts** — import-breaking mutants (e.g. `__slots__ = None`,
+  which raises `TypeError` at class creation) that mutmut 2.5.1 sometimes
+  misreports as survivors even though the focused suite fails under them
+  (verified by applying the mutation manually).  Counted in the ceiling
+  because the gate compares mutmut's numbers, not ground truth.
+
+Anything outside these categories must be killed, not ceilinged.

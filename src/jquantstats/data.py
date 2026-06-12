@@ -12,7 +12,7 @@ import narwhals as nw
 import polars as pl
 
 from ._types import NativeFrame, NativeFrameOrScalar
-from .exceptions import BenchmarkAlignmentWarning, NullsInReturnsError
+from .exceptions import BenchmarkAlignmentWarning, MissingDateColumnError, NullsInReturnsError
 
 if TYPE_CHECKING:
     from ._plots import DataPlots
@@ -272,6 +272,9 @@ class Data:
             and ``plots`` properties.
 
         Raises:
+            MissingDateColumnError: If *date_col* is not a column of
+                *returns*, *benchmark*, or a DataFrame-valued *rf*. Raised
+                before any joins so the offending frame is named explicitly.
             NullsInReturnsError: If *null_strategy* is ``"raise"`` and the
                 data contains null values.
             ValueError: If there are no overlapping dates between returns and
@@ -327,6 +330,13 @@ class Data:
         benchmark_pl = _to_polars(benchmark) if benchmark is not None else None
         # accept ints (e.g. rf=0) by coercing to float
         rf_converted: float | pl.DataFrame = float(rf) if isinstance(rf, int | float) else _to_polars(rf)
+
+        frames: list[tuple[str, pl.DataFrame | None]] = [("returns", returns_pl), ("benchmark", benchmark_pl)]
+        if isinstance(rf_converted, pl.DataFrame):
+            frames.append(("rf", rf_converted))
+        for frame_name, frame in frames:
+            if frame is not None and date_col not in frame.columns:
+                raise MissingDateColumnError(frame_name, column=date_col, available=list(frame.columns))
 
         returns_pl = _apply_null_strategy(returns_pl, date_col, "returns", null_strategy)
         if benchmark_pl is not None:
@@ -409,6 +419,11 @@ class Data:
             prices, with methods for analysis and visualization through the
             ``stats`` and ``plots`` properties.
 
+        Raises:
+            MissingDateColumnError: If *date_col* is not a column of *prices*
+                or *benchmark*. Raised before returns are derived so the
+                offending frame is named explicitly.
+
         Examples:
             ```python
             from jquantstats import Data
@@ -424,12 +439,16 @@ class Data:
 
         """
         prices_pl = _to_polars(prices)
+        if date_col not in prices_pl.columns:
+            raise MissingDateColumnError("prices", column=date_col, available=list(prices_pl.columns))
         asset_cols = [c for c in prices_pl.columns if c != date_col]
         returns_pl = prices_pl.with_columns([pl.col(c).pct_change().alias(c) for c in asset_cols]).slice(1)
 
         benchmark_returns: NativeFrame | None = None
         if benchmark is not None:
             benchmark_pl = _to_polars(benchmark)
+            if date_col not in benchmark_pl.columns:
+                raise MissingDateColumnError("benchmark", column=date_col, available=list(benchmark_pl.columns))
             bench_cols = [c for c in benchmark_pl.columns if c != date_col]
             benchmark_returns = benchmark_pl.with_columns([pl.col(c).pct_change().alias(c) for c in bench_cols]).slice(
                 1
