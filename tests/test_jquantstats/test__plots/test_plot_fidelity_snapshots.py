@@ -43,9 +43,17 @@ def plots(data):
 
 
 def _nan_safe(value):
-    """Make non-finite floats snapshot-comparable (nan != nan breaks equality)."""
+    """Normalize values that would make snapshots flaky.
+
+    Non-finite floats become their repr (``nan != nan`` breaks equality), and
+    midnight timestamps lose their time part (plotly's date-axis serialization
+    flipped between ``YYYY-MM-DD`` and ``YYYY-MM-DDT00:00:00`` across
+    versions).
+    """
     if isinstance(value, float) and not math.isfinite(value):
         return repr(value)
+    if isinstance(value, str) and value.endswith("T00:00:00"):
+        return value[: -len("T00:00:00")]
     return value
 
 
