@@ -1,3 +1,17 @@
+## [0.9.5] - 2026-06-12
+
+### 🐛 Bug Fixes
+
+- Warn when benchmark alignment drops rows, loosen kaleido pin
+- Raise timeout for kaleido tests to absorb Chrome cold-start
+
+### 💼 Other
+
+- Bump version 0.9.4 → 0.9.5
+
+### ⚙️ Miscellaneous Tasks
+
+- Update CHANGELOG.md for v0.9.4 [skip ci]
 ## [0.9.4] - 2026-06-12
 
 ### 🚀 Features
