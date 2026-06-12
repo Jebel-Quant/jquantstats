@@ -1,3 +1,27 @@
+## [0.9.4] - 2026-06-12
+
+### 🚀 Features
+
+- Typed stat decorators, snapshot tests, docs FAQ/diagrams, protocol dedup
+
+### 🐛 Bug Fixes
+
+- CAGR sign flip in reports, accept integer rf, harden API endpoint (#791)
+- Harden public API, messaged exceptions, numerical edge-case docs, 100% coverage gate
+- Move coverage gate to custom-env.mk so rhiza validation passes
+
+### 💼 Other
+
+- Bump version 0.9.3 → 0.9.4
+
+### 🧪 Testing
+
+- Increase coverage to 100%
+
+### ⚙️ Miscellaneous Tasks
+
+- Update CHANGELOG.md for v0.9.3 [skip ci]
+- Bump rhiza to v0.18.8 (#788)
 ## [0.9.3] - 2026-06-05
 
 ### 🐛 Bug Fixes
