@@ -327,3 +327,27 @@ The full sweep is slow (hours) and runs weekly in CI
 Survivor counts are relative to each module's focused runner, so the gate is
 self-consistent; a mutant only killable by an unrelated suite still counts
 as a survivor for its module.
+
+### Triaged-survivor categories (June 2026 full sweep)
+
+The first full sweep over `src/jquantstats` (#816) killed the bulk of the
+survivors with new tests (exact error-message assertions, default-argument
+pinning, null-fill sensitivity, report-content checks) and by widening the
+runners — the `_stats/*` modules are gated against the migration,
+numerical-edge, edge-case, and snapshot suites; protocol modules run
+`test_protocols.py` so `isinstance` checks see `@runtime_checkable`.
+
+The remaining non-zero ceilings cover only these categories:
+
+- **Typing-only mutants** — Protocol stub default arguments, `@property` on
+  protocol stubs, `TypeAlias`/`TypeVar` rewrites under lazy annotations, and
+  `if TYPE_CHECKING` stubs. Never executed at runtime.
+- **Equivalent mutants** — e.g. `warmup 0 -> 1` where
+  `min_samples = 1 if warmup == 0 else warmup` maps both to the same value,
+  or `plots.mkdir(parents=...)` after the sibling call already created the
+  parent.
+- **Unreachable defensive fallbacks** — e.g. `zip(..., strict=False)` over
+  always-equal-length iterables, numeric fallbacks behind `isinstance`
+  guards that polars cannot trigger.
+
+Anything outside these categories must be killed, not ceilinged.
