@@ -96,6 +96,57 @@ def test_non_overlapping_dates():
         Data.from_returns(returns=returns, benchmark=benchmark)
 
 
+def test_partially_overlapping_dates_warns():
+    """Tests that Data.from_returns warns when alignment drops rows.
+
+    Verifies:
+        1. A BenchmarkAlignmentWarning is emitted with the dropped row counts.
+        2. Both frames are truncated to the common dates.
+    """
+    from jquantstats.exceptions import BenchmarkAlignmentWarning
+
+    returns_dates = [f"2020-01-{i:02d}" for i in range(1, 11)]
+    returns = pl.DataFrame({"Date": returns_dates, "Asset": [0.01] * len(returns_dates)}).with_columns(
+        pl.col("Date").str.to_date()
+    )
+
+    # Benchmark covers only the first four dates
+    benchmark = pl.DataFrame({"Date": returns_dates[:4], "Benchmark": [0.01] * 4}).with_columns(
+        pl.col("Date").str.to_date()
+    )
+
+    with pytest.warns(BenchmarkAlignmentWarning, match=r"dropped 6 of 10 returns row\(s\) and 0 of 4 benchmark"):
+        data = Data.from_returns(returns=returns, benchmark=benchmark)
+
+    assert data.index.height == 4
+    assert data.returns.height == 4
+    assert data.benchmark is not None
+    assert data.benchmark.height == 4
+
+
+def test_fully_overlapping_dates_no_warning():
+    """Tests that Data.from_returns stays silent when dates align exactly.
+
+    Verifies:
+        1. No BenchmarkAlignmentWarning is emitted when no rows are dropped.
+    """
+    import warnings as warnings_module
+
+    from jquantstats.exceptions import BenchmarkAlignmentWarning
+
+    returns_dates = [f"2020-01-{i:02d}" for i in range(1, 11)]
+    returns = pl.DataFrame({"Date": returns_dates, "Asset": [0.01] * len(returns_dates)}).with_columns(
+        pl.col("Date").str.to_date()
+    )
+    benchmark = pl.DataFrame({"Date": returns_dates, "Benchmark": [0.01] * len(returns_dates)}).with_columns(
+        pl.col("Date").str.to_date()
+    )
+
+    with warnings_module.catch_warnings():
+        warnings_module.simplefilter("error", BenchmarkAlignmentWarning)
+        Data.from_returns(returns=returns, benchmark=benchmark)
+
+
 def test_periods_per_year_non_date_index():
     """Integer-indexed Data falls back to 252 trading days per year."""
     index = pl.DataFrame({"i": [1, 2, 3, 4, 5]})

@@ -12,7 +12,7 @@ import narwhals as nw
 import polars as pl
 
 from ._types import NativeFrame, NativeFrameOrScalar
-from .exceptions import NullsInReturnsError
+from .exceptions import BenchmarkAlignmentWarning, NullsInReturnsError
 
 if TYPE_CHECKING:
     from ._plots import DataPlots
@@ -243,7 +243,10 @@ class Data:
 
             benchmark (NativeFrame | None): Benchmark returns. Defaults to
                 None (no benchmark). First column should be the date column,
-                remaining columns are benchmark returns.
+                remaining columns are benchmark returns. Returns and
+                benchmark are aligned on their common dates; if either frame
+                contains dates the other lacks, those rows are dropped and a
+                `BenchmarkAlignmentWarning` is emitted.
             date_col (str): Name of the date column in the DataFrames.
                 Defaults to ``"Date"``.
             null_strategy ({"raise", "drop", "forward_fill"} | None): How to
@@ -273,6 +276,10 @@ class Data:
                 data contains null values.
             ValueError: If there are no overlapping dates between returns and
                 benchmark.
+
+        Warns:
+            BenchmarkAlignmentWarning: If aligning returns and benchmark on
+                their common dates drops rows from either frame.
 
         Examples:
             Basic usage:
@@ -329,6 +336,18 @@ class Data:
             joined_dates = returns_pl.join(benchmark_pl, on=date_col, how="inner").select(date_col)
             if joined_dates.is_empty():
                 raise ValueError("No overlapping dates between returns and benchmark.")  # noqa: TRY003
+            dropped_returns = returns_pl.height - joined_dates.height
+            dropped_benchmark = benchmark_pl.height - joined_dates.height
+            if dropped_returns > 0 or dropped_benchmark > 0:
+                warnings.warn(
+                    f"Aligning returns and benchmark on common dates dropped "
+                    f"{dropped_returns} of {returns_pl.height} returns row(s) and "
+                    f"{dropped_benchmark} of {benchmark_pl.height} benchmark row(s); "
+                    f"{joined_dates.height} row(s) remain. Pass a benchmark covering "
+                    f"the same dates as the returns to avoid this.",
+                    BenchmarkAlignmentWarning,
+                    stacklevel=2,
+                )
             returns_pl = returns_pl.join(joined_dates, on=date_col, how="inner")
             benchmark_pl = benchmark_pl.join(joined_dates, on=date_col, how="inner")
 

@@ -279,3 +279,21 @@ class NullsInReturnsError(JQuantStatsError, ValueError):
         )
         self.frame_name = frame_name
         self.columns = columns
+
+
+class BenchmarkAlignmentWarning(UserWarning):
+    """Emitted when aligning returns and benchmark drops rows from either side.
+
+    Returns and benchmark are aligned on their common dates with an inner
+    join.  Rows whose date appears in only one of the two frames are
+    silently discarded by that join; this warning surfaces how many rows
+    were lost so a partially overlapping benchmark cannot truncate the
+    analysis unnoticed.
+
+    Suppress it once the overlap is understood::
+
+        import warnings
+        from jquantstats.exceptions import BenchmarkAlignmentWarning
+
+        warnings.filterwarnings("ignore", category=BenchmarkAlignmentWarning)
+    """
