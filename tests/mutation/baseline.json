@@ -13,7 +13,7 @@
     ]
   },
   "src/jquantstats/_protocol.py": {
-    "max_survivors": 0,
+    "max_survivors": 5,
     "tests": [
       "tests/test_jquantstats/test_protocols.py"
     ]
@@ -45,7 +45,7 @@
     ]
   },
   "src/jquantstats/result.py": {
-    "max_survivors": 0,
+    "max_survivors": 2,
     "tests": [
       "tests/test_jquantstats/test_result.py"
     ]
@@ -58,25 +58,25 @@
     ]
   },
   "src/jquantstats/_portfolio_attribution.py": {
-    "max_survivors": 0,
+    "max_survivors": 3,
     "tests": [
       "tests/test_jquantstats/test_portfolio"
     ]
   },
   "src/jquantstats/_portfolio_cost.py": {
-    "max_survivors": 0,
+    "max_survivors": 3,
     "tests": [
       "tests/test_jquantstats/test_portfolio"
     ]
   },
   "src/jquantstats/_portfolio_nav.py": {
-    "max_survivors": 0,
+    "max_survivors": 5,
     "tests": [
       "tests/test_jquantstats/test_portfolio"
     ]
   },
   "src/jquantstats/_portfolio_turnover.py": {
-    "max_survivors": 0,
+    "max_survivors": 3,
     "tests": [
       "tests/test_jquantstats/test_portfolio"
     ]
@@ -98,7 +98,7 @@
     ]
   },
   "src/jquantstats/_stats/_internals.py": {
-    "max_survivors": 0,
+    "max_survivors": 2,
     "tests": [
       "tests/test_jquantstats/test__stats",
       "tests/test_jquantstats/test_migration",
@@ -125,7 +125,7 @@
     ]
   },
   "src/jquantstats/_stats/_performance.py": {
-    "max_survivors": 0,
+    "max_survivors": 29,
     "tests": [
       "tests/test_jquantstats/test__stats",
       "tests/test_jquantstats/test_migration",
@@ -135,7 +135,7 @@
     ]
   },
   "src/jquantstats/_stats/_basic.py": {
-    "max_survivors": 0,
+    "max_survivors": 9,
     "tests": [
       "tests/test_jquantstats/test__stats",
       "tests/test_jquantstats/test_migration",
@@ -145,7 +145,7 @@
     ]
   },
   "src/jquantstats/_stats/_reporting.py": {
-    "max_survivors": 0,
+    "max_survivors": 16,
     "tests": [
       "tests/test_jquantstats/test__stats",
       "tests/test_jquantstats/test_migration",
@@ -155,7 +155,7 @@
     ]
   },
   "src/jquantstats/_stats/_rolling.py": {
-    "max_survivors": 0,
+    "max_survivors": 1,
     "tests": [
       "tests/test_jquantstats/test__stats",
       "tests/test_jquantstats/test_migration",
@@ -165,7 +165,7 @@
     ]
   },
   "src/jquantstats/_stats/_montecarlo.py": {
-    "max_survivors": 0,
+    "max_survivors": 2,
     "tests": [
       "tests/test_jquantstats/test__stats",
       "tests/test_jquantstats/test_migration",
@@ -194,14 +194,14 @@
     ]
   },
   "src/jquantstats/_reports/_portfolio.py": {
-    "max_survivors": 0,
+    "max_survivors": 16,
     "tests": [
       "tests/test_jquantstats/test__reports",
       "tests/test_jquantstats/test_snapshots.py"
     ]
   },
   "src/jquantstats/_reports/_protocol.py": {
-    "max_survivors": 0,
+    "max_survivors": 3,
     "tests": [
       "tests/test_jquantstats/test__reports",
       "tests/test_jquantstats/test_protocols.py"
@@ -214,7 +214,7 @@
     ]
   },
   "src/jquantstats/_plots/_data.py": {
-    "max_survivors": 0,
+    "max_survivors": 71,
     "tests": [
       "tests/test_jquantstats/test__plots"
     ]
@@ -226,7 +226,7 @@
     ]
   },
   "src/jquantstats/_plots/_protocol.py": {
-    "max_survivors": 0,
+    "max_survivors": 14,
     "tests": [
       "tests/test_jquantstats/test__plots",
       "tests/test_jquantstats/test_protocols.py"
@@ -239,19 +239,19 @@
     ]
   },
   "src/jquantstats/_utils/_data.py": {
-    "max_survivors": 0,
+    "max_survivors": 3,
     "tests": [
       "tests/test_jquantstats/test__utils"
     ]
   },
   "src/jquantstats/_utils/_portfolio.py": {
-    "max_survivors": 0,
+    "max_survivors": 2,
     "tests": [
       "tests/test_jquantstats/test__utils"
     ]
   },
   "src/jquantstats/_utils/_protocol.py": {
-    "max_survivors": 0,
+    "max_survivors": 2,
     "tests": [
       "tests/test_jquantstats/test__utils",
       "tests/test_jquantstats/test_protocols.py"
