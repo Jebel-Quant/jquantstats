@@ -120,7 +120,8 @@
   "src/jquantstats/_cache.py": {
     "max_survivors": 0,
     "tests": [
-      "tests/test_jquantstats/test_portfolio"
+      "tests/test_jquantstats/test_portfolio",
+      "tests/test_jquantstats/test__cache_mutation_kills.py"
     ]
   },
   "src/jquantstats/_stats/_performance.py": {

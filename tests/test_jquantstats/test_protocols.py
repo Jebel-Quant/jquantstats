@@ -18,9 +18,11 @@ from jquantstats._protocol import DataLike as RootDataLike
 from jquantstats._protocol import DataLike as StatsDataLike  # stats mixins now use the root protocol
 from jquantstats._protocol import StatsLike as RootStatsLike
 from jquantstats._reports._protocol import DataLike as ReportsDataLike
+from jquantstats._reports._protocol import PlotsLike as ReportsPlotsLike
 from jquantstats._reports._protocol import PortfolioLike as ReportsPortfolioLike
 from jquantstats._reports._protocol import StatsLike as ReportsStatsLike
 from jquantstats._utils._protocol import DataLike as UtilsDataLike
+from jquantstats._utils._protocol import PortfolioLike as UtilsPortfolioLike
 
 
 @pytest.fixture
@@ -67,6 +69,18 @@ def test_portfolio_satisfies_plots_portfolio_like(simple_portfolio):
 def test_portfolio_satisfies_reports_portfolio_like(simple_portfolio):
     """Portfolio satisfies the ReportsPortfolioLike protocol."""
     assert isinstance(simple_portfolio, ReportsPortfolioLike)
+
+
+def test_portfolio_satisfies_utils_portfolio_like(simple_portfolio):
+    """Portfolio satisfies the utils PortfolioLike protocol (runtime-checkable)."""
+    assert isinstance(simple_portfolio, UtilsPortfolioLike)
+    assert not isinstance("not-a-portfolio", UtilsPortfolioLike)
+
+
+def test_portfolio_plots_satisfy_reports_plots_like(simple_portfolio):
+    """The portfolio plots facade satisfies the reports PlotsLike protocol (runtime-checkable)."""
+    assert isinstance(simple_portfolio.plots, ReportsPlotsLike)
+    assert not isinstance(42, ReportsPlotsLike)
 
 
 def test_reports_stats_like_protocol_is_minimal():

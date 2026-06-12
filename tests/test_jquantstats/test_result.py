@@ -105,6 +105,9 @@ def test_result_create_reports_html_uses_cdn_plotlyjs(tmp_path, simple_portfolio
     for name in ("snapshot.html", "lag_ir.html", "lagged_perf.html", "smooth_perf.html"):
         html = (tmp_path / "plots" / name).read_text()
         assert "cdn.plot.ly" in html, f"{name} does not reference the plotly CDN"
+        # an inlined plotly.js bundle is ~4-5 MB and still contains the CDN
+        # string, so the size bound is what actually pins the CDN mode
+        assert len(html) < 1_000_000, f"{name} appears to embed the plotly.js bundle"
 
 
 def test_result_create_reports_does_not_open_browser(tmp_path, simple_portfolio, monkeypatch):
