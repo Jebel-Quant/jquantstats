@@ -349,5 +349,10 @@ The remaining non-zero ceilings cover only these categories:
 - **Unreachable defensive fallbacks** — e.g. `zip(..., strict=False)` over
   always-equal-length iterables, numeric fallbacks behind `isinstance`
   guards that polars cannot trigger.
+- **mutmut artifacts** — import-breaking mutants (e.g. `__slots__ = None`,
+  which raises `TypeError` at class creation) that mutmut 2.5.1 sometimes
+  misreports as survivors even though the focused suite fails under them
+  (verified by applying the mutation manually).  Counted in the ceiling
+  because the gate compares mutmut's numbers, not ground truth.
 
 Anything outside these categories must be killed, not ceilinged.
