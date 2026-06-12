@@ -12,10 +12,15 @@ import pytest
 
 kaleido = pytest.importorskip("kaleido", reason="kaleido not installed (pip install jquantstats[plot])")
 
-pytestmark = pytest.mark.skipif(
-    sys.platform == "win32",
-    reason="kaleido launches a Chrome subprocess that crashes the xdist worker on Windows CI",
-)
+pytestmark = [
+    pytest.mark.skipif(
+        sys.platform == "win32",
+        reason="kaleido launches a Chrome subprocess that crashes the xdist worker on Windows CI",
+    ),
+    # The first render pays the Chrome cold-start, which can exceed the
+    # global 60s timeout on a busy CI runner (flaked on the v0.9.4 tag build).
+    pytest.mark.timeout(300),
+]
 
 # PNG magic bytes: \x89PNG
 _PNG_MAGIC = b"\x89PNG"
