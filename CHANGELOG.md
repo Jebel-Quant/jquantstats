@@ -1,3 +1,12 @@
+## [0.9.6] - 2026-06-13
+
+### 💼 Other
+
+- Bump version 0.9.5 → 0.9.6
+
+### ⚙️ Miscellaneous Tasks
+
+- Update CHANGELOG.md for v0.9.5 [skip ci]
 ## [0.9.5] - 2026-06-12
 
 ### 🐛 Bug Fixes
