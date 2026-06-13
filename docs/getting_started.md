@@ -4,28 +4,6 @@ icon: material/rocket-launch
 
 # Getting Started
 
-jQuantStats provides two entry points depending on what data you have:
-
-| You have… | Use… | Why |
-|-----------|------|-----|
-| Prices **and** positions | [`Portfolio`](#route-a-portfolio) | Unlocks execution-delay analysis, turnover analytics, and cost modelling |
-| Returns (or prices only) | [`Data`](#route-b-data) | Lighter-weight path; easiest migration from QuantStats |
-
-```mermaid
-flowchart TD
-    Q1{What data do you have?}
-    Q1 -- "prices + positions" --> PF["Portfolio.from_cash_position(...)"]
-    Q1 -- "returns only" --> DR["Data.from_returns(...)"]
-    Q1 -- "prices only" --> DP["Data.from_prices(...)"]
-    PF --> PA["stats · plots · report<br/>+ turnover · costs · lag() · attribution"]
-    DR --> DA["stats · plots · report"]
-    DP --> DA
-```
-
-Both routes expose the same stats, plots, and report API.
-
----
-
 ## First five minutes
 
 A complete, runnable example — returns in, Sharpe out:
@@ -50,6 +28,28 @@ Swap the inline frame for your own returns (pandas works too — any
 narwhals-compatible frame is accepted) and you have a full tear sheet via
 `data.reports.full()`. The rest of this page covers the two entry points in
 depth; runnable notebooks live under [Examples](examples.md).
+
+---
+
+jQuantStats provides two entry points depending on what data you have:
+
+| You have… | Use… | Why |
+|-----------|------|-----|
+| Prices **and** positions | [`Portfolio`](#route-a-portfolio) | Unlocks execution-delay analysis, turnover analytics, and cost modelling |
+| Returns (or prices only) | [`Data`](#route-b-data) | Lighter-weight path; easiest migration from QuantStats |
+
+```mermaid
+flowchart TD
+    Q1{What data do you have?}
+    Q1 -- "prices + positions" --> PF["Portfolio.from_cash_position(...)"]
+    Q1 -- "returns only" --> DR["Data.from_returns(...)"]
+    Q1 -- "prices only" --> DP["Data.from_prices(...)"]
+    PF --> PA["stats · plots · report<br/>+ turnover · costs · lag() · attribution"]
+    DR --> DA["stats · plots · report"]
+    DP --> DA
+```
+
+Both routes expose the same stats, plots, and report API.
 
 ---
 
