@@ -7,14 +7,13 @@ from typing import TYPE_CHECKING
 import polars as pl
 
 from ._cache import cached_in_slot
+from ._portfolio_base import _PortfolioMembers
 
 
-class PortfolioTurnoverMixin:
+class PortfolioTurnoverMixin(_PortfolioMembers):
     """Mixin providing turnover analytics for Portfolio."""
 
     if TYPE_CHECKING:
-        cashposition: pl.DataFrame
-        aum: float
         _turnover_cache: pl.DataFrame | None
 
     @property
