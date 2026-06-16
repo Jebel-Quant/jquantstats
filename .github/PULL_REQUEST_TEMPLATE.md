@@ -26,4 +26,5 @@ Closes #
 - [ ] I have run `make deptry` and there are no dependency issues
 - [ ] I have added or updated tests that cover my changes
 - [ ] I have updated documentation if necessary
+- [ ] `CHANGELOG.md` entry added (or not needed for this change)
 - [ ] My commit messages follow the [Conventional Commits](https://www.conventionalcommits.org/) format

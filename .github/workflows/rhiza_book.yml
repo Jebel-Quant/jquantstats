@@ -16,6 +16,9 @@
 
 name: "(RHIZA) BOOK"
 
+permissions:
+  contents: read
+
 on:
   push:
     branches:
@@ -24,7 +27,7 @@ on:
 
 jobs:
   book:
-    uses: jebel-quant/rhiza/.github/workflows/rhiza_book.yml@v0.18.8
+    uses: jebel-quant/rhiza/.github/workflows/rhiza_book.yml@v0.19.3
     secrets: inherit
     permissions:
       contents: read
