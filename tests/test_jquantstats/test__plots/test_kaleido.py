@@ -6,16 +6,44 @@ installed so the base test suite remains dependency-free.
 
 from __future__ import annotations
 
+import os
 import sys
 
 import pytest
 
 kaleido = pytest.importorskip("kaleido", reason="kaleido not installed (pip install jquantstats[plot])")
 
+
+def _chrome_available() -> bool:
+    """Report whether kaleido can locate a Chrome/Chromium to render with.
+
+    kaleido v1 renders images by driving a headless Chrome subprocess. With no
+    browser on the system (and none downloaded via ``plotly_get_chrome``),
+    ``to_image`` / ``write_image`` block until the watchdog kills them — a 300s
+    hang rather than a clean skip. Resolve the browser the same way kaleido does
+    (choreographer's locator, which honours ``$BROWSER_PATH`` and the choreo
+    download cache) so these tests skip cleanly in a browserless dev env while
+    still running on CI runners, which ship Chrome. If the choreographer API
+    ever moves, fall back to *not* skipping so CI coverage is never silently lost.
+    """
+    if os.environ.get("BROWSER_PATH"):
+        return True
+    try:
+        from choreographer.browsers.chromium import chromium_based_browsers, get_browser_path
+
+        return get_browser_path(chromium_based_browsers) is not None
+    except Exception:
+        return True
+
+
 pytestmark = [
     pytest.mark.skipif(
         sys.platform == "win32",
         reason="kaleido launches a Chrome subprocess that crashes the xdist worker on Windows CI",
+    ),
+    pytest.mark.skipif(
+        not _chrome_available(),
+        reason="no Chrome/Chromium found for kaleido (install a browser or run `plotly_get_chrome`)",
     ),
     # The first render pays the Chrome cold-start, which can exceed the
     # global 60s timeout on a busy CI runner (flaked on the v0.9.4 tag build).
