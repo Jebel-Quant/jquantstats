@@ -21,10 +21,22 @@ class PortfolioCostMixin:
         aum: float
         cost_per_unit: float
         cost_bps: float
-        returns: pl.DataFrame
-        turnover: pl.DataFrame
-        profit: pl.DataFrame
-        data: Data
+
+        @property
+        def data(self) -> Data:
+            """Defined on Portfolio."""
+
+        @property
+        def returns(self) -> pl.DataFrame:
+            """Defined on PortfolioNavMixin."""
+
+        @property
+        def turnover(self) -> pl.DataFrame:
+            """Defined on PortfolioTurnoverMixin."""
+
+        @property
+        def profit(self) -> pl.DataFrame:
+            """Defined on PortfolioNavMixin."""
 
     @property
     def position_delta_costs(self) -> pl.DataFrame:
@@ -200,7 +212,7 @@ class PortfolioCostMixin:
 
         periods = self.data._periods_per_year  # one Data object, outside the loop
         sqrt_periods = float(np.sqrt(periods))
-        cost_levels = list(range(0, max_bps + 1))
+        cost_levels = list(range(max_bps + 1))
 
         # Extract base returns and turnover once — O(1) allocations regardless of max_bps
         base_rets = self.returns["returns"]

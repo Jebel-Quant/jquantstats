@@ -106,6 +106,7 @@ def test_native_expression_speedup(ten_year_daily_returns: pl.DataFrame) -> None
     """Confirm native expressions are faster than legacy map_elements approach."""
 
     def _median_runtime(fn: Callable[[pl.DataFrame], pl.DataFrame], repeats: int = BENCHMARK_REPEATS) -> float:
+        """Return the median runtime of repeatedly calling the given function."""
         runtimes: list[float] = []
         for _ in range(repeats):
             start = time.perf_counter()

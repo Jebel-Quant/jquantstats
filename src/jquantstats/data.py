@@ -470,7 +470,7 @@ class Data:
             date_column = date_cols[0]
             start = self.index[date_column].min()
             end = self.index[date_column].max()
-            return f"Data(assets={self.assets}, rows={rows}, start={start}, end={end})"
+            return f"Data(assets={self.assets}, rows={rows}, start={start!s}, end={end!s})"
         return f"Data(assets={self.assets}, rows={rows})"  # pragma: no cover  # __post_init__ requires ≥1 index column
 
     @property

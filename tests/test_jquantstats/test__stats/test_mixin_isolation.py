@@ -9,6 +9,7 @@ class _IsolatedReportingStatsMixin(_ReportingStatsMixin):
     """Concrete isolated reporting mixin used to exercise dependency errors."""
 
     def cagr(self, periods=None):
+        """Return a stub CAGR mapping for dependency testing."""
         return {"META": 0.1}
 
 

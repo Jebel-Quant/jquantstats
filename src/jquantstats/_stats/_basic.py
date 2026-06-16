@@ -34,7 +34,6 @@ class _BasicStatsMixin:
         from .._protocol import DataLike
 
         data: DataLike
-        all: pl.DataFrame | None
 
     @staticmethod
     def _positive(series: pl.Series) -> pl.Series:
@@ -763,7 +762,7 @@ class _BasicStatsMixin:
             float: The exposure value.
 
         """
-        all_data = cast(pl.DataFrame, self.all)
+        all_data = self.all
         ex = series.filter(series != 0).count() / all_data.height
         return math.ceil(ex * 100) / 100
 

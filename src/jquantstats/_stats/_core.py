@@ -200,7 +200,7 @@ def columnwise_stat(
             data = getattr(self, data_attr)
             return {col: inner_func(self, series, *args, **kwargs) for col, series in data.items()}
 
-        return wrapper
+        return cast("Callable[Concatenate[Any, P], dict[str, R]]", wrapper)
 
     if func is None:
         return decorator
@@ -255,12 +255,13 @@ def to_frame(
                 )
                 raise AttributeError(msg)
             data = getattr(self, data_attr)
-            return cast(pl.DataFrame, self.all).select(
+            result: pl.DataFrame = self.all.select(
                 [pl.col(name) for name in data.date_col]
                 + [inner_func(self, series, *args, **kwargs).alias(col) for col, series in data.items()]
             )
+            return result
 
-        return wrapper
+        return cast("Callable[Concatenate[Any, P], pl.DataFrame]", wrapper)
 
     if func is None:
         return decorator

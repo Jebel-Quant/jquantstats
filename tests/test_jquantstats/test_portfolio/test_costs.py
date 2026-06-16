@@ -175,7 +175,7 @@ def test_trading_cost_impact_vectorised_equivalence():
     periods = pf.data._periods_per_year
     _eps = np.finfo(np.float64).eps
 
-    for i, bps in enumerate(range(0, max_bps + 1)):
+    for i, bps in enumerate(range(max_bps + 1)):
         adj = base_rets - turnover_arr * (bps / 10_000.0)
         mean_val = float(np.mean(adj))
         std_val = float(np.std(adj, ddof=1))

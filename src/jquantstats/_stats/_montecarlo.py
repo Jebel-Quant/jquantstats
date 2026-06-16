@@ -22,7 +22,6 @@ class _MonteCarloStatsMixin:
         from .._protocol import DataLike
 
         data: DataLike
-        all: pl.DataFrame | None
 
     @staticmethod
     def _validate_positive_integer(name: str, value: int) -> int:
@@ -60,7 +59,7 @@ class _MonteCarloStatsMixin:
         idx = starts[:, :, np.newaxis] + np.arange(block_size)[np.newaxis, np.newaxis, :]
         idx = np.clip(idx, 0, n_obs - 1)
         # Flatten and trim to the requested period length
-        return values[idx].reshape(n, -1)[:, :period]
+        return np.asarray(values[idx].reshape(n, -1)[:, :period])
 
     def _simulate_distribution(self, n: int, period: int) -> dict[str, np.ndarray]:
         """Prepare validated inputs and sample *n* block-bootstrap paths per asset.

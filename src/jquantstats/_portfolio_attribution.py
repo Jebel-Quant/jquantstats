@@ -21,9 +21,15 @@ class PortfolioAttributionMixin:
         aum: float
         cost_per_unit: float
         cost_bps: float
-        assets: list[str]
-        nav_accumulated: pl.DataFrame
         _tilt_cache: Self | None
+
+        @property
+        def assets(self) -> list[str]:
+            """Defined on Portfolio."""
+
+        @property
+        def nav_accumulated(self) -> pl.DataFrame:
+            """Defined on PortfolioNavMixin."""
 
         @classmethod
         def from_cash_position(

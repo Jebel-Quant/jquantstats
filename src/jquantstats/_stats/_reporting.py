@@ -36,7 +36,6 @@ class _ReportingStatsMixin:
         from .._protocol import DataLike
 
         data: DataLike
-        all: pl.DataFrame | None
 
         def avg_return(self) -> dict[str, float]:
             """Defined on _BasicStatsMixin."""
@@ -56,10 +55,10 @@ class _ReportingStatsMixin:
         def payoff_ratio(self) -> dict[str, float]:
             """Defined on _BasicStatsMixin."""
 
-        def best(self) -> dict[str, float]:
+        def best(self) -> dict[str, float | None]:
             """Defined on _BasicStatsMixin."""
 
-        def worst(self) -> dict[str, float]:
+        def worst(self) -> dict[str, float | None]:
             """Defined on _BasicStatsMixin."""
 
         def volatility(self) -> dict[str, float]:
@@ -68,10 +67,10 @@ class _ReportingStatsMixin:
         def sharpe(self) -> dict[str, float]:
             """Defined on _RiskStatsMixin."""
 
-        def skew(self) -> dict[str, float]:
+        def skew(self) -> dict[str, int | float | None]:
             """Defined on _BasicStatsMixin."""
 
-        def kurtosis(self) -> dict[str, float]:
+        def kurtosis(self) -> dict[str, int | float | None]:
             """Defined on _BasicStatsMixin."""
 
         def value_at_risk(self) -> dict[str, float]:
@@ -82,9 +81,6 @@ class _ReportingStatsMixin:
 
         def max_drawdown(self) -> dict[str, float]:
             """Defined on _RiskStatsMixin."""
-
-        def cagr(self, periods: int | float | None = None) -> dict[str, float]:
-            """Defined on _ReportingStatsMixin."""
 
         def exposure(self) -> dict[str, float]:
             """Defined on _BasicStatsMixin."""
@@ -214,7 +210,7 @@ class _ReportingStatsMixin:
         if aggregate.lower() not in _freq_map:
             raise ValueError(f"aggregate must be one of {list(_freq_map)}, got {aggregate!r}")  # noqa: TRY003
 
-        all_df = cast(pl.DataFrame, self.all)
+        all_df = self.all
         date_col_name = self._data.date_col[0] if self._data.date_col else None
         if date_col_name is None or not all_df[date_col_name].dtype.is_temporal():
             return _raw_expected_returns()
@@ -262,13 +258,13 @@ class _ReportingStatsMixin:
         Returns:
             float: Calmar ratio, or ``nan`` if max drawdown is zero.
         """
-        raw_periods = periods or self._data._periods_per_year
+        raw_periods = float(periods or self._data._periods_per_year)
         max_dd = _to_float(_drawdown_series(series).max())
         if max_dd <= 0:
             return float("nan")
         n = len(series)
         comp_return = _comp_return(series)
-        cagr = (1.0 + comp_return) ** (raw_periods / n) - 1.0
+        cagr = float((1.0 + comp_return) ** (raw_periods / n)) - 1.0
         return cagr / max_dd
 
     @columnwise_stat
@@ -303,7 +299,7 @@ class _ReportingStatsMixin:
             dict[str, float | int | None]: Asset → max drawdown duration.
             Returns 0 when there are no underwater periods.
         """
-        all_df = cast(pl.DataFrame, self.all)
+        all_df = self.all
         date_col_name = self._data.date_col[0] if self._data.date_col else None
         has_date = date_col_name is not None and all_df[date_col_name].dtype.is_temporal()
         result: dict[str, float | int | None] = {}
@@ -351,7 +347,7 @@ class _ReportingStatsMixin:
             Entries are ``float("nan")`` when no temporal index is present or an
             asset has no non-null observations.
         """
-        all_df = cast(pl.DataFrame, self.all)
+        all_df = self.all
         date_col_name = self._data.date_col[0] if self._data.date_col else None
         if date_col_name is None or not all_df[date_col_name].dtype.is_temporal():
             return {col: float("nan") for col, _ in self._data.items()}
@@ -398,7 +394,7 @@ class _ReportingStatsMixin:
                 ``year``, ``JAN`` … ``DEC``, and optionally ``EOY``.
 
         """
-        all_df = cast(pl.DataFrame, self.all)
+        all_df = self.all
         date_col_name = self._data.date_col[0]
         month_names = {
             1: "JAN",
@@ -480,7 +476,7 @@ class _ReportingStatsMixin:
                 ``"Quarterly"``, ``"Yearly"``.
 
         """
-        all_df = cast(pl.DataFrame, self.all)
+        all_df = self.all
         date_col_name = self._data.date_col[0]
 
         def _agg(df: pl.DataFrame, group_col: str) -> pl.Series:
@@ -546,7 +542,7 @@ class _ReportingStatsMixin:
         if self._data.benchmark is None:
             raise AttributeError("No benchmark data available")  # noqa: TRY003
 
-        all_df = cast(pl.DataFrame, self.all)
+        all_df = self.all
         date_col_name = self._data.date_col[0]
         bench_col = self._data.benchmark.columns[0]
 
@@ -719,7 +715,7 @@ class _ReportingStatsMixin:
         Raises:
             ValueError: If the data has no date index.
         """
-        all_df = cast(pl.DataFrame, self.all)
+        all_df = self.all
         date_col_name = self._data.date_col[0] if self._data.date_col else None
         has_temporal = date_col_name is not None and all_df[date_col_name].dtype.is_temporal()
 
@@ -797,9 +793,10 @@ class _ReportingStatsMixin:
         def _safe(fn: Any) -> dict[str, Any]:
             """Call *fn()* and return its result; return NaN for each asset on any exception."""
             try:
-                return fn()
+                result: dict[str, Any] = fn()
             except Exception:
                 return dict.fromkeys(assets, float("nan"))
+            return result
 
         metrics: dict[str, dict[str, Any]] = {
             "avg_return": _safe(self.avg_return),

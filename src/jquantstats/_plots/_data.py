@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import math
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import plotly.express as px
@@ -47,7 +47,7 @@ def _ticker_colors(tickers: list[str]) -> dict[str, str]:
     return {ticker: palette[i % len(palette)] for i, ticker in enumerate(tickers)}
 
 
-def _date_range_selector() -> dict:
+def _date_range_selector() -> dict[str, Any]:
     """Return a standard Plotly date range-selector configuration.
 
     Returns:
@@ -87,7 +87,7 @@ def _apply_base_layout(
         The same figure, mutated in-place and returned for chaining.
 
     """
-    layout_kw: dict = {
+    layout_kw: dict[str, Any] = {
         "title": title,
         "height": height,
         "hovermode": "x unified",
@@ -121,7 +121,7 @@ def _bar_colors(values: list[float | None], positive_color: str, single_asset: b
     return [positive_color if v is not None and v > 0 else negative_color for v in values]
 
 
-def _compute_drawdown_periods(prices: list[float], n: int) -> list[dict]:
+def _compute_drawdown_periods(prices: list[float], n: int) -> list[dict[str, Any]]:
     """Identify the top *n* drawdown periods from a cumulative price series.
 
     Args:
@@ -140,7 +140,7 @@ def _compute_drawdown_periods(prices: list[float], n: int) -> list[dict]:
         hwm[i] = max(hwm[i - 1], prices[i])
 
     in_dd = [prices[i] < hwm[i] for i in range(length)]
-    periods: list[dict] = []
+    periods: list[dict[str, Any]] = []
     i = 0
     while i < length:
         if not in_dd[i]:

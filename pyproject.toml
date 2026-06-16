@@ -10,7 +10,7 @@ dependencies = [
     "jinja2>=3.1.0",
     "narwhals>=2.0.0",
     "numpy>=2.0.0",
-    "plotly>=6.0.0",
+    "plotly>=6.1.1",
     "polars>=1.35.2",
     "scipy>=1.14.1"
 ]
@@ -134,6 +134,12 @@ exclude_lines = [
 
 
 # Interrogate docstring coverage configuration
+[tool.mypy]
+
+[[tool.mypy.overrides]]
+module = ["plotly.*", "scipy.*"]
+ignore_missing_imports = true
+
 [tool.interrogate]
 fail-under = 100
 ignore-init-method = true

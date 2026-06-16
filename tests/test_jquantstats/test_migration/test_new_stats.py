@@ -231,6 +231,7 @@ def test_sharpe_variance_decreases_with_sample_size():
     extended_vals = base_vals + (rng.standard_normal(450) * 0.01 + 0.001).tolist()
 
     def _make(vals):
+        """Build a returns DataFrame with daily dates for the given values."""
         n = len(vals)
         return pl.DataFrame({"Date": [date(2020, 1, 1) + timedelta(days=i) for i in range(n)], "asset": vals})
 
