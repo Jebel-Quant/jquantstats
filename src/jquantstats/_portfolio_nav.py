@@ -7,16 +7,14 @@ from typing import TYPE_CHECKING
 import polars as pl
 
 from ._cache import cached_in_slot
+from ._portfolio_base import _PortfolioMembers
 from .exceptions import MissingDateColumnError, NoAssetColumnsError
 
 
-class PortfolioNavMixin:
+class PortfolioNavMixin(_PortfolioMembers):
     """Mixin providing NAV & returns chain properties for Portfolio."""
 
     if TYPE_CHECKING:
-        prices: pl.DataFrame
-        cashposition: pl.DataFrame
-        aum: float
         _profits_cache: pl.DataFrame | None
         _returns_cache: pl.DataFrame | None
 

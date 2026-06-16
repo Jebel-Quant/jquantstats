@@ -3,40 +3,15 @@
 from __future__ import annotations
 
 import math
-from typing import TYPE_CHECKING
 
 import polars as pl
 
+from ._portfolio_base import _PortfolioMembers
 from .exceptions import InvalidMaxBpsError, NegativeCostBpsError
 
-if TYPE_CHECKING:
-    from .data import Data
 
-
-class PortfolioCostMixin:
+class PortfolioCostMixin(_PortfolioMembers):
     """Mixin providing cost analysis methods for Portfolio."""
-
-    if TYPE_CHECKING:
-        cashposition: pl.DataFrame
-        aum: float
-        cost_per_unit: float
-        cost_bps: float
-
-        @property
-        def data(self) -> Data:
-            """Defined on Portfolio."""
-
-        @property
-        def returns(self) -> pl.DataFrame:
-            """Defined on PortfolioNavMixin."""
-
-        @property
-        def turnover(self) -> pl.DataFrame:
-            """Defined on PortfolioTurnoverMixin."""
-
-        @property
-        def profit(self) -> pl.DataFrame:
-            """Defined on PortfolioNavMixin."""
 
     @property
     def position_delta_costs(self) -> pl.DataFrame:

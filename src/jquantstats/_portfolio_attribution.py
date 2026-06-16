@@ -7,29 +7,14 @@ from typing import TYPE_CHECKING, Self
 import polars as pl
 
 from ._cache import cached_in_slot
-
-if TYPE_CHECKING:
-    pass
+from ._portfolio_base import _PortfolioMembers
 
 
-class PortfolioAttributionMixin:
+class PortfolioAttributionMixin(_PortfolioMembers):
     """Mixin providing tilt/timing attribution properties for Portfolio."""
 
     if TYPE_CHECKING:
-        cashposition: pl.DataFrame
-        prices: pl.DataFrame
-        aum: float
-        cost_per_unit: float
-        cost_bps: float
         _tilt_cache: Self | None
-
-        @property
-        def assets(self) -> list[str]:
-            """Defined on Portfolio."""
-
-        @property
-        def nav_accumulated(self) -> pl.DataFrame:
-            """Defined on PortfolioNavMixin."""
 
         @classmethod
         def from_cash_position(
