@@ -70,6 +70,20 @@ _strictly_negative_returns = st.floats(min_value=-0.1, max_value=-1e-6, allow_na
 # Positive scale factors (used for scale-invariance tests)
 _positive_scale_factor = st.floats(min_value=0.1, max_value=10.0, allow_nan=False, allow_infinity=False)
 
+# Returns conditioned for scale-invariance tests: either exactly zero or a
+# realistic magnitude in [1e-6, 0.1]. This excludes the denormal-magnitude band
+# (|r| ~ 1e-30), where mean/std-ratio metrics like Sharpe become scale-dependent:
+# the negligible-std guard in ``_std_is_negligible`` falls back to an absolute
+# floor (~eps**2) once |mean| drops below one machine epsilon, so scaling such a
+# series can flip the std from "real dispersion" to "rounding noise" (finite
+# Sharpe -> NaN). That regime never occurs in real return data; restricting to it
+# keeps the scale-invariance property meaningful. See #836.
+_scale_safe_returns = st.one_of(
+    st.just(0.0),
+    st.floats(min_value=1e-6, max_value=0.1, allow_nan=False, allow_infinity=False),
+    st.floats(min_value=-0.1, max_value=-1e-6, allow_nan=False, allow_infinity=False),
+)
+
 # Positive prices (used to build synthetic Portfolio instances)
 _pos_price = st.floats(min_value=0.1, max_value=100.0, allow_nan=False, allow_infinity=False)
 
@@ -186,7 +200,7 @@ def test_sortino_nonnegative_for_all_positive_returns(returns: list[float]) -> N
 
 @pytest.mark.property
 @given(
-    returns=st.lists(_general_returns, min_size=10, max_size=50),
+    returns=st.lists(_scale_safe_returns, min_size=10, max_size=50),
     scale=_positive_scale_factor,
 )
 @settings(max_examples=100)
