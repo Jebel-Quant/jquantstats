@@ -200,7 +200,7 @@ class PortfolioCostMixin:
 
         periods = self.data._periods_per_year  # one Data object, outside the loop
         sqrt_periods = float(np.sqrt(periods))
-        cost_levels = list(range(0, max_bps + 1))
+        cost_levels = list(range(max_bps + 1))
 
         # Extract base returns and turnover once — O(1) allocations regardless of max_bps
         base_rets = self.returns["returns"]

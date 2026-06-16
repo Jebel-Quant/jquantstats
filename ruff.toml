@@ -70,9 +70,7 @@ extend-select = [
     "A",     # flake8-builtins - Don't shadow Python builtins
     "ANN001", # flake8-annotations - Require function argument annotations
     "ANN2",   # flake8-annotations - Require function return annotations
-    "ARG",   # flake8-unused-arguments - Unused arguments (tests exempt below: pytest fixtures)
     "B",     # flake8-bugbear - Find likely bugs and design problems
-    "BLE",   # flake8-blind-except - No bare `except Exception` swallowing
     "C4",    # flake8-comprehensions - Better list/set/dict comprehensions
     "PIE",   # flake8-pie - Miscellaneous lints (duplicate class fields, useless spread, ...)
     "SIM",   # flake8-simplify - Simplify code
@@ -85,6 +83,10 @@ extend-select = [
 
 # Deliberately NOT enabled — exclusions are decisions, not omissions.
 # One-line rationale per family; revisit when the rationale stops holding:
+# ARG: several stat/report/plot methods accept params (periods, rf, kwargs, title) purely for
+#      API parity with QuantStats; flagging them as unused fights a deliberate, documented contract
+# BLE: report/metric rendering is best-effort by design (the _safe wrapper and _try_div helpers
+#      swallow any failure so one broken chart/metric never aborts the whole report)
 # ERA: templates, notebooks, and shipped configs legitimately carry commented-out example code
 # T10: stray breakpoints/pdb imports would fail local pre-commit mid-debugging; review catches leftovers
 # PL: Pylint family is large and opinionated (magic values, arg counts) — high noise for a template repo
@@ -131,7 +133,6 @@ line-ending = "auto"
     "S101",  # assert is the test idiom
     "S603",  # tests drive git/make/uv via subprocess with fixed argument lists
     "S607",  # partial executable paths (git, make) are intentional in test drivers
-    "ARG",   # pytest fixtures are requested by name for their side effects, not always read
 ]
 # Project test suite only — allowances the synced .rhiza/tests should not inherit
 "tests/**/*.py" = [

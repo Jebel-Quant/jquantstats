@@ -61,8 +61,6 @@ def _make_stub_stats(**method_returns: dict) -> object:
     class _Stub:
         """Minimal stats-like stub populated by setattr."""
 
-        pass
-
     stub = _Stub()
     for name, retval in method_returns.items():
         setattr(stub, name, lambda rv=retval, **_kw: rv)
