@@ -26,6 +26,7 @@ def integer_indexed_data():
     from jquantstats.data import Data
 
     def _build(returns: pl.DataFrame, idx_col: str = "idx") -> Data:
+        """Build a Data object indexed by integer positions."""
         index = pl.DataFrame({idx_col: list(range(returns.height))})
         return Data(returns=returns, index=index)
 
@@ -890,8 +891,11 @@ def test_columnwise_stat_missing_data_attr_raises_descriptive_error():
     from jquantstats._stats._core import columnwise_stat
 
     class _MissingData:
+        """Host class that omits the required data attribute."""
+
         @columnwise_stat
         def metric(self, series: pl.Series) -> float:
+            """Return the mean of the given series."""
             return float(series.mean() or 0.0)
 
     with pytest.raises(AttributeError, match="columnwise_stat requires host object to define '_data'"):
@@ -903,10 +907,13 @@ def test_to_frame_missing_data_attr_raises_descriptive_error():
     from jquantstats._stats._core import to_frame
 
     class _MissingData:
+        """Host class that omits the required data attribute."""
+
         all = pl.DataFrame({"Date": [1]})
 
         @to_frame
         def metric(self, series: pl.Series) -> pl.Expr:
+            """Return a literal expression of the series mean."""
             return pl.lit(float(series.mean() or 0.0))
 
     with pytest.raises(AttributeError, match="to_frame requires host object to define '_data'"):
@@ -918,10 +925,13 @@ def test_columnwise_stat_supports_custom_data_attr():
     from jquantstats._stats._core import columnwise_stat
 
     class _CustomDataHost:
+        """Host class exposing data under a custom attribute name."""
+
         data = {"asset": pl.Series("asset", [1.0, 2.0, 3.0])}
 
         @columnwise_stat(data_attr="data")
         def metric(self, series: pl.Series) -> float:
+            """Return the mean of the given series."""
             return float(series.mean() or 0.0)
 
     assert _CustomDataHost().metric() == {"asset": pytest.approx(2.0)}
@@ -932,14 +942,19 @@ def test_to_frame_supports_custom_data_attr():
     from jquantstats._stats._core import to_frame
 
     class _DataDictWithDateCol(dict[str, pl.Series]):
+        """Series mapping that also exposes a date column attribute."""
+
         date_col = ["Date"]
 
     class _CustomDataHost:
+        """Host class exposing data under a custom attribute name."""
+
         data = _DataDictWithDateCol({"asset": pl.Series("asset", [1.0, 2.0, 3.0])})
         all = pl.DataFrame({"Date": [1, 2, 3], "asset": [1.0, 2.0, 3.0]})
 
         @to_frame(data_attr="data")
         def metric(self, series: pl.Series) -> pl.Expr:
+            """Return a literal expression of the series mean."""
             return pl.lit(float(series.mean() or 0.0))
 
     result = _CustomDataHost().metric()

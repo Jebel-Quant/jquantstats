@@ -325,6 +325,7 @@ def test_volatility_adjusted_returns_custom_estimator(long_data):
 
     # Use rolling_mean of absolute returns as an alternative vol proxy
     def custom(expr):
+        """Estimate volatility as the rolling mean of absolute returns."""
         return expr.abs().rolling_mean(5)
 
     result = long_data.utils.to_volatility_adjusted_returns(vol_estimator=custom)
