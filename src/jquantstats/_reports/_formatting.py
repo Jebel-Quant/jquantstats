@@ -24,7 +24,7 @@ def _plotly_div(fig: Any, include_plotlyjs: bool | str = False) -> str:
     """Serialise a Plotly figure to a standalone HTML ``<div>``."""
     import plotly.io as pio
 
-    return pio.to_html(fig, full_html=False, include_plotlyjs=include_plotlyjs)
+    return str(pio.to_html(fig, full_html=False, include_plotlyjs=include_plotlyjs))
 
 
 def _table_html(header_cells: str, body_html: str) -> str:

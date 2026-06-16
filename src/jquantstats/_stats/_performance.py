@@ -46,7 +46,6 @@ class _RiskStatsMixin:
         from .._protocol import DataLike
 
         data: DataLike
-        all: pl.DataFrame | None
 
         def autocorr_penalty(self) -> dict[str, float]:
             """Defined on _BasicStatsMixin."""
@@ -417,7 +416,7 @@ class _RiskStatsMixin:
             that have not yet recovered by the last observation.
             ``max_drawdown`` is a negative fraction (e.g. ``-0.2`` for 20%).
         """
-        all_df = cast(pl.DataFrame, self.all)
+        all_df = self.all
         date_col_name = self._data.date_col[0] if self._data.date_col else None
         has_date = date_col_name is not None and all_df[date_col_name].dtype.is_temporal()
 
@@ -739,7 +738,7 @@ class _RiskStatsMixin:
         benchmark_col = benchmark or self._data.benchmark.columns[0]
 
         # Evaluate both series and benchmark as Series
-        all_data = cast(pl.DataFrame, self.all)
+        all_data = self.all
         dframe = all_data.select([series, pl.col(benchmark_col).alias("benchmark")]).drop_nulls()
 
         matrix = dframe.to_numpy()
@@ -783,7 +782,7 @@ class _RiskStatsMixin:
         ppy = periods_per_year or self._data._periods_per_year
 
         benchmark_col = benchmark or self._data.benchmark.columns[0]
-        all_series = cast(pl.DataFrame, self.all)
+        all_series = self.all
         valid_pairs = pl.DataFrame({"strategy": series, "benchmark": all_series[benchmark_col]}).drop_nulls()
         active = valid_pairs["strategy"] - valid_pairs["benchmark"]
 
@@ -822,7 +821,7 @@ class _RiskStatsMixin:
         benchmark_col = benchmark or benchmark_data.columns[0]
 
         # Evaluate both series and benchmark as Series
-        all_data = cast(pl.DataFrame, self.all)
+        all_data = self.all
         dframe = all_data.select([series, pl.col(benchmark_col).alias("benchmark")]).drop_nulls()
         matrix = dframe.to_numpy()
 
@@ -880,7 +879,7 @@ class _RiskStatsMixin:
         benchmark_data = self._data.benchmark
         benchmark_col = benchmark or benchmark_data.columns[0]
 
-        all_data = cast(pl.DataFrame, self.all)
+        all_data = self.all
         dframe = all_data.select([series, pl.col(benchmark_col).alias("_bench")]).drop_nulls()
         matrix = dframe.to_numpy()
         strategy_np = matrix[:, 0]

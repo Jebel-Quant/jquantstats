@@ -20,9 +20,10 @@ from ._formatting import _fmt, _is_finite, _plotly_div, _table_html
 def _safe(fn: Any, *args: Any, **kwargs: Any) -> dict[str, float]:
     """Call ``fn(*args, **kwargs)`` and return ``{}`` on any exception."""
     try:
-        return fn(*args, **kwargs)
+        result: dict[str, float] = fn(*args, **kwargs)
     except Exception:
         return {}
+    return result
 
 
 def _pct(d: dict[str, float]) -> dict[str, float]:
@@ -765,7 +766,7 @@ class Reports:
                 start_dt = all_df[date_col].min()
                 end_dt = all_df[date_col].max()
                 n = len(all_df)
-                period_info = f"{start_dt} → {end_dt} | {n:,} observations"
+                period_info = f"{start_dt!s} → {end_dt!s} | {n:,} observations"
 
         # ── Drawdowns ─────────────────────────────────────────────────────────
         drawdowns_html = _drawdowns_section_html(self._data, assets)
@@ -774,7 +775,7 @@ class Reports:
         plots = getattr(self._data, "plots", None)
         chart_parts: list[str] = []
         if plots is not None:  # pragma: no branch — Data always exposes .plots; getattr default is defensive
-            _chart_methods = [
+            _chart_methods: list[tuple[str, dict[str, Any]]] = [
                 ("snapshot", {}),
                 ("returns", {}),
                 ("drawdown", {}),

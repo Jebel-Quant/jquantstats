@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import math
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 import numpy as np
 import polars as pl
@@ -32,7 +32,6 @@ class _RollingStatsMixin:
         from .._protocol import DataLike
 
         data: DataLike
-        all: pl.DataFrame | None
 
     def implied_volatility(self, periods: int = 252, annualize: bool = True) -> pl.DataFrame | dict[str, float]:
         """Calculate implied volatility using log returns.
@@ -58,7 +57,7 @@ class _RollingStatsMixin:
         """
         if annualize:
             scale = _annualization_factor(periods)
-            return cast(pl.DataFrame, self.all).select(
+            return self.all.select(
                 [pl.col(name) for name in self._data.date_col]
                 + [
                     ((1.0 + pl.col(col)).log(math.e).rolling_std(window_size=periods) * scale).alias(col)
@@ -109,7 +108,7 @@ class _RollingStatsMixin:
         if not isinstance(window, int) or window <= 0:
             raise ValueError("window must be a positive integer")  # noqa: TRY003
 
-        cols = []
+        cols: list[pl.Expr | pl.Series] = [pl.col(name) for name in self._data.date_col]
         for col, series in self._data.items():
             prices = _RiskStatsMixin.prices(series)
             ranked = prices.rolling_map(
@@ -118,7 +117,7 @@ class _RollingStatsMixin:
             ).alias(col)
             cols.append(ranked)
 
-        return cast(pl.DataFrame, self.all).select([pl.col(name) for name in self._data.date_col] + cols)
+        return self.all.select(cols)
 
     def rolling_sortino(
         self,
@@ -149,7 +148,7 @@ class _RollingStatsMixin:
             negative_squared = pl.when(pl.col(col) < 0).then(pl.col(col) ** 2).otherwise(0.0)
             downside = negative_squared.rolling_mean(window_size=rolling_period)
             exprs.append(((mean_ret / downside.sqrt()) * scale).alias(col))
-        return cast(pl.DataFrame, self.all).select([pl.col(name) for name in self._data.date_col] + exprs)
+        return self.all.select([pl.col(name) for name in self._data.date_col] + exprs)
 
     def rolling_sharpe(
         self,
@@ -175,7 +174,7 @@ class _RollingStatsMixin:
         if not isinstance(actual_window, int) or actual_window <= 0:
             raise ValueError("rolling_period must be a positive integer")  # noqa: TRY003
         scale = _annualization_factor(actual_periods)
-        return cast(pl.DataFrame, self.all).select(
+        return self.all.select(
             [pl.col(name) for name in self._data.date_col]
             + [
                 (
@@ -221,7 +220,7 @@ class _RollingStatsMixin:
             raise ValueError("rolling_period must be a positive integer")  # noqa: TRY003
 
         ppy = periods_per_year or self._data._periods_per_year
-        all_df = cast(pl.DataFrame, self.all)
+        all_df = self.all
         bench_col = benchmark or self._data.benchmark.columns[0]
 
         w = rolling_period
@@ -273,7 +272,7 @@ class _RollingStatsMixin:
         if not isinstance(actual_periods, int | float):
             raise TypeError
         factor = _annualization_factor(actual_periods) if annualize else 1.0
-        return cast(pl.DataFrame, self.all).select(
+        return self.all.select(
             [pl.col(name) for name in self._data.date_col]
             + [
                 (pl.col(col).rolling_std(window_size=actual_window) * factor).alias(col)

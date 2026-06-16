@@ -57,8 +57,15 @@ class PortfolioLike(Protocol):  # pragma: no cover
     concrete dependency on `Portfolio`.
     """
 
-    prices: pl.DataFrame
-    aum: float
+    @property
+    def prices(self) -> pl.DataFrame:
+        """Price (holding) DataFrame."""
+        ...
+
+    @property
+    def aum(self) -> float:
+        """Assets under management."""
+        ...
 
     @property
     def assets(self) -> list[str]:

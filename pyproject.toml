@@ -134,6 +134,12 @@ exclude_lines = [
 
 
 # Interrogate docstring coverage configuration
+[tool.mypy]
+
+[[tool.mypy.overrides]]
+module = ["plotly.*", "scipy.*"]
+ignore_missing_imports = true
+
 [tool.interrogate]
 fail-under = 100
 ignore-init-method = true

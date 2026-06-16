@@ -41,9 +41,20 @@ class DataLike(Protocol):  # pragma: no cover
     use only part of it, and keeps a single definition.
     """
 
-    returns: pl.DataFrame
-    index: pl.DataFrame
-    benchmark: pl.DataFrame | None
+    @property
+    def returns(self) -> pl.DataFrame:
+        """Return DataFrame (asset columns only, no benchmark or date)."""
+        ...
+
+    @property
+    def index(self) -> pl.DataFrame:
+        """Date / time index DataFrame."""
+        ...
+
+    @property
+    def benchmark(self) -> pl.DataFrame | None:
+        """Benchmark DataFrame, or None when no benchmark was provided."""
+        ...
 
     @property
     def all(self) -> pl.DataFrame:
