@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 import quantstats as qs
 
-from jquantstats._stats._performance import _RiskStatsMixin
+from jquantstats._stats._drawdown import _DrawdownMixin
 
 from ..tolerances import TOL_FLOAT64
 
@@ -36,7 +36,7 @@ def test_rolling(stats, method, kwargs, atol):
 def test_pct_rank(stats):
     """Verify pct_rank matches quantstats on AAPL prices."""
     aapl_returns = stats.returns["AAPL"]
-    aapl_prices = _RiskStatsMixin.prices(aapl_returns)
+    aapl_prices = _DrawdownMixin.prices(aapl_returns)
     aapl_prices_pd = aapl_prices.to_pandas()
     aapl_prices_pd.index = stats.index["Date"].to_pandas()
 

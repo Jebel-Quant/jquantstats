@@ -55,6 +55,20 @@ class _BasicStatsMixin:
         """Return the mean of all negative values in *series*, or NaN if none exist."""
         return _mean(_BasicStatsMixin._negative(series))
 
+    @staticmethod
+    def _gaussian_quantile(alpha: float, mu: float, sigma: float) -> float:
+        """Gaussian inverse-CDF (``norm.ppf``) returning NaN for a zero-scale input.
+
+        ``norm.ppf(alpha, mu, 0.0)`` already returns ``nan`` for a degenerate
+        (zero-variance) distribution — but it emits an ``invalid value
+        encountered in multiply`` RuntimeWarning while doing so (``inf * 0``
+        internally).  Degenerate scale arises for a single observation (undefined
+        std) or a constant series.  Short-circuiting to ``float("nan")`` keeps the
+        exact same result while suppressing the spurious warning; downstream
+        masking relies on this NaN (Polars treats ``x < nan`` as ``True``).
+        """
+        return float("nan") if sigma == 0.0 else float(norm.ppf(alpha, mu, sigma))
+
     # ── Basic statistics ──────────────────────────────────────────────────────
 
     @columnwise_stat
@@ -288,7 +302,7 @@ class _BasicStatsMixin:
         mu = mean_val
         sigma *= std_val if std_val is not None else 0.0
 
-        return float(norm.ppf(alpha, mu, sigma))
+        return self._gaussian_quantile(alpha, mu, sigma)
 
     @columnwise_stat
     def _conditional_value_at_risk_impl(self, series: pl.Series, sigma: float = 1.0, alpha: float = 0.05) -> float:
@@ -298,7 +312,7 @@ class _BasicStatsMixin:
         mu = mean_val
         sigma *= std_val if std_val is not None else 0.0
 
-        var = norm.ppf(alpha, mu, sigma)
+        var = self._gaussian_quantile(alpha, mu, sigma)
 
         # Compute mean of returns less than or equal to VaR
         # Cast to Any or pl.Series to suppress Ty error
@@ -424,7 +438,7 @@ class _BasicStatsMixin:
         dd_neg = -self._drawdown_with_baseline(series)
         mu = _mean(dd_neg)
         sigma = cast(float, dd_neg.std())
-        var_threshold = float(norm.ppf(0.05, mu, sigma))
+        var_threshold = self._gaussian_quantile(0.05, mu, sigma)
         mask = cast(Iterable[bool], dd_neg < var_threshold)
         cvar_val = _mean(dd_neg.filter(mask))
 

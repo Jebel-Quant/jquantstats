@@ -6,10 +6,14 @@ class that combines five mixin classes:
 - `_BasicStatsMixin` — basic statistics,
   volatility, win/loss metrics, and risk metrics (VaR, Sharpe inputs, Kelly).
 - `_RiskStatsMixin` — Sharpe,
-  Sortino, drawdown, benchmark/factor analytics (R², alpha, beta).
+  Sortino, benchmark/factor analytics (R², alpha, beta).
+- `_DrawdownMixin` — cumulative returns, drawdown series, max drawdown, and
+  per-episode drawdown details.
 - `_ReportingStatsMixin` — temporal
   reporting, Calmar, recovery factor, capture ratios, annual breakdown, and
   summary.
+- `_PeriodicReportingMixin` — period-bucketed tables: monthly-returns pivot,
+  distribution across calendar frequencies, benchmark comparison, worst-N periods.
 - `_RollingStatsMixin` — rolling-window
   time-series metrics (rolling Sharpe, Sortino, and volatility).
 - `_MonteCarloStatsMixin` — block-bootstrap Monte Carlo simulation distributions
@@ -34,6 +38,7 @@ from ._core import (
     columnwise_stat,
     to_frame,
 )
+from ._drawdown import _DrawdownMixin
 from ._internals import (
     _annualization_factor,
     _comp_return,
@@ -42,6 +47,7 @@ from ._internals import (
 )
 from ._montecarlo import _MonteCarloStatsMixin
 from ._performance import _RiskStatsMixin
+from ._periodic import _PeriodicReportingMixin
 from ._reporting import _ReportingStatsMixin
 from ._rolling import _RollingStatsMixin
 
@@ -62,7 +68,15 @@ __all__ = [
 ]
 
 
-class Stats(_BasicStatsMixin, _RiskStatsMixin, _ReportingStatsMixin, _RollingStatsMixin, _MonteCarloStatsMixin):
+class Stats(
+    _BasicStatsMixin,
+    _RiskStatsMixin,
+    _DrawdownMixin,
+    _ReportingStatsMixin,
+    _PeriodicReportingMixin,
+    _RollingStatsMixin,
+    _MonteCarloStatsMixin,
+):
     """Statistical analysis tools for financial returns data.
 
     Provides a comprehensive set of methods for calculating various financial
@@ -83,7 +97,9 @@ class Stats(_BasicStatsMixin, _RiskStatsMixin, _ReportingStatsMixin, _RollingSta
 
     - `_BasicStatsMixin`
     - `_RiskStatsMixin`
+    - `_DrawdownMixin`
     - `_ReportingStatsMixin`
+    - `_PeriodicReportingMixin`
     - `_RollingStatsMixin`
     - `_MonteCarloStatsMixin`
 
