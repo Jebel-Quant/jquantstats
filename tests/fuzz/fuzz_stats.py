@@ -21,9 +21,18 @@ import sys
 
 import atheris
 
-with atheris.instrument_imports():
-    import polars as pl
+# Pre-import the heavy native dependencies OUTSIDE the instrumentation block.
+# Atheris's bytecode instrumentation miscompiles parts of polars' Python
+# machinery (an instrumented build returns None from Series.is_not_null(),
+# which crashes interpolate()), so we let these libraries load uninstrumented
+# and instrument only the first-party package under test. Importing the
+# top-level packages pulls in their submodules, so jquantstats's own imports
+# below hit the module cache and are never re-instrumented.
+import narwhals  # noqa: F401  # pre-imported uninstrumented (see note above)
+import numpy as np  # noqa: F401  # pre-imported uninstrumented (see note above)
+import polars as pl
 
+with atheris.instrument_imports():
     from jquantstats import Data, interpolate
     from jquantstats.exceptions import JQuantStatsError
 
