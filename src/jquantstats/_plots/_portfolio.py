@@ -15,7 +15,7 @@ import plotly.io as pio
 import polars as pl
 from plotly.subplots import make_subplots
 
-from ._data import _apply_base_layout
+from ._data._styling import _apply_base_layout
 
 if TYPE_CHECKING:
     from ._protocol import PortfolioLike
