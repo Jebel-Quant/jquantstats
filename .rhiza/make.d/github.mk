@@ -41,7 +41,7 @@ failed-workflows: gh-install ## list recent failing workflow runs
 	@gh run list --limit 10 --status failure --json conclusion,name,headBranch,event,createdAt --template \
 		'{{tablerow (printf "STATUS" | color "bold") (printf "NAME" | color "bold") (printf "BRANCH" | color "bold") (printf "EVENT" | color "bold") (printf "TIME" | color "bold")}}{{range .}}{{tablerow (printf "%s" .conclusion | color "red") .name (.headBranch | color "cyan") (.event | color "yellow") (timeago .createdAt | color "white")}}{{end}}'
 
-whoami: gh-install ## check github auth status
+whoami: require-gh ## check github auth status
 	@printf "${BLUE}[INFO] GitHub Authentication Status:${RESET}\n"
 	@gh auth status --hostname github.com --json hosts --template \
 		'{{range $$host, $$accounts := .hosts}}{{range $$accounts}}{{if .active}}  {{printf "✓" | color "green"}} Logged in to {{$$host}} account {{.login | color "bold"}} ({{.tokenSource}}){{"\n"}}  Active account: {{printf "true" | color "green"}}{{"\n"}}  Git operations protocol: {{.gitProtocol | color "yellow"}}{{"\n"}}  Token scopes: {{.scopes | color "yellow"}}{{"\n"}}{{end}}{{end}}{{end}}'
