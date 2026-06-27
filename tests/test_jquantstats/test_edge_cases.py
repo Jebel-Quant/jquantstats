@@ -8,6 +8,7 @@ import pytest
 from polars.testing import assert_frame_equal
 
 from jquantstats.data import Data
+from jquantstats.exceptions import BenchmarkAlignmentWarning
 
 
 @pytest.fixture
@@ -332,7 +333,10 @@ def test_partial_date_overlap_aligns_correctly():
         pl.col("Date").str.to_date()
     )
 
-    data = Data.from_returns(returns=returns, benchmark=benchmark)
+    # The partial overlap must surface a BenchmarkAlignmentWarning so dropped
+    # rows cannot truncate the analysis unnoticed.
+    with pytest.warns(BenchmarkAlignmentWarning):
+        data = Data.from_returns(returns=returns, benchmark=benchmark)
 
     assert data.returns.shape[0] == 6
     assert data.benchmark is not None
@@ -463,8 +467,13 @@ def test_null_strategy_nan_not_affected_by_null_strategy():
     assert data_drop.returns.shape[0] == 3
 
 
+@pytest.mark.filterwarnings("ignore::jquantstats.exceptions.BenchmarkAlignmentWarning")
 def test_null_strategy_applied_to_benchmark():
-    """null_strategy is applied to benchmark as well as returns."""
+    """null_strategy is applied to benchmark as well as returns.
+
+    Dropping the null benchmark row leaves returns and benchmark misaligned;
+    that alignment warning is incidental to the null-handling under test.
+    """
     from datetime import date, timedelta
 
     from jquantstats.exceptions import NullsInReturnsError

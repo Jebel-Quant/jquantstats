@@ -93,6 +93,7 @@ def test_pandas_input(returns):
     assert_frame_equal(d.returns, returns.drop("Date"))
 
 
+@pytest.mark.filterwarnings("ignore::jquantstats.exceptions.BenchmarkAlignmentWarning")
 def test_with_benchmark(returns, benchmark_frame):
     """Tests that Data.from_returns correctly handles a benchmark.
 
@@ -167,6 +168,7 @@ def test_from_returns_pandas_input(returns):
     assert_frame_equal(d.returns, returns.drop("Date"))
 
 
+@pytest.mark.filterwarnings("ignore::jquantstats.exceptions.BenchmarkAlignmentWarning")
 def test_from_returns_with_benchmark(returns, benchmark_frame):
     """Data.from_returns with benchmark correctly stores benchmark."""
     d = Data.from_returns(returns=returns, benchmark=benchmark_frame)
