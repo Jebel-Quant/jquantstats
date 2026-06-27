@@ -1,9 +1,13 @@
 """Tests for the stats module."""
 
+import warnings
+
 import numpy as np
 import polars as pl
 import pytest
 from scipy.stats import norm
+
+from jquantstats.exceptions import BenchmarkAlignmentWarning
 
 
 @pytest.fixture
@@ -1481,7 +1485,12 @@ def loss_data(benchmark_frame):
     dates = pl.date_range(pl.date(2020, 1, 1), pl.date(2020, 4, 9), interval="1d", eager=True)[:100]
     df = pl.DataFrame({"Date": dates, "ret": pl.Series([0.01] * 99 + [-1.0])})
     bench = benchmark_frame.filter(pl.col("Date").is_between(dates[0], dates[-1]))
-    return Data.from_returns(returns=df, benchmark=bench)
+    # The synthetic returns and the filtered benchmark do not share every date,
+    # so alignment drops rows. That is incidental to the -100%-loss scenario
+    # under test, so suppress the warning at the source.
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", BenchmarkAlignmentWarning)
+        return Data.from_returns(returns=df, benchmark=bench)
 
 
 @pytest.fixture
