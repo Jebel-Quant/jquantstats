@@ -29,5 +29,5 @@ paper:: ## compile LaTeX documents in docs/paper to PDF using latexmk
 
 paper-clean:: ## remove latexmk build artifacts in docs/paper
 	@printf "${BLUE}[INFO] Cleaning paper artifacts...${RESET}\n"
-	@cd $(PAPER_DIR) && latexmk -C 2>/dev/null || true
+	@cd "$(PAPER_DIR)" && latexmk -C 2>/dev/null || true
 	@printf "${GREEN}[SUCCESS] Cleaned $(PAPER_DIR)${RESET}\n"
