@@ -201,6 +201,7 @@ class PortfolioConstructorMixin(_PortfolioMembers):
 
         Examples:
             >>> import polars as pl
+            >>> from jquantstats.portfolio import Portfolio
             >>> prices = pl.DataFrame({"A": [100.0, 110.0, 105.0]})
             >>> pos = pl.DataFrame({"A": [10.0, 10.0, 10.0]})
             >>> pf = Portfolio.from_position(prices=prices, position=pos, aum=1e6)
