@@ -8,23 +8,24 @@ import polars as pl
 import pytest
 from polars.testing import assert_frame_equal
 
-from jquantstats._reports._data import (
+from jquantstats._reports._formatting import _fmt, _is_finite
+from jquantstats._reports._html import (
+    _build_full_html,
+    _drawdowns_section_html,
+    _metrics_table_html,
+    _try_plotly_div,
+)
+from jquantstats._reports._metrics import (
     _add_drawdown_rows,
     _add_overview_rows,
     _add_recent_returns_rows,
     _add_risk_adjusted_rows,
     _add_trading_rows,
-    _build_full_html,
     _build_metrics_df,
     _cagr_since,
     _comp_since,
     _cutoff_months,
-    _drawdowns_section_html,
-    _fmt,
-    _is_finite,
-    _metrics_table_html,
     _pct,
-    _try_plotly_div,
 )
 
 # ── Module-level helper unit tests ────────────────────────────────────────────

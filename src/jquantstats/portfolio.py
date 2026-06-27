@@ -4,12 +4,14 @@ This module provides `Portfolio`, a frozen dataclass that stores the
 raw portfolio inputs (prices, cash positions, AUM) and exposes both the
 derived data series and the full analytics / visualisation suite.
 
-The class is composed from four focused mixin modules:
+The class is composed from focused mixin modules:
 
 - `PortfolioNavMixin` — NAV & returns chain
 - `PortfolioAttributionMixin` — tilt/timing attribution
 - `PortfolioTurnoverMixin` — turnover analytics
 - `PortfolioCostMixin` — cost analysis
+- `PortfolioTransformMixin` — range/lag/smoothing transforms & correlation
+- `PortfolioConstructorMixin` — `from_risk_position` / `from_position` factories
 
 Public API is unchanged:
 
@@ -34,52 +36,24 @@ if TYPE_CHECKING:
     from .data import Data as Data
 
 import polars as pl
-import polars.selectors as cs
 
 from ._cache import cached_in_slot
 from ._cost_model import CostModel
 from ._plots import PortfolioPlots
 from ._portfolio_attribution import PortfolioAttributionMixin
+from ._portfolio_constructors import PortfolioConstructorMixin, _evaluate_position_expr
 from ._portfolio_cost import PortfolioCostMixin
 from ._portfolio_nav import PortfolioNavMixin
+from ._portfolio_transform import PortfolioTransformMixin
 from ._portfolio_turnover import PortfolioTurnoverMixin
 from ._reports import Report
 from .exceptions import (
-    IntegerIndexBoundError,
     InvalidCashPositionTypeError,
     InvalidPricesTypeError,
     NonPositiveAumError,
-    PositionExprColumnError,
     RowCountMismatchError,
     UncleanSeriesError,
 )
-
-
-def _evaluate_position_expr(prices: pl.DataFrame, expr: pl.Expr, param: str) -> pl.DataFrame:
-    """Evaluate a position expression against *prices* and validate the result.
-
-    Args:
-        prices: Price levels per asset over time.
-        expr: Polars expression producing positions, evaluated via
-            ``prices.with_columns(expr)``.
-        param: Name of the parameter the expression was passed as (used in
-            the error message).
-
-    Returns:
-        The evaluated positions frame, guaranteed to have the same columns
-        as *prices*.
-
-    Raises:
-        PositionExprColumnError: If the expression created columns that do
-            not exist in *prices* — those would leave the original asset
-            columns untouched, silently treating raw prices as positions.
-    """
-    evaluated = prices.with_columns(expr)
-    extra = [c for c in evaluated.columns if c not in prices.columns]
-    if extra:
-        raise PositionExprColumnError(param, extra)
-    return evaluated
-
 
 # Slot fields used as lazy caches; __post_init__ initialises each to None and
 # `cached_in_slot` fills them on first property access.
@@ -102,6 +76,8 @@ class Portfolio(
     PortfolioAttributionMixin,
     PortfolioTurnoverMixin,
     PortfolioCostMixin,
+    PortfolioTransformMixin,
+    PortfolioConstructorMixin,
 ):
     """Portfolio analytics class for quant finance.
 
@@ -311,159 +287,6 @@ class Portfolio(
     # ── Factory classmethods ──────────────────────────────────────────────────
 
     @classmethod
-    def from_risk_position(
-        cls,
-        prices: pl.DataFrame,
-        risk_position: pl.DataFrame | pl.Expr,
-        aum: float,
-        vola: int | dict[str, int] = 32,
-        vol_cap: float | None = None,
-        cost_per_unit: float = 0.0,
-        cost_bps: float = 0.0,
-        cost_model: CostModel | None = None,
-    ) -> Self:
-        """Create a Portfolio from per-asset risk positions.
-
-        De-volatizes each risk position using an EWMA volatility estimate
-        derived from the corresponding price series.
-
-        Args:
-            prices: Price levels per asset over time (may include a date column).
-            risk_position: Risk units per asset aligned with prices.
-            vola: EWMA lookback (span-equivalent) used to estimate volatility.
-                Pass an ``int`` to apply the same span to every asset, or a
-                ``dict[str, int]`` to set a per-asset span (assets absent from
-                the dict default to ``32``).  Every span value must be a
-                positive integer; a ``ValueError`` is raised otherwise.  Dict
-                keys that do not correspond to any numeric column in *prices*
-                also raise a ``ValueError``.
-            vol_cap: Optional lower bound for the EWMA volatility estimate.
-                When provided, the vol series is clipped from below at this
-                value before dividing the risk position, preventing
-                position blow-up in calm, low-volatility regimes.  For
-                example, ``vol_cap=0.05`` ensures annualised vol is never
-                estimated below 5%.  Must be positive when not ``None``.
-            aum: Assets under management used as the base NAV offset.
-            cost_per_unit: One-way trading cost per unit of position change.
-                Defaults to 0.0 (no cost).  Ignored when *cost_model* is given.
-            cost_bps: One-way trading cost in basis points of AUM turnover.
-                Defaults to 0.0 (no cost).  Ignored when *cost_model* is given.
-            cost_model: Optional `CostModel`
-                instance.  When supplied, its ``cost_per_unit`` and
-                ``cost_bps`` values take precedence over the individual
-                parameters above.
-
-        Returns:
-            A Portfolio instance whose cash positions are risk_position
-            divided by EWMA volatility.
-
-        Raises:
-            ValueError: If any span value in *vola* is ≤ 0, or if a key in a
-                *vola* dict does not match any numeric column in *prices*, or
-                if *vol_cap* is provided but is not positive.
-            PositionExprColumnError: If *risk_position* is an expression that
-                creates columns not present in *prices*.
-        """
-        if isinstance(risk_position, pl.Expr):
-            risk_position = _evaluate_position_expr(prices, risk_position, "risk_position")
-        if cost_model is not None:
-            cost_per_unit = cost_model.cost_per_unit
-            cost_bps = cost_model.cost_bps
-        assets = [col for col, dtype in prices.schema.items() if dtype.is_numeric()]
-
-        # ── Validate vol_cap ──────────────────────────────────────────────────
-        if vol_cap is not None and vol_cap <= 0:
-            raise ValueError(f"vol_cap must be a positive number when provided, got {vol_cap!r}")  # noqa: TRY003
-
-        # ── Validate vola ─────────────────────────────────────────────────────
-        if isinstance(vola, dict):
-            unknown = set(vola.keys()) - set(assets)
-            if unknown:
-                raise ValueError(  # noqa: TRY003
-                    f"vola dict contains keys that do not match any numeric column in prices: {sorted(unknown)}"
-                )
-            for asset, span in vola.items():
-                if int(span) <= 0:
-                    raise ValueError(f"vola span for '{asset}' must be a positive integer, got {span!r}")  # noqa: TRY003
-        else:
-            if int(vola) <= 0:
-                raise ValueError(f"vola span must be a positive integer, got {vola!r}")  # noqa: TRY003
-
-        def _span(asset: str) -> int:
-            """Return the EWMA span for *asset*, falling back to 32 if not specified."""
-            if isinstance(vola, dict):
-                return int(vola.get(asset, 32))
-            return int(vola)
-
-        def _vol(asset: str) -> pl.Series:
-            """Return the EWMA volatility series for *asset*, optionally clipped from below."""
-            vol = prices[asset].pct_change().ewm_std(com=_span(asset) - 1, adjust=True, min_samples=_span(asset))
-            if vol_cap is not None:
-                vol = vol.clip(lower_bound=vol_cap)
-            return vol
-
-        cash_position = risk_position.with_columns((pl.col(asset) / _vol(asset)).alias(asset) for asset in assets)
-        return cls(prices=prices, cashposition=cash_position, aum=aum, cost_per_unit=cost_per_unit, cost_bps=cost_bps)
-
-    @classmethod
-    def from_position(
-        cls,
-        prices: pl.DataFrame,
-        position: pl.DataFrame | pl.Expr,
-        aum: float,
-        cost_per_unit: float = 0.0,
-        cost_bps: float = 0.0,
-        cost_model: CostModel | None = None,
-    ) -> Self:
-        """Create a Portfolio from share/unit positions.
-
-        Converts *position* (number of units held per asset) to cash exposure
-        by multiplying element-wise with *prices*, then delegates to
-        :py`from_cash_position`.
-
-        Args:
-            prices: Price levels per asset over time (may include a date column).
-            position: Number of units held per asset over time, aligned with
-                *prices*.  Non-numeric columns (e.g. ``'date'``) are passed
-                through unchanged.
-            aum: Assets under management used as the base NAV offset.
-            cost_per_unit: One-way trading cost per unit of position change.
-                Defaults to 0.0 (no cost).  Ignored when *cost_model* is given.
-            cost_bps: One-way trading cost in basis points of AUM turnover.
-                Defaults to 0.0 (no cost).  Ignored when *cost_model* is given.
-            cost_model: Optional `CostModel` instance.
-                When supplied, its ``cost_per_unit`` and ``cost_bps`` values
-                take precedence over the individual parameters above.
-
-        Returns:
-            A Portfolio instance whose cash positions equal *position* x *prices*.
-
-        Raises:
-            PositionExprColumnError: If *position* is an expression that
-                creates columns not present in *prices*.
-
-        Examples:
-            >>> import polars as pl
-            >>> prices = pl.DataFrame({"A": [100.0, 110.0, 105.0]})
-            >>> pos = pl.DataFrame({"A": [10.0, 10.0, 10.0]})
-            >>> pf = Portfolio.from_position(prices=prices, position=pos, aum=1e6)
-            >>> pf.cashposition["A"].to_list()
-            [1000.0, 1100.0, 1050.0]
-        """
-        if isinstance(position, pl.Expr):
-            position = _evaluate_position_expr(prices, position, "position")
-        assets = [col for col, dtype in prices.schema.items() if dtype.is_numeric()]
-        cash_position = position.with_columns((pl.col(asset) * prices[asset]).alias(asset) for asset in assets)
-        return cls.from_cash_position(
-            prices=prices,
-            cash_position=cash_position,
-            aum=aum,
-            cost_per_unit=cost_per_unit,
-            cost_bps=cost_bps,
-            cost_model=cost_model,
-        )
-
-    @classmethod
     def from_cash_position(
         cls,
         prices: pl.DataFrame,
@@ -627,167 +450,3 @@ class Portfolio(
         from ._utils import PortfolioUtils
 
         return PortfolioUtils(self)
-
-    # ── Portfolio transforms ───────────────────────────────────────────────────
-
-    def truncate(
-        self,
-        start: date | datetime | str | int | None = None,
-        end: date | datetime | str | int | None = None,
-    ) -> "Portfolio":
-        """Return a new Portfolio truncated to the inclusive [start, end] range.
-
-        When a ``'date'`` column is present in both prices and cash positions,
-        truncation is performed by comparing the ``'date'`` column against
-        ``start`` and ``end`` (which should be date/datetime values or strings
-        parseable by Polars).
-
-        When the ``'date'`` column is absent, integer-based row slicing is
-        used instead.  In this case ``start`` and ``end`` must be non-negative
-        integers representing 0-based row indices.  Passing non-integer bounds
-        to an integer-indexed portfolio raises `TypeError`.
-
-        In all cases the ``aum`` value is preserved.
-
-        Args:
-            start: Optional lower bound (inclusive). A date/datetime or
-                Polars-parseable string when a ``'date'`` column exists; a
-                non-negative int row index when the data has no ``'date'``
-                column.
-            end: Optional upper bound (inclusive). Same type rules as
-                ``start``.
-
-        Returns:
-            A new Portfolio instance with prices and cash positions filtered
-            to the specified range.
-
-        Raises:
-            TypeError: When the portfolio has no ``'date'`` column and a
-                non-integer bound is supplied.
-        """
-        has_date = "date" in self.prices.columns
-        if has_date:
-            cond = pl.lit(True)
-            if start is not None:
-                cond = cond & (pl.col("date") >= pl.lit(start))
-            if end is not None:
-                cond = cond & (pl.col("date") <= pl.lit(end))
-            pr = self.prices.filter(cond)
-            cp = self.cashposition.filter(cond)
-        else:
-            if start is not None and not isinstance(start, int):
-                raise IntegerIndexBoundError("start", type(start).__name__)
-            if end is not None and not isinstance(end, int):
-                raise IntegerIndexBoundError("end", type(end).__name__)
-            row_start = int(start) if start is not None else 0
-            row_end = int(end) + 1 if end is not None else self.prices.height
-            length = max(0, row_end - row_start)
-            pr = self.prices.slice(row_start, length)
-            cp = self.cashposition.slice(row_start, length)
-        return Portfolio(
-            prices=pr,
-            cashposition=cp,
-            aum=self.aum,
-            cost_per_unit=self.cost_per_unit,
-            cost_bps=self.cost_bps,
-        )
-
-    def lag(self, n: int) -> "Portfolio":
-        """Return a new Portfolio with cash positions lagged by ``n`` steps.
-
-        This method shifts the numeric asset columns in the cashposition
-        DataFrame by ``n`` rows, preserving the ``'date'`` column and any
-        non-numeric columns unchanged.  Positive ``n`` delays weights (moves
-        them down); negative ``n`` leads them (moves them up); ``n == 0``
-        returns the current portfolio unchanged.
-
-        Notes:
-            Missing values introduced by the shift are left as nulls;
-            downstream profit computation already guards and treats nulls as
-            zero when multiplying by returns.
-
-        Args:
-            n: Number of rows to shift (can be negative, zero, or positive).
-
-        Returns:
-            A new Portfolio instance with lagged cash positions and the same
-            prices/AUM as the original.
-        """
-        if not isinstance(n, int):
-            raise TypeError
-        if n == 0:
-            return self
-
-        assets = [c for c in self.cashposition.columns if c != "date" and self.cashposition[c].dtype.is_numeric()]
-        cp_lagged = self.cashposition.with_columns(pl.col(c).shift(n) for c in assets)
-        return Portfolio(
-            prices=self.prices,
-            cashposition=cp_lagged,
-            aum=self.aum,
-            cost_per_unit=self.cost_per_unit,
-            cost_bps=self.cost_bps,
-        )
-
-    def smoothed_holding(self, n: int) -> "Portfolio":
-        """Return a new Portfolio with cash positions smoothed by a rolling mean.
-
-        Applies a trailing window average over the last ``n`` steps for each
-        numeric asset column (excluding ``'date'``). The window length is
-        ``n + 1`` so that:
-
-        - n=0 returns the original weights (no smoothing),
-        - n=1 averages the current and previous weights,
-        - n=k averages the current and last k weights.
-
-        Args:
-            n: Non-negative integer specifying how many previous steps to
-                include.
-
-        Returns:
-            A new Portfolio with smoothed cash positions and the same
-            prices/AUM.
-        """
-        if not isinstance(n, int):
-            raise TypeError(f"n must be an integer, got {type(n).__name__}")  # noqa: TRY003
-        if n < 0:
-            raise ValueError(f"n must be a non-negative integer, got {n}")  # noqa: TRY003
-        if n == 0:
-            return self
-
-        assets = [c for c in self.cashposition.columns if c != "date" and self.cashposition[c].dtype.is_numeric()]
-        window = n + 1
-        cp_smoothed = self.cashposition.with_columns(
-            pl.col(c).rolling_mean(window_size=window, min_samples=1).alias(c) for c in assets
-        )
-        return Portfolio(
-            prices=self.prices,
-            cashposition=cp_smoothed,
-            aum=self.aum,
-            cost_per_unit=self.cost_per_unit,
-            cost_bps=self.cost_bps,
-        )
-
-    # ── Utility ────────────────────────────────────────────────────────────────
-
-    def correlation(self, frame: pl.DataFrame, name: str = "portfolio") -> pl.DataFrame:
-        """Compute a correlation matrix of asset returns plus the portfolio.
-
-        Computes percentage changes for all numeric columns in ``frame``,
-        appends the portfolio profit series under the provided ``name``, and
-        returns the Pearson correlation matrix across all numeric columns.
-
-        Args:
-            frame: A Polars DataFrame containing at least the asset price
-                columns (and a date column which will be ignored if
-                non-numeric).
-            name: The column name to use when adding the portfolio profit
-                series to the input frame.
-
-        Returns:
-            A square Polars DataFrame where each cell is the correlation
-            between a pair of series (values in [-1, 1]).
-        """
-        p = frame.with_columns(cs.by_dtype(pl.Float32, pl.Float64).pct_change())
-        p = p.with_columns(pl.Series(name, self.profit["profit"]))
-        corr_matrix = p.select(cs.numeric()).fill_null(0.0).corr()
-        return corr_matrix
