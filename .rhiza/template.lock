@@ -6,6 +6,7 @@ include: []
 exclude: []
 templates:
 - legal
+- github-paper
 files:
 - .bandit
 - .claude/commands/rhiza_book.md
@@ -31,6 +32,7 @@ files:
 - .github/workflows/rhiza_fuzzing.yml
 - .github/workflows/rhiza_marimo.yml
 - .github/workflows/rhiza_mutation.yml
+- .github/workflows/rhiza_paper.yml
 - .github/workflows/rhiza_release.yml
 - .github/workflows/rhiza_scorecard.yml
 - .github/workflows/rhiza_sync.yml
@@ -55,6 +57,7 @@ files:
 - .rhiza/make.d/doctor.mk
 - .rhiza/make.d/github.mk
 - .rhiza/make.d/marimo.mk
+- .rhiza/make.d/paper.mk
 - .rhiza/make.d/quality.mk
 - .rhiza/make.d/releasing.mk
 - .rhiza/make.d/test.mk
@@ -105,5 +108,5 @@ files:
 - ruff.toml
 profiles:
 - github-project
-synced_at: '2026-06-27T03:41:31Z'
+synced_at: '2026-06-27T03:47:45Z'
 strategy: merge
