@@ -4,12 +4,14 @@ Security note: Test code uses pytest assertions (S101), which are intentional
 and safe in the test context. No subprocess calls (S603/S607) are used here.
 """
 
+import warnings
 from pathlib import Path
 
 import polars as pl
 import pytest
 
 from jquantstats import Data
+from jquantstats.exceptions import BenchmarkAlignmentWarning
 
 
 @pytest.fixture(scope="session")
@@ -109,7 +111,13 @@ def data(portfolio, benchmark_frame):
         Data: A Data object containing portfolio returns and benchmark data.
 
     """
-    return Data.from_returns(returns=portfolio, benchmark=benchmark_frame)
+    # portfolio.csv and benchmark.csv cover overlapping but not identical date
+    # ranges, so alignment legitimately drops rows. That is incidental to the
+    # many tests that consume this fixture, so suppress the warning at the
+    # source rather than letting it flood the suite output.
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", BenchmarkAlignmentWarning)
+        return Data.from_returns(returns=portfolio, benchmark=benchmark_frame)
 
 
 @pytest.fixture
