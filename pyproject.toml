@@ -48,7 +48,7 @@ dev = [
     "pandas>=2.2.3",       # required by quantstats (comparison tests only — not a runtime dependency)
     "pyarrow>=22.0.0",
     "yfinance==1.4.1",
-    "ipython==9.14.1",
+    "ipython==9.15.0",
     "quantstats==0.0.81",  # reference implementation used in test_quantstats.py for metric validation
     "httpx>=0.28.1",
     "marimo>=0.23.6",
