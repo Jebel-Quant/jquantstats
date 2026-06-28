@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 import polars as pl
 
+from ..exceptions import NoBenchmarkError, NonPositiveWindowError
 from ._core import _to_float
 from ._drawdown import _DrawdownMixin
 from ._internals import _annualization_factor
@@ -106,7 +107,7 @@ class _RollingStatsMixin:
 
         """
         if not isinstance(window, int) or window <= 0:
-            raise ValueError("window must be a positive integer")  # noqa: TRY003
+            raise NonPositiveWindowError("window")
 
         cols: list[pl.Expr | pl.Series] = [pl.col(name) for name in self._data.date_col]
         for col, series in self._data.items():
@@ -139,7 +140,7 @@ class _RollingStatsMixin:
 
         """
         if not isinstance(rolling_period, int) or rolling_period <= 0:
-            raise ValueError("rolling_period must be a positive integer")  # noqa: TRY003
+            raise NonPositiveWindowError("rolling_period")
         ppy = periods_per_year or self._data._periods_per_year
         scale = _annualization_factor(ppy)
         exprs: list[pl.Expr] = []
@@ -172,7 +173,7 @@ class _RollingStatsMixin:
         actual_window = rolling_period
         actual_periods = periods_per_year or self._data._periods_per_year
         if not isinstance(actual_window, int) or actual_window <= 0:
-            raise ValueError("rolling_period must be a positive integer")  # noqa: TRY003
+            raise NonPositiveWindowError("rolling_period")
         scale = _annualization_factor(actual_periods)
         return self.all.select(
             [pl.col(name) for name in self._data.date_col]
@@ -215,9 +216,9 @@ class _RollingStatsMixin:
             ValueError: If *rolling_period* is not a positive integer.
         """
         if self._data.benchmark is None:
-            raise AttributeError("No benchmark data available")  # noqa: TRY003
+            raise NoBenchmarkError
         if not isinstance(rolling_period, int) or rolling_period <= 0:
-            raise ValueError("rolling_period must be a positive integer")  # noqa: TRY003
+            raise NonPositiveWindowError("rolling_period")
 
         ppy = periods_per_year or self._data._periods_per_year
         all_df = self.all
@@ -268,7 +269,7 @@ class _RollingStatsMixin:
         actual_window = rolling_period
         actual_periods = periods_per_year or self._data._periods_per_year
         if not isinstance(actual_window, int) or actual_window <= 0:
-            raise ValueError("rolling_period must be a positive integer")  # noqa: TRY003
+            raise NonPositiveWindowError("rolling_period")
         if not isinstance(actual_periods, int | float):
             raise TypeError
         factor = _annualization_factor(actual_periods) if annualize else 1.0

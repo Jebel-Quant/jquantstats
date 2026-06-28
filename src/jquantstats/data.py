@@ -12,7 +12,12 @@ import narwhals as nw
 import polars as pl
 
 from ._types import NativeFrame, NativeFrameOrScalar
-from .exceptions import BenchmarkAlignmentWarning, MissingDateColumnError, NullsInReturnsError
+from .exceptions import (
+    BenchmarkAlignmentWarning,
+    IntegerIndexBoundError,
+    MissingDateColumnError,
+    NullsInReturnsError,
+)
 
 if TYPE_CHECKING:
     from ._plots import DataPlots
@@ -701,9 +706,9 @@ class Data:
             new_benchmark = self.benchmark.filter(mask) if self.benchmark is not None else None
         else:
             if start is not None and not isinstance(start, int):
-                raise TypeError(f"start must be an integer, got {type(start).__name__}.")  # noqa: TRY003
+                raise IntegerIndexBoundError("start", type(start).__name__)
             if end is not None and not isinstance(end, int):
-                raise TypeError(f"end must be an integer, got {type(end).__name__}.")  # noqa: TRY003
+                raise IntegerIndexBoundError("end", type(end).__name__)
             row_start = start if start is not None else 0
             row_end = end + 1 if end is not None else self.index.height
             length = max(0, row_end - row_start)

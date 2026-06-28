@@ -8,6 +8,8 @@ from typing import TYPE_CHECKING
 import plotly.graph_objects as go
 import polars as pl
 
+from jquantstats.exceptions import NoBenchmarkError
+
 from ._styling import _apply_base_layout, _apply_figsize, _ticker_colors
 
 if TYPE_CHECKING:
@@ -214,7 +216,7 @@ class _RollingPlotsMixin:
 
         benchmark_df = getattr(self._data, "benchmark", None)
         if benchmark_df is None:
-            raise AttributeError("No benchmark data available")  # noqa: TRY003
+            raise NoBenchmarkError
 
         bench_col = benchmark_df.columns[0]
         returns_df = getattr(self._data, "returns", None)

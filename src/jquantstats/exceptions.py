@@ -329,6 +329,59 @@ class NullsInReturnsError(JQuantStatsError, ValueError):
         self.columns = columns
 
 
+class NoBenchmarkError(JQuantStatsError, AttributeError):
+    """Raised when a benchmark-dependent statistic is requested without a benchmark.
+
+    Subclasses `AttributeError` so existing callers that catch
+    ``AttributeError`` for the no-benchmark path keep working unchanged.
+
+    Examples:
+        >>> raise NoBenchmarkError()
+        Traceback (most recent call last):
+            ...
+        jquantstats.exceptions.NoBenchmarkError: No benchmark data available
+    """
+
+    def __init__(self) -> None:
+        """Initialize with the fixed no-benchmark message."""
+        super().__init__("No benchmark data available")
+
+
+class NonPositiveWindowError(JQuantStatsError, ValueError):
+    """Raised when a rolling-window size is not a positive integer.
+
+    Args:
+        param: Name of the offending parameter (e.g. ``"window"`` or
+            ``"rolling_period"``).
+
+    Examples:
+        >>> raise NonPositiveWindowError("window")
+        Traceback (most recent call last):
+            ...
+        jquantstats.exceptions.NonPositiveWindowError: window must be a positive integer
+    """
+
+    def __init__(self, param: str) -> None:
+        """Initialize with the name of the offending window parameter."""
+        super().__init__(f"{param} must be a positive integer")
+        self.param = param
+
+
+class NonPositivePeriodsPerYearError(JQuantStatsError, ValueError):
+    """Raised when ``periods_per_year`` is not strictly positive.
+
+    Examples:
+        >>> raise NonPositivePeriodsPerYearError()
+        Traceback (most recent call last):
+            ...
+        jquantstats.exceptions.NonPositivePeriodsPerYearError: periods_per_year must be positive
+    """
+
+    def __init__(self) -> None:
+        """Initialize with the fixed non-positive periods-per-year message."""
+        super().__init__("periods_per_year must be positive")
+
+
 class BenchmarkAlignmentWarning(UserWarning):
     """Emitted when aligning returns and benchmark drops rows from either side.
 
