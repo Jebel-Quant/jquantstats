@@ -17,6 +17,7 @@ from jquantstats._reports._html import (
 )
 from jquantstats._reports._metrics import (
     _add_drawdown_rows,
+    _add_full_mode_rows,
     _add_overview_rows,
     _add_recent_returns_rows,
     _add_risk_adjusted_rows,
@@ -627,6 +628,95 @@ def test_metrics_full_mode_correlation_raises(data):
     # Correlation row is absent but R² is still computed
     assert "R²" in df["Metric"].to_list()
     assert "Correlation" not in df["Metric"].to_list()
+
+
+def test_metrics_full_mode_no_benchmark_omits_benchmark_rows(data_no_benchmark):
+    """Full mode omits Beta/Alpha/Correlation when no benchmark is configured.
+
+    This is the legitimate degenerate-input path the narrowed except blocks must
+    keep tolerating: ``greeks()`` raises ``AttributeError`` and the correlation
+    block is skipped because no benchmark is present.
+    """
+    df = data_no_benchmark.reports.metrics(mode="full")
+    labels = df["Metric"].to_list()
+    assert "Beta" not in labels
+    assert "Alpha" not in labels
+    assert "Correlation" not in labels
+    # Non-benchmark rows are still computed.
+    assert "R²" in labels
+
+
+def test_full_mode_unexpected_greeks_error_propagates(data):
+    """An unexpected error in the greeks block now propagates, not silently swallowed."""
+
+    class _BoomStats:
+        """Stats proxy whose greeks() raises an unexpected error."""
+
+        def __init__(self, real: object) -> None:
+            """Wrap a real Stats object."""
+            self._real = real
+
+        def __getattr__(self, name: str) -> object:
+            """Delegate every other attribute to the wrapped Stats object."""
+            return getattr(self._real, name)
+
+        def greeks(self) -> dict:
+            """Simulate a genuine bug in the beta/alpha computation."""
+            raise ValueError("boom")
+
+    rows: list = []
+    with pytest.raises(ValueError, match="boom"):
+        _add_full_mode_rows(
+            rows,
+            _BoomStats(data.stats),
+            float(data._periods_per_year),
+            data,
+            data.all,
+            "Date",
+            ["AAPL", "META"],
+        )
+
+
+def test_full_mode_unexpected_correlation_error_propagates(data):
+    """An unexpected error in the correlation block now propagates, not silently swallowed."""
+
+    class _BoomBenchmark:
+        """Benchmark proxy whose column access raises an unexpected error."""
+
+        @property
+        def columns(self) -> list[str]:
+            """Simulate a genuine bug while resolving the benchmark column."""
+            raise RuntimeError("boom")
+
+    class _DataProxy:
+        """Data proxy that returns a benchmark whose column access blows up."""
+
+        def __init__(self, real: object) -> None:
+            """Wrap a real Data object."""
+            self._real = real
+
+        def __getattr__(self, name: str) -> object:
+            """Delegate every other attribute to the wrapped Data object."""
+            return getattr(self._real, name)
+
+        @property
+        def benchmark(self) -> _BoomBenchmark:
+            """Return the exploding benchmark proxy."""
+            return _BoomBenchmark()
+
+    rows: list = []
+    # greeks() succeeds on the real stats (benchmark present), so we only reach
+    # the correlation block, where the RuntimeError must propagate.
+    with pytest.raises(RuntimeError, match="boom"):
+        _add_full_mode_rows(
+            rows,
+            data.stats,
+            float(data._periods_per_year),
+            _DataProxy(data),
+            data.all,
+            "Date",
+            ["AAPL", "META"],
+        )
 
 
 def test_full_skips_missing_plot_method(data):

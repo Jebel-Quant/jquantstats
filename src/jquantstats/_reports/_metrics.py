@@ -258,7 +258,11 @@ def _add_full_mode_rows(
     rows.append(("Best Day", _pct(_safe(s.best))))
     rows.append(("Worst Day", _pct(_safe(s.worst))))
 
-    # Benchmark greeks (only if benchmark is present)
+    # Benchmark greeks (only if benchmark is present). Without a benchmark,
+    # ``s.greeks()`` reaches ``benchmark_data.columns`` on a ``None`` benchmark
+    # and raises ``AttributeError``; we tolerate only that case and omit the
+    # rows. Any other error (malformed column, polars schema/arithmetic bug)
+    # propagates so genuine bugs are not silently swallowed.
     try:
         greeks = s.greeks()
         if greeks:  # pragma: no branch — greeks() raises without a benchmark, so falsy is unreachable
@@ -266,9 +270,14 @@ def _add_full_mode_rows(
             alpha = {k: v["alpha"] * 100.0 for k, v in greeks.items()}
             rows.append(("Beta", beta))
             rows.append(("Alpha", alpha))
-    except Exception:  # noqa: S110
-        pass  # nosec B110
+    except AttributeError:
+        pass
 
+    # Correlation against the benchmark. When the benchmark column is absent
+    # (no benchmark configured, or it is missing from the joined frame) polars
+    # raises ``ColumnNotFoundError`` and ``None.columns`` raises
+    # ``AttributeError`` — both mean "no benchmark to correlate against", so the
+    # row is omitted. Any other error propagates.
     try:
         bench_obj = getattr(data, "benchmark", None)
         if bench_obj is not None and all_df is not None and date_col is not None:  # pragma: no branch
@@ -281,8 +290,8 @@ def _add_full_mode_rows(
                 corr_val = float(sub.select(pl.corr(ac, bench_col))[0, 0])
                 corr_dict[ac] = corr_val * 100.0
             rows.append(("Correlation", corr_dict))
-    except Exception:  # noqa: S110
-        pass  # nosec B110
+    except (AttributeError, pl.exceptions.ColumnNotFoundError):
+        pass
 
     rows.append(("R²", _safe(s.r_squared)))
     rows.append(("Treynor Ratio", _safe(s.treynor_ratio, periods=ppy)))
