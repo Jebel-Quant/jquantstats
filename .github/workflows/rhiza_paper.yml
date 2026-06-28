@@ -28,7 +28,7 @@ on:
 
 jobs:
   paper:
-    uses: jebel-quant/rhiza/.github/workflows/rhiza_paper.yml@v0.19.6
+    uses: jebel-quant/rhiza/.github/workflows/rhiza_paper.yml@v0.19.8
     secrets: inherit
     permissions:
       contents: write
