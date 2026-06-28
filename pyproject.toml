@@ -66,6 +66,7 @@ test = [
     "syrupy>=4.9.1",
     "pygal>=3.1.0",
     "python-dotenv>=1.0",
+    "packaging>=24",       # used by .rhiza/tests/structure/test_pyproject.py (Rhiza-managed)
 ]
 lint = [
     "pre-commit>=4.0",
@@ -119,6 +120,8 @@ narwhals = "narwhals"
 python-multipart = "python_multipart"
 pyarrow = "pyarrow"
 httpx = "httpx"
+python-dotenv = "dotenv"
+packaging = "packaging"
 
 # Coverage configuration
 [tool.coverage.run]
