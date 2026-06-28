@@ -8,6 +8,8 @@ from typing import TYPE_CHECKING
 import numpy as np
 import polars as pl
 
+from ..exceptions import NonPositivePeriodsPerYearError, NonPositiveWindowError
+
 if TYPE_CHECKING:
     from ..data import Data
 
@@ -27,7 +29,7 @@ class _MonteCarloStatsMixin:
     def _validate_positive_integer(name: str, value: int) -> int:
         """Validate that *value* is a positive integer."""
         if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
-            raise ValueError(f"{name} must be a positive integer")  # noqa: TRY003
+            raise NonPositiveWindowError(name)
         return value
 
     @staticmethod
@@ -136,7 +138,7 @@ class _MonteCarloStatsMixin:
         """
         ppy = self._data._periods_per_year if periods_per_year is None else periods_per_year
         if ppy <= 0:
-            raise ValueError("periods_per_year must be positive")  # noqa: TRY003
+            raise NonPositivePeriodsPerYearError
         scale = math.sqrt(ppy)
         paths = self._simulate_distribution(n=n, period=period)
         result: dict[str, np.ndarray] = {}
@@ -196,7 +198,7 @@ class _MonteCarloStatsMixin:
         """
         ppy = self._data._periods_per_year if periods_per_year is None else periods_per_year
         if ppy <= 0:
-            raise ValueError("periods_per_year must be positive")  # noqa: TRY003
+            raise NonPositivePeriodsPerYearError
         years = period / ppy
         paths = self._simulate_distribution(n=n, period=period)
         result: dict[str, np.ndarray] = {}

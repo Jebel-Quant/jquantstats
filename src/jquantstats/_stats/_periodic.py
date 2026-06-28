@@ -11,6 +11,8 @@ from typing import TYPE_CHECKING, cast
 
 import polars as pl
 
+from ..exceptions import NoBenchmarkError
+
 if TYPE_CHECKING:
     from ..data import Data
 
@@ -195,7 +197,7 @@ class _PeriodicReportingMixin:
 
         """
         if self._data.benchmark is None:
-            raise AttributeError("No benchmark data available")  # noqa: TRY003
+            raise NoBenchmarkError
 
         all_df = self.all
         date_col_name = self._data.date_col[0]

@@ -9,6 +9,7 @@ import numpy as np
 import polars as pl
 from scipy.stats import norm
 
+from ..exceptions import NoBenchmarkError
 from ._core import _mean, _std_is_negligible, _to_float, columnwise_stat
 from ._internals import _annualization_factor, _comp_return, _downside_deviation
 
@@ -543,7 +544,7 @@ class _RiskStatsMixin:
 
         """
         if self._data.benchmark is None:
-            raise AttributeError("No benchmark data available")  # noqa: TRY003
+            raise NoBenchmarkError
 
         benchmark_col = benchmark or self._data.benchmark.columns[0]
 
@@ -587,7 +588,7 @@ class _RiskStatsMixin:
 
         """
         if self._data.benchmark is None:
-            raise AttributeError("No benchmark data available")  # noqa: TRY003
+            raise NoBenchmarkError
 
         ppy = periods_per_year or self._data._periods_per_year
 
@@ -682,7 +683,7 @@ class _RiskStatsMixin:
             series is empty, or the compounded NAV is non-positive.
         """
         if self._data.benchmark is None:
-            raise AttributeError("No benchmark data available")  # noqa: TRY003
+            raise NoBenchmarkError
 
         ppy = periods or self._data._periods_per_year
 
