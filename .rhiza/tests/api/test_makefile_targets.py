@@ -174,6 +174,56 @@ class TestMakefile:
         assert ".rhiza/utils" in out
         assert "No bandit scan folders found" in out
 
+    def test_benchmark_target_dry_run(self, logger):
+        """Benchmark target should run pytest in benchmark-only mode against the benchmarks folder."""
+        proc = run_make(logger, ["benchmark"])
+        out = proc.stdout
+        assert "no rule to make target" not in proc.stderr.lower()
+        assert "/benchmarks/" in out
+        assert "--benchmark-only" in out
+
+    def test_stress_target_dry_run(self, logger):
+        """Stress target should run pytest selecting the stress marker."""
+        proc = run_make(logger, ["stress"])
+        out = proc.stdout
+        assert "no rule to make target" not in proc.stderr.lower()
+        assert "uv run pytest" in out
+        assert "-m stress" in out
+
+    def test_hypothesis_test_target_dry_run(self, logger):
+        """Hypothesis-test target should run pytest selecting property-based tests with statistics."""
+        proc = run_make(logger, ["hypothesis-test"])
+        out = proc.stdout
+        assert "no rule to make target" not in proc.stderr.lower()
+        assert '-m "hypothesis or property"' in out
+        assert "--hypothesis-show-statistics" in out
+
+    def test_mutation_target_dry_run(self, logger):
+        """Mutation target should run mutmut against SOURCE_FOLDER with the tests directory."""
+        proc = run_make(logger, ["mutation"])
+        out = proc.stdout
+        assert "no rule to make target" not in proc.stderr.lower()
+        assert "mutmut run" in out
+        assert "--paths-to-mutate=" in out
+
+    def test_test_pyproject_target_dry_run(self, logger):
+        """Test-pyproject target should run the pyproject structure test module via pytest."""
+        proc = run_make(logger, ["test-pyproject"])
+        out = proc.stdout
+        assert "no rule to make target" not in proc.stderr.lower()
+        assert "uv run pytest .rhiza/tests/structure/test_pyproject.py" in out
+
+    def test_all_target_chains_ci_subtargets(self, logger):
+        """The `all` aggregator should chain the CI sub-targets (fmt, test, docs-coverage, security)."""
+        proc = run_make(logger, ["all"])
+        out = proc.stdout
+        assert "no rule to make target" not in proc.stderr.lower()
+        # Markers proving the prerequisite chain expands each sub-target's recipe.
+        assert "pre-commit run --all-files" in out  # fmt
+        assert "uv run pytest" in out  # test / rhiza-test
+        assert "uv run interrogate" in out  # docs-coverage
+        assert "pip_audit_policy.py" in out  # security
+
     def test_python_version_defaults_to_3_13_if_missing(self, logger, tmp_path):
         """`PYTHON_VERSION` should default to `3.13` if .python-version is missing."""
         # Ensure .python-version does not exist
@@ -225,6 +275,22 @@ class TestMakefile:
         proc = run_make(logger, ["license", "LICENSE_FAIL_ON=MIT;Apache"])
         out = proc.stdout
         assert '--fail-on="MIT;Apache"' in out
+
+    def test_semgrep_target_dry_run(self, logger):
+        """Semgrep target should invoke semgrep against SOURCE_FOLDER with the rhiza config."""
+        proc = run_make(logger, ["semgrep"])
+        out = proc.stdout
+        assert "no rule to make target" not in proc.stderr.lower()
+        assert "Running Semgrep" in out
+        assert "semgrep --config .rhiza/semgrep.yml" in out
+
+    def test_todos_target_dry_run(self, logger):
+        """Todos target should grep the codebase for TODO/FIXME/HACK markers."""
+        proc = run_make(logger, ["todos"])
+        out = proc.stdout
+        assert "no rule to make target" not in proc.stderr.lower()
+        assert "(TODO|FIXME|HACK):" in out
+        assert "grep -nHE" in out
 
     def test_serve_target_uses_uv_run_python_http_server(self, logger):
         """Serve target should use uv run instead of directly calling python3."""

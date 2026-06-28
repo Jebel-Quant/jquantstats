@@ -13,12 +13,19 @@ all: fmt deptry test docs-coverage security license typecheck rhiza-test ## run 
 # deptry scans one or more folders for dependency issues. Each feature bundle
 # contributes the folders it owns to DEPTRY_FOLDERS (and any per-folder ignores
 # to DEPTRY_IGNORE), so this core target never needs to know which bundles are
-# present. Core itself contributes SOURCE_FOLDER when it exists; see e.g.
-# marimo.mk for a bundle that appends its own folder.
+# present. Core itself contributes SOURCE_FOLDER plus the .rhiza/utils and
+# .rhiza/tests folders it owns when they exist; see e.g. marimo.mk for a bundle
+# that appends its own folder.
 DEPTRY_FOLDERS ?=
 DEPTRY_IGNORE ?=
 ifneq ($(wildcard $(SOURCE_FOLDER)),)
 DEPTRY_FOLDERS += $(SOURCE_FOLDER)
+endif
+ifneq ($(wildcard .rhiza/utils),)
+DEPTRY_FOLDERS += .rhiza/utils
+endif
+ifneq ($(wildcard .rhiza/tests),)
+DEPTRY_FOLDERS += .rhiza/tests
 endif
 
 deptry: install-uv ## Run deptry over the folders contributed by each bundle
