@@ -43,6 +43,43 @@ def _evaluate_position_expr(prices: pl.DataFrame, expr: pl.Expr, param: str) -> 
     return evaluated
 
 
+def _validate_vol_cap(vol_cap: float | None) -> None:
+    """Validate the optional ``vol_cap`` lower bound.
+
+    Args:
+        vol_cap: Candidate lower bound for the EWMA volatility estimate.
+
+    Raises:
+        ValueError: If *vol_cap* is provided but not strictly positive.
+    """
+    if vol_cap is not None and vol_cap <= 0:
+        raise ValueError(f"vol_cap must be a positive number when provided, got {vol_cap!r}")  # noqa: TRY003
+
+
+def _validate_vola(vola: int | dict[str, int], assets: list[str]) -> None:
+    """Validate the EWMA ``vola`` span specification against the asset columns.
+
+    Args:
+        vola: A single span applied to every asset, or a per-asset span dict.
+        assets: Numeric column names available in the price frame.
+
+    Raises:
+        ValueError: If a dict key matches no numeric column, or any span is
+            not a positive integer.
+    """
+    if isinstance(vola, dict):
+        unknown = set(vola.keys()) - set(assets)
+        if unknown:
+            raise ValueError(  # noqa: TRY003
+                f"vola dict contains keys that do not match any numeric column in prices: {sorted(unknown)}"
+            )
+        for asset, span in vola.items():
+            if int(span) <= 0:
+                raise ValueError(f"vola span for '{asset}' must be a positive integer, got {span!r}")  # noqa: TRY003
+    elif int(vola) <= 0:
+        raise ValueError(f"vola span must be a positive integer, got {vola!r}")  # noqa: TRY003
+
+
 class PortfolioConstructorMixin(_PortfolioMembers):
     """Mixin providing the risk- and notional-position factory classmethods."""
 
@@ -122,23 +159,8 @@ class PortfolioConstructorMixin(_PortfolioMembers):
             cost_bps = cost_model.cost_bps
         assets = [col for col, dtype in prices.schema.items() if dtype.is_numeric()]
 
-        # ── Validate vol_cap ──────────────────────────────────────────────────
-        if vol_cap is not None and vol_cap <= 0:
-            raise ValueError(f"vol_cap must be a positive number when provided, got {vol_cap!r}")  # noqa: TRY003
-
-        # ── Validate vola ─────────────────────────────────────────────────────
-        if isinstance(vola, dict):
-            unknown = set(vola.keys()) - set(assets)
-            if unknown:
-                raise ValueError(  # noqa: TRY003
-                    f"vola dict contains keys that do not match any numeric column in prices: {sorted(unknown)}"
-                )
-            for asset, span in vola.items():
-                if int(span) <= 0:
-                    raise ValueError(f"vola span for '{asset}' must be a positive integer, got {span!r}")  # noqa: TRY003
-        else:
-            if int(vola) <= 0:
-                raise ValueError(f"vola span must be a positive integer, got {vola!r}")  # noqa: TRY003
+        _validate_vol_cap(vol_cap)
+        _validate_vola(vola, assets)
 
         def _span(asset: str) -> int:
             """Return the EWMA span for *asset*, falling back to 32 if not specified."""
