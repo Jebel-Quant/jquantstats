@@ -188,16 +188,7 @@ def _metrics_table_html(df: pl.DataFrame) -> str:
 
     rendered: set[str] = set()
     for section_label, section_metrics in _SECTION_SPANS:
-        section_rows: list[str] = []
-        for label in section_metrics:
-            if label not in rows_by_label:
-                continue
-            vals = rows_by_label[label]
-            rendered.add(label)
-            suffix = "%" if label in _PCT_METRICS else ""
-            cells = "".join(f'<td class="metric-value">{_fmt(vals.get(a), ".2f", suffix)}</td>' for a in assets)
-            section_rows.append(f'<tr><td class="metric-name">{label}</td>{cells}</tr>\n')
-
+        section_rows = _section_rows_html(section_metrics, rows_by_label, assets, rendered)
         if section_rows:
             parts.append(
                 f'<tr class="table-section-header"><td colspan="{n_cols}"><strong>{section_label}</strong></td></tr>\n'
@@ -205,6 +196,59 @@ def _metrics_table_html(df: pl.DataFrame) -> str:
             parts.extend(section_rows)
 
     # Anything not matched by a section (e.g. string-valued rows like dates)
+    parts.extend(_unmatched_rows_html(rows_by_label, rendered, assets))
+
+    return _table_html(header_cells, "".join(parts))
+
+
+def _section_rows_html(
+    section_metrics: Any,
+    rows_by_label: dict[str, dict[str, Any]],
+    assets: list[str],
+    rendered: set[str],
+) -> list[str]:
+    """Render the ``<tr>`` rows for one metric section, in section order.
+
+    Args:
+        section_metrics: Ordered metric labels belonging to the section.
+        rows_by_label: Lookup of metric label → per-asset values.
+        assets: Asset column names, in output order.
+        rendered: Mutable set of labels already emitted; updated in place so
+            the caller can render unmatched rows afterwards.
+
+    Returns:
+        A list of HTML ``<tr>`` strings (empty when no metric matched).
+
+    """
+    section_rows: list[str] = []
+    for label in section_metrics:
+        if label not in rows_by_label:
+            continue
+        vals = rows_by_label[label]
+        rendered.add(label)
+        suffix = "%" if label in _PCT_METRICS else ""
+        cells = "".join(f'<td class="metric-value">{_fmt(vals.get(a), ".2f", suffix)}</td>' for a in assets)
+        section_rows.append(f'<tr><td class="metric-name">{label}</td>{cells}</tr>\n')
+    return section_rows
+
+
+def _unmatched_rows_html(
+    rows_by_label: dict[str, dict[str, Any]],
+    rendered: set[str],
+    assets: list[str],
+) -> list[str]:
+    """Render rows not claimed by any section (e.g. string-valued date rows).
+
+    Args:
+        rows_by_label: Lookup of metric label → per-asset values.
+        rendered: Labels already emitted by the section pass.
+        assets: Asset column names, in output order.
+
+    Returns:
+        A list of HTML ``<tr>`` strings for the leftover labels.
+
+    """
+    parts: list[str] = []
     for label, vals in rows_by_label.items():
         if label in rendered:
             continue
@@ -214,8 +258,7 @@ def _metrics_table_html(df: pl.DataFrame) -> str:
         else:
             cells = "".join(f'<td class="metric-value">{_fmt(vals.get(a), ".4f")}</td>' for a in assets)
         parts.append(f'<tr><td class="metric-name">{label}</td>{cells}</tr>\n')
-
-    return _table_html(header_cells, "".join(parts))
+    return parts
 
 
 def _drawdowns_section_html(data: Any, assets: list[str]) -> str:

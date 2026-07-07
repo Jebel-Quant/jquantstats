@@ -47,7 +47,34 @@ def _plot_performance_dashboard(returns: pl.DataFrame, log_scale: bool = False) 
         vertical_spacing=0.05,
     )
 
-    # --- Row 1: Cumulative Returns
+    _add_cumulative_traces(fig, prices, date_col, tickers, colors)
+    _add_drawdown_traces(fig, prices, date_col, tickers, colors)
+    fig.add_hline(y=0, line_width=1, line_color="gray", row=2, col=1)
+    _add_monthly_traces(fig, monthly_returns, date_col, tickers, colors)
+
+    _apply_base_layout(fig, f"{' vs '.join(tickers)} Performance Dashboard", height=1200)
+
+    fig.update_yaxes(title_text="Cumulative Return", row=1, col=1, tickformat=".2f")
+    fig.update_yaxes(title_text="Drawdown", row=2, col=1, tickformat=".0%")
+    fig.update_yaxes(title_text="Monthly Return", row=3, col=1, tickformat=".0%")
+
+    fig.update_xaxes(showgrid=True, gridwidth=0.5, gridcolor="lightgrey")
+    fig.update_yaxes(showgrid=True, gridwidth=0.5, gridcolor="lightgrey")
+
+    if log_scale:
+        fig.update_yaxes(type="log", row=1, col=1)
+
+    return fig
+
+
+def _add_cumulative_traces(
+    fig: go.Figure,
+    prices: pl.DataFrame,
+    date_col: str,
+    tickers: list[str],
+    colors: dict[str, str],
+) -> None:
+    """Add the row-1 cumulative-return line traces (one per ticker)."""
     for ticker in tickers:
         price_col = f"{ticker}_price"
         fig.add_trace(
@@ -65,7 +92,15 @@ def _plot_performance_dashboard(returns: pl.DataFrame, log_scale: bool = False) 
             col=1,
         )
 
-    # --- Row 2: Drawdowns
+
+def _add_drawdown_traces(
+    fig: go.Figure,
+    prices: pl.DataFrame,
+    date_col: str,
+    tickers: list[str],
+    colors: dict[str, str],
+) -> None:
+    """Add the row-2 drawdown area traces (one per ticker)."""
     for ticker in tickers:
         price_col = f"{ticker}_price"
         # Calculate drawdowns using polars
@@ -90,9 +125,15 @@ def _plot_performance_dashboard(returns: pl.DataFrame, log_scale: bool = False) 
             col=1,
         )
 
-    fig.add_hline(y=0, line_width=1, line_color="gray", row=2, col=1)
 
-    # --- Row 3: Monthly Returns
+def _add_monthly_traces(
+    fig: go.Figure,
+    monthly_returns: pl.DataFrame,
+    date_col: str,
+    tickers: list[str],
+    colors: dict[str, str],
+) -> None:
+    """Add the row-3 monthly-return bar traces (one per ticker)."""
     for ticker in tickers:
         # Get monthly returns values as a list for coloring
         monthly_values = monthly_returns[ticker].to_list()
@@ -120,17 +161,3 @@ def _plot_performance_dashboard(returns: pl.DataFrame, log_scale: bool = False) 
             row=3,
             col=1,
         )
-
-    _apply_base_layout(fig, f"{' vs '.join(tickers)} Performance Dashboard", height=1200)
-
-    fig.update_yaxes(title_text="Cumulative Return", row=1, col=1, tickformat=".2f")
-    fig.update_yaxes(title_text="Drawdown", row=2, col=1, tickformat=".0%")
-    fig.update_yaxes(title_text="Monthly Return", row=3, col=1, tickformat=".0%")
-
-    fig.update_xaxes(showgrid=True, gridwidth=0.5, gridcolor="lightgrey")
-    fig.update_yaxes(showgrid=True, gridwidth=0.5, gridcolor="lightgrey")
-
-    if log_scale:
-        fig.update_yaxes(type="log", row=1, col=1)
-
-    return fig

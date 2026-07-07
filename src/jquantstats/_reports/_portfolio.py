@@ -119,26 +119,52 @@ def _stats_table_html(summary: pl.DataFrame) -> str:
         for metric in metrics:
             if metric not in metric_data:
                 continue
-            fmt, suffix = _METRIC_FORMATS.get(metric, (".4f", ""))
-            label = _METRIC_LABELS.get(metric, metric.replace("_", " ").title())
-            values = metric_data[metric]
-
-            # Find the best asset to highlight (only for higher-is-better metrics)
-            best_asset: str | None = None
-            if metric in _HIGHER_IS_BETTER:
-                finite_pairs = [(a, float(v)) for a, v in values.items() if _is_finite(v)]
-                if finite_pairs:
-                    best_asset = max(finite_pairs, key=lambda x: x[1])[0]
-
-            cells = "".join(
-                f'<td class="metric-value{"  best-value" if a == best_asset else ""}">'
-                f"{_fmt(values.get(a), fmt, suffix)}</td>"
-                for a in assets
-            )
-            rows_html_parts.append(f'<tr><td class="metric-name">{label}</td>{cells}</tr>\n')
+            rows_html_parts.append(_stats_metric_row_html(metric, metric_data[metric], assets))
 
     rows_html = "".join(rows_html_parts)
     return _table_html(header_cells, rows_html)
+
+
+def _best_asset(metric: str, values: dict[str, Any]) -> str | None:
+    """Return the asset with the highest finite value, for higher-is-better metrics.
+
+    Args:
+        metric: The metric name being rendered.
+        values: Mapping of asset name → value for this metric.
+
+    Returns:
+        The best asset name to highlight, or ``None`` when the metric is not
+        higher-is-better or has no finite values.
+
+    """
+    if metric not in _HIGHER_IS_BETTER:
+        return None
+    finite_pairs = [(a, float(v)) for a, v in values.items() if _is_finite(v)]
+    if not finite_pairs:
+        return None
+    return max(finite_pairs, key=lambda x: x[1])[0]
+
+
+def _stats_metric_row_html(metric: str, values: dict[str, Any], assets: list[str]) -> str:
+    """Render a single metric row, highlighting the best asset where applicable.
+
+    Args:
+        metric: The metric name (drives label, format, and highlight rule).
+        values: Mapping of asset name → value for this metric.
+        assets: Asset column names, in output order.
+
+    Returns:
+        An HTML ``<tr>`` string for the metric.
+
+    """
+    fmt, suffix = _METRIC_FORMATS.get(metric, (".4f", ""))
+    label = _METRIC_LABELS.get(metric, metric.replace("_", " ").title())
+    best_asset = _best_asset(metric, values)
+    cells = "".join(
+        f'<td class="metric-value{"  best-value" if a == best_asset else ""}">{_fmt(values.get(a), fmt, suffix)}</td>'
+        for a in assets
+    )
+    return f'<tr><td class="metric-name">{label}</td>{cells}</tr>\n'
 
 
 # ── Report dataclass ──────────────────────────────────────────────────────────

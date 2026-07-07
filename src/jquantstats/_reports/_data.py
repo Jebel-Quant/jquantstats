@@ -121,54 +121,14 @@ class Reports:
 
         # ── Period info for header ────────────────────────────────────────────
         all_df: pl.DataFrame | None = getattr(self._data, "all", None)
-        period_info = ""
-        temporal_index = False
-        if all_df is not None:  # pragma: no branch — Data always exposes .all; getattr default is defensive
-            date_col = all_df.columns[0]
-            temporal_index = all_df[date_col].dtype.is_temporal()
-            if temporal_index:
-                start_dt = all_df[date_col].min()
-                end_dt = all_df[date_col].max()
-                n = len(all_df)
-                period_info = f"{start_dt!s} → {end_dt!s} | {n:,} observations"
+        period_info, temporal_index = _report_period_info(all_df)
 
         # ── Drawdowns ─────────────────────────────────────────────────────────
         drawdowns_html = _drawdowns_section_html(self._data, assets)
 
         # ── Charts ────────────────────────────────────────────────────────────
         plots = getattr(self._data, "plots", None)
-        chart_parts: list[str] = []
-        if plots is not None:  # pragma: no branch — Data always exposes .plots; getattr default is defensive
-            _chart_methods: list[tuple[str, dict[str, Any]]] = [
-                ("snapshot", {}),
-                ("returns", {}),
-                ("drawdown", {}),
-                ("rolling_sharpe", {}),
-                ("rolling_volatility", {}),
-                ("monthly_heatmap", {}),
-                ("yearly_returns", {}),
-                ("histogram", {}),
-            ]
-            # These charts aggregate by calendar period (resample, dt.year/
-            # dt.month) and cannot be computed for an integer index.
-            _calendar_charts = {"snapshot", "monthly_heatmap", "yearly_returns"}
-            if not temporal_index:
-                skipped = ", ".join(m for m, _ in _chart_methods if m in _calendar_charts)
-                warnings.warn(
-                    f"Index is not temporal; skipping calendar-based charts: {skipped}.",
-                    stacklevel=2,
-                )
-            for method, kwargs in _chart_methods:
-                if not temporal_index and method in _calendar_charts:
-                    continue
-                fn = getattr(plots, method, None)
-                if fn is None:
-                    continue
-                div = _try_plotly_div(fn(**kwargs), include_cdn=not chart_parts)
-                if div:  # pragma: no branch — _try_plotly_div only returns falsy on render failure
-                    chart_parts.append(f'<div style="margin-bottom:24px">{div}</div>')
-
-        charts_html = "\n".join(chart_parts) if chart_parts else "<p>No charts available.</p>"
+        charts_html = _report_charts_html(plots, temporal_index)
 
         return _build_full_html(
             title=title,
@@ -178,3 +138,98 @@ class Reports:
             drawdowns_html=drawdowns_html,
             charts_html=charts_html,
         )
+
+
+def _report_period_info(all_df: pl.DataFrame | None) -> tuple[str, bool]:
+    """Derive the header period string and whether the index is temporal.
+
+    Args:
+        all_df: The combined ``Data.all`` frame, or ``None`` if unavailable.
+
+    Returns:
+        A ``(period_info, temporal_index)`` tuple. ``period_info`` is empty
+        for a non-temporal (integer) index.
+
+    """
+    period_info = ""
+    temporal_index = False
+    if all_df is not None:  # pragma: no branch — Data always exposes .all; getattr default is defensive
+        date_col = all_df.columns[0]
+        temporal_index = all_df[date_col].dtype.is_temporal()
+        if temporal_index:
+            start_dt = all_df[date_col].min()
+            end_dt = all_df[date_col].max()
+            n = len(all_df)
+            period_info = f"{start_dt!s} → {end_dt!s} | {n:,} observations"
+    return period_info, temporal_index
+
+
+def _report_charts_html(plots: Any, temporal_index: bool) -> str:
+    """Render every available report chart as embedded Plotly ``<div>`` HTML.
+
+    Calendar-based charts (which resample by ``dt.year``/``dt.month``) are
+    skipped with a warning when the index is not temporal.
+
+    Args:
+        plots: The ``Data.plots`` facade, or ``None`` if unavailable.
+        temporal_index: Whether the underlying index is date/datetime typed.
+
+    Returns:
+        Concatenated chart HTML, or a placeholder when none could be rendered.
+
+    """
+    chart_parts: list[str] = []
+    if plots is not None:  # pragma: no branch — Data always exposes .plots; getattr default is defensive
+        _chart_methods: list[tuple[str, dict[str, Any]]] = [
+            ("snapshot", {}),
+            ("returns", {}),
+            ("drawdown", {}),
+            ("rolling_sharpe", {}),
+            ("rolling_volatility", {}),
+            ("monthly_heatmap", {}),
+            ("yearly_returns", {}),
+            ("histogram", {}),
+        ]
+        # These charts aggregate by calendar period (resample, dt.year/
+        # dt.month) and cannot be computed for an integer index.
+        _calendar_charts = {"snapshot", "monthly_heatmap", "yearly_returns"}
+        if not temporal_index:
+            skipped = ", ".join(m for m, _ in _chart_methods if m in _calendar_charts)
+            warnings.warn(
+                f"Index is not temporal; skipping calendar-based charts: {skipped}.",
+                stacklevel=2,
+            )
+        chart_parts = _collect_chart_divs(plots, _chart_methods, _calendar_charts, temporal_index)
+
+    return "\n".join(chart_parts) if chart_parts else "<p>No charts available.</p>"
+
+
+def _collect_chart_divs(
+    plots: Any,
+    chart_methods: list[tuple[str, dict[str, Any]]],
+    calendar_charts: set[str],
+    temporal_index: bool,
+) -> list[str]:
+    """Render each requested chart to an embedded ``<div>``, skipping the impossible.
+
+    Args:
+        plots: The ``Data.plots`` facade.
+        chart_methods: Ordered ``(method_name, kwargs)`` pairs to attempt.
+        calendar_charts: Method names that require a temporal index.
+        temporal_index: Whether the underlying index is date/datetime typed.
+
+    Returns:
+        The successfully rendered chart ``<div>`` strings, in request order.
+
+    """
+    chart_parts: list[str] = []
+    for method, kwargs in chart_methods:
+        if not temporal_index and method in calendar_charts:
+            continue
+        fn = getattr(plots, method, None)
+        if fn is None:
+            continue
+        div = _try_plotly_div(fn(**kwargs), include_cdn=not chart_parts)
+        if div:  # pragma: no branch — _try_plotly_div only returns falsy on render failure
+            chart_parts.append(f'<div style="margin-bottom:24px">{div}</div>')
+    return chart_parts
