@@ -13,6 +13,13 @@ TESTS_FOLDER := tests
 # (Can be overridden in local.mk or via environment variable)
 COVERAGE_FAIL_UNDER ?= 90
 
+# Which static type checker(s) the 'typecheck' target runs: ty, mypy, or both.
+# Running both is the default for backward compatibility, but ty and mypy
+# occasionally disagree (e.g. one accepts a suppression the other still flags),
+# forcing duplicate `# type: ignore` / `# ty: ignore` comments. Set this to
+# 'ty' or 'mypy' in local.mk or .rhiza/.env to run a single checker instead.
+TYPECHECKER ?= both
+
 ##@ Development and Testing
 
 # The 'test' target runs the complete test suite.
@@ -69,11 +76,11 @@ test:: install ## run all tests
 	  attempt=$$((attempt + 1)); \
 	done
 
-# The 'typecheck' target runs static type analysis using ty and mypy.
+# The 'typecheck' target runs static type analysis using ty and/or mypy.
 # 1. Builds a list of existing Python source folders to check.
-# 2. Runs ty on those folders.
-# 3. Runs mypy in strict mode on those folders as a cross-check.
-typecheck: install ## run ty and mypy type checking
+# 2. Depending on TYPECHECKER (ty|mypy|both, default: both), runs ty,
+#    mypy in strict mode, or both in sequence as a cross-check.
+typecheck: install ## run ty and/or mypy type checking (TYPECHECKER=ty|mypy|both, default: both)
 	@typecheck_paths=""; \
 	if [ -d "${SOURCE_FOLDER}" ]; then \
 	  typecheck_paths="${SOURCE_FOLDER}"; \
@@ -81,14 +88,30 @@ typecheck: install ## run ty and mypy type checking
 	if [ -d ".rhiza/utils" ]; then \
 	  typecheck_paths="$${typecheck_paths} .rhiza/utils"; \
 	fi; \
-	if [ -n "$${typecheck_paths}" ]; then \
-	  printf "${BLUE}[INFO] Running ty type checking in:$${typecheck_paths}${RESET}\n"; \
-	  ${UV_BIN} run ty check $${typecheck_paths} && \
-	  printf "${BLUE}[INFO] Running mypy strict type checking in:$${typecheck_paths}${RESET}\n"; \
-	  ${UV_BIN} run mypy --strict $${typecheck_paths}; \
-	else \
+	if [ -z "$${typecheck_paths}" ]; then \
 	  printf "${YELLOW}[WARN] No typecheck folders found (SOURCE_FOLDER='${SOURCE_FOLDER}', .rhiza/utils missing), skipping typecheck${RESET}\n"; \
-	fi
+	  exit 0; \
+	fi; \
+	case "${TYPECHECKER}" in \
+	  ty) \
+	    printf "${BLUE}[INFO] Running ty type checking in:$${typecheck_paths}${RESET}\n"; \
+	    ${UV_BIN} run ty check $${typecheck_paths} \
+	    ;; \
+	  mypy) \
+	    printf "${BLUE}[INFO] Running mypy strict type checking in:$${typecheck_paths}${RESET}\n"; \
+	    ${UV_BIN} run mypy --strict $${typecheck_paths} \
+	    ;; \
+	  both) \
+	    printf "${BLUE}[INFO] Running ty type checking in:$${typecheck_paths}${RESET}\n"; \
+	    ${UV_BIN} run ty check $${typecheck_paths} && \
+	    printf "${BLUE}[INFO] Running mypy strict type checking in:$${typecheck_paths}${RESET}\n"; \
+	    ${UV_BIN} run mypy --strict $${typecheck_paths} \
+	    ;; \
+	  *) \
+	    printf "${RED}[ERROR] Invalid TYPECHECKER='${TYPECHECKER}' (expected: ty, mypy, or both)${RESET}\n"; \
+	    exit 1 \
+	    ;; \
+	esac
 
 # Extra flags forwarded to pip-audit (e.g. --ignore-vuln CVE-XXXX-YYYY)
 PIP_AUDIT_ARGS ?=

@@ -1,7 +1,7 @@
-sha: ff7bd135efaaad8aadf01d41bb60dd8419c015ae
+sha: 76e9bec5ac5ec09e016253ddc7a4431c53a10a0f
 repo: jebel-quant/rhiza
 host: github
-ref: v0.19.9
+ref: v1.0.2
 include: []
 exclude: []
 templates:
@@ -74,6 +74,7 @@ files:
 - .rhiza/tests/api/test_make_variable_overrides.py
 - .rhiza/tests/api/test_makefile_api.py
 - .rhiza/tests/api/test_makefile_targets.py
+- .rhiza/tests/api/test_releasing_targets.py
 - .rhiza/tests/conftest.py
 - .rhiza/tests/integration/test_book_targets.py
 - .rhiza/tests/integration/test_docs_targets.py
@@ -110,5 +111,5 @@ files:
 - ruff.toml
 profiles:
 - github-project
-synced_at: '2026-06-28T13:14:50Z'
+synced_at: '2026-07-07T03:48:02Z'
 strategy: merge
