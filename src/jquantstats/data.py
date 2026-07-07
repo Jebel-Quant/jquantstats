@@ -184,6 +184,60 @@ def _subtract_risk_free(dframe: pl.DataFrame, rf: float | pl.DataFrame, date_col
     )
 
 
+def _require_date_col(frames: list[tuple[str, pl.DataFrame | None]], date_col: str) -> None:
+    """Verify *date_col* is present in every supplied (non-None) frame.
+
+    Args:
+        frames: ``(name, frame)`` pairs; ``None`` frames are skipped.
+        date_col: The required date column name.
+
+    Raises:
+        MissingDateColumnError: If any frame lacks *date_col*, naming that frame.
+    """
+    for frame_name, frame in frames:
+        if frame is not None and date_col not in frame.columns:
+            raise MissingDateColumnError(frame_name, column=date_col, available=list(frame.columns))
+
+
+def _align_returns_benchmark(
+    returns_pl: pl.DataFrame, benchmark_pl: pl.DataFrame, date_col: str
+) -> tuple[pl.DataFrame, pl.DataFrame]:
+    """Inner-join returns and benchmark on their common dates.
+
+    Args:
+        returns_pl: Returns frame with a *date_col* column.
+        benchmark_pl: Benchmark frame with a *date_col* column.
+        date_col: The shared date column name.
+
+    Returns:
+        The two frames filtered to their overlapping dates.
+
+    Raises:
+        ValueError: If the frames share no dates.
+
+    Warns:
+        BenchmarkAlignmentWarning: If aligning drops rows from either frame.
+    """
+    joined_dates = returns_pl.join(benchmark_pl, on=date_col, how="inner").select(date_col)
+    if joined_dates.is_empty():
+        raise ValueError("No overlapping dates between returns and benchmark.")  # noqa: TRY003
+    dropped_returns = returns_pl.height - joined_dates.height
+    dropped_benchmark = benchmark_pl.height - joined_dates.height
+    if dropped_returns > 0 or dropped_benchmark > 0:
+        warnings.warn(
+            f"Aligning returns and benchmark on common dates dropped "
+            f"{dropped_returns} of {returns_pl.height} returns row(s) and "
+            f"{dropped_benchmark} of {benchmark_pl.height} benchmark row(s); "
+            f"{joined_dates.height} row(s) remain. Pass a benchmark covering "
+            f"the same dates as the returns to avoid this.",
+            BenchmarkAlignmentWarning,
+            stacklevel=2,
+        )
+    returns_pl = returns_pl.join(joined_dates, on=date_col, how="inner")
+    benchmark_pl = benchmark_pl.join(joined_dates, on=date_col, how="inner")
+    return returns_pl, benchmark_pl
+
+
 @dataclasses.dataclass(frozen=True, slots=True)
 class Data:
     """A container for financial returns data and an optional benchmark.
@@ -339,32 +393,12 @@ class Data:
         frames: list[tuple[str, pl.DataFrame | None]] = [("returns", returns_pl), ("benchmark", benchmark_pl)]
         if isinstance(rf_converted, pl.DataFrame):
             frames.append(("rf", rf_converted))
-        for frame_name, frame in frames:
-            if frame is not None and date_col not in frame.columns:
-                raise MissingDateColumnError(frame_name, column=date_col, available=list(frame.columns))
+        _require_date_col(frames, date_col)
 
         returns_pl = _apply_null_strategy(returns_pl, date_col, "returns", null_strategy)
         if benchmark_pl is not None:
             benchmark_pl = _apply_null_strategy(benchmark_pl, date_col, "benchmark", null_strategy)
-
-        if benchmark_pl is not None:
-            joined_dates = returns_pl.join(benchmark_pl, on=date_col, how="inner").select(date_col)
-            if joined_dates.is_empty():
-                raise ValueError("No overlapping dates between returns and benchmark.")  # noqa: TRY003
-            dropped_returns = returns_pl.height - joined_dates.height
-            dropped_benchmark = benchmark_pl.height - joined_dates.height
-            if dropped_returns > 0 or dropped_benchmark > 0:
-                warnings.warn(
-                    f"Aligning returns and benchmark on common dates dropped "
-                    f"{dropped_returns} of {returns_pl.height} returns row(s) and "
-                    f"{dropped_benchmark} of {benchmark_pl.height} benchmark row(s); "
-                    f"{joined_dates.height} row(s) remain. Pass a benchmark covering "
-                    f"the same dates as the returns to avoid this.",
-                    BenchmarkAlignmentWarning,
-                    stacklevel=2,
-                )
-            returns_pl = returns_pl.join(joined_dates, on=date_col, how="inner")
-            benchmark_pl = benchmark_pl.join(joined_dates, on=date_col, how="inner")
+            returns_pl, benchmark_pl = _align_returns_benchmark(returns_pl, benchmark_pl, date_col)
 
         index = returns_pl.select(date_col)
         excess_returns = _subtract_risk_free(returns_pl, rf_converted, date_col).drop(date_col)
@@ -692,31 +726,45 @@ class Data:
 
         """
         date_column = self.index.columns[0]
-        is_temporal = self.index[date_column].dtype.is_temporal()
 
-        if is_temporal:
-            cond = pl.lit(True)
-            if start is not None:
-                cond = cond & (pl.col(date_column) >= pl.lit(start))
-            if end is not None:
-                cond = cond & (pl.col(date_column) <= pl.lit(end))
-            mask = self.index.select(cond.alias("mask"))["mask"]
-            new_index = self.index.filter(mask)
-            new_returns = self.returns.filter(mask)
-            new_benchmark = self.benchmark.filter(mask) if self.benchmark is not None else None
+        if self.index[date_column].dtype.is_temporal():
+            new_index, new_returns, new_benchmark = self._truncate_temporal(date_column, start, end)
         else:
-            if start is not None and not isinstance(start, int):
-                raise IntegerIndexBoundError("start", type(start).__name__)
-            if end is not None and not isinstance(end, int):
-                raise IntegerIndexBoundError("end", type(end).__name__)
-            row_start = start if start is not None else 0
-            row_end = end + 1 if end is not None else self.index.height
-            length = max(0, row_end - row_start)
-            new_index = self.index.slice(row_start, length)
-            new_returns = self.returns.slice(row_start, length)
-            new_benchmark = self.benchmark.slice(row_start, length) if self.benchmark is not None else None
+            new_index, new_returns, new_benchmark = self._truncate_integer(start, end)
 
         return Data(returns=new_returns, benchmark=new_benchmark, index=new_index)
+
+    def _truncate_temporal(
+        self,
+        date_column: str,
+        start: date | datetime | str | int | None,
+        end: date | datetime | str | int | None,
+    ) -> tuple[pl.DataFrame, pl.DataFrame, pl.DataFrame | None]:
+        """Truncate a temporal index by comparing the date column to [start, end]."""
+        cond = pl.lit(True)
+        if start is not None:
+            cond = cond & (pl.col(date_column) >= pl.lit(start))
+        if end is not None:
+            cond = cond & (pl.col(date_column) <= pl.lit(end))
+        mask = self.index.select(cond.alias("mask"))["mask"]
+        new_benchmark = self.benchmark.filter(mask) if self.benchmark is not None else None
+        return self.index.filter(mask), self.returns.filter(mask), new_benchmark
+
+    def _truncate_integer(
+        self,
+        start: date | datetime | str | int | None,
+        end: date | datetime | str | int | None,
+    ) -> tuple[pl.DataFrame, pl.DataFrame, pl.DataFrame | None]:
+        """Truncate an integer index by row slicing; bounds must be integers."""
+        if start is not None and not isinstance(start, int):
+            raise IntegerIndexBoundError("start", type(start).__name__)
+        if end is not None and not isinstance(end, int):
+            raise IntegerIndexBoundError("end", type(end).__name__)
+        row_start = start if start is not None else 0
+        row_end = end + 1 if end is not None else self.index.height
+        length = max(0, row_end - row_start)
+        new_benchmark = self.benchmark.slice(row_start, length) if self.benchmark is not None else None
+        return self.index.slice(row_start, length), self.returns.slice(row_start, length), new_benchmark
 
     @property
     def _periods_per_year(self) -> float:

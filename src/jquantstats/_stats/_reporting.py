@@ -473,49 +473,60 @@ class _ReportingStatsMixin:
         date_col_name = self._data.date_col[0] if self._data.date_col else None
         has_temporal = date_col_name is not None and all_df[date_col_name].dtype.is_temporal()
 
-        from ..data import Data
-
         if not has_temporal:
-            # Integer-index fallback: group by chunks of ~_periods_per_year rows
-            chunk = round(self._data._periods_per_year)
-            total = all_df.height
-            frames_int: list[pl.DataFrame] = []
-            for i, start in enumerate(range(0, total, chunk), start=1):
-                chunk_all = all_df.slice(start, chunk)
-                if chunk_all.height < max(5, chunk // 4):
-                    continue
-                chunk_index = chunk_all.select(self._data.date_col)
-                chunk_returns = chunk_all.select(self._data.returns.columns)
-                chunk_benchmark = (
-                    chunk_all.select(self._data.benchmark.columns) if self._data.benchmark is not None else None
-                )
-                chunk_data = Data(returns=chunk_returns, index=chunk_index, benchmark=chunk_benchmark)
-                chunk_summary = cast(Any, type(self))(chunk_data).summary()
-                chunk_summary = chunk_summary.with_columns(pl.lit(i).alias("year"))
-                frames_int.append(chunk_summary)
-            if not frames_int:
-                return pl.DataFrame()
-            result_int = pl.concat(frames_int)
-            ordered_int = ["year", "metric", *[c for c in result_int.columns if c not in ("year", "metric")]]
-            return result_int.select(ordered_int)
-
+            return self._annual_breakdown_integer(all_df)
         if date_col_name is None:  # unreachable: has_temporal guarantees non-None  # pragma: no cover
             return pl.DataFrame()  # pragma: no cover
-        years = all_df[date_col_name].dt.year().unique().sort().to_list()
+        return self._annual_breakdown_temporal(all_df, date_col_name)
 
+    def _summary_frame(self, sub_all: pl.DataFrame, index_cols: list[str], label: int) -> pl.DataFrame:
+        """Compute a `summary` for one sub-period and tag it with a ``year`` label.
+
+        Args:
+            sub_all: The combined (index + returns + benchmark) rows for the period.
+            index_cols: Column name(s) to use as the sub-period's date index.
+            label: Value written to the ``year`` column (calendar year or chunk ordinal).
+
+        Returns:
+            The summary DataFrame with an added ``year`` column.
+        """
+        from ..data import Data
+
+        sub_returns = sub_all.select(self._data.returns.columns)
+        sub_benchmark = sub_all.select(self._data.benchmark.columns) if self._data.benchmark is not None else None
+        sub_data = Data(returns=sub_returns, index=sub_all.select(index_cols), benchmark=sub_benchmark)
+        summary: pl.DataFrame = cast(Any, type(self))(sub_data).summary()
+        return summary.with_columns(pl.lit(label).alias("year"))
+
+    @staticmethod
+    def _order_breakdown(result: pl.DataFrame) -> pl.DataFrame:
+        """Reorder breakdown columns so ``year`` and ``metric`` lead."""
+        ordered = ["year", "metric", *[c for c in result.columns if c not in ("year", "metric")]]
+        return result.select(ordered)
+
+    def _annual_breakdown_integer(self, all_df: pl.DataFrame) -> pl.DataFrame:
+        """Break down by fixed row chunks (~one year each) for an integer index."""
+        chunk = round(self._data._periods_per_year)
+        total = all_df.height
+        frames: list[pl.DataFrame] = []
+        for i, start in enumerate(range(0, total, chunk), start=1):
+            chunk_all = all_df.slice(start, chunk)
+            if chunk_all.height < max(5, chunk // 4):
+                continue
+            frames.append(self._summary_frame(chunk_all, self._data.date_col, i))
+        if not frames:
+            return pl.DataFrame()
+        return self._order_breakdown(pl.concat(frames))
+
+    def _annual_breakdown_temporal(self, all_df: pl.DataFrame, date_col_name: str) -> pl.DataFrame:
+        """Break down by calendar year for a temporal index."""
+        years = all_df[date_col_name].dt.year().unique().sort().to_list()
         frames: list[pl.DataFrame] = []
         for year in years:
             year_all = all_df.filter(pl.col(date_col_name).dt.year() == year)
             if year_all.height < 2:
                 continue
-            year_index = year_all.select([date_col_name])
-            year_returns = year_all.select(self._data.returns.columns)
-            year_benchmark = year_all.select(self._data.benchmark.columns) if self._data.benchmark is not None else None
-            year_data = Data(returns=year_returns, index=year_index, benchmark=year_benchmark)
-            year_summary = cast(Any, type(self))(year_data).summary()
-            year_summary = year_summary.with_columns(pl.lit(year).alias("year"))
-            frames.append(year_summary)
-
+            frames.append(self._summary_frame(year_all, [date_col_name], year))
         if not frames:
             asset_cols = list(self._data.returns.columns)
             schema: dict[str, type[pl.DataType]] = {
@@ -524,10 +535,7 @@ class _ReportingStatsMixin:
                 **dict.fromkeys(asset_cols, pl.Float64),
             }
             return pl.DataFrame(schema=schema)
-
-        result = pl.concat(frames)
-        ordered = ["year", "metric", *[c for c in result.columns if c not in ("year", "metric")]]
-        return result.select(ordered)
+        return self._order_breakdown(pl.concat(frames))
 
     def summary(self) -> pl.DataFrame:
         """Summary statistics for each asset as a tidy DataFrame.

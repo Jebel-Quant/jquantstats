@@ -13,6 +13,32 @@ if TYPE_CHECKING:
     from jquantstats._protocol import DataLike
 
 
+def _monthly_heatmap_matrix(
+    monthly: pl.DataFrame, years: list[int]
+) -> tuple[list[list[float | None]], list[list[str]]]:
+    """Build the year-by-month value and label grids for the monthly heatmap.
+
+    Args:
+        monthly: Aggregated frame with ``_year``, ``_month`` and ``ret`` columns.
+        years: Sorted unique years, defining the row order of the output grids.
+
+    Returns:
+        A ``(z, text)`` tuple: ``z`` holds returns scaled to percent (``None``
+        for missing cells) and ``text`` the formatted per-cell labels.
+
+    """
+    year_idx = {y: i for i, y in enumerate(years)}
+    z: list[list[float | None]] = [[None] * 12 for _ in years]
+    text: list[list[str]] = [[""] * 12 for _ in years]
+    for row in monthly.iter_rows(named=True):
+        yi = year_idx[row["_year"]]
+        mi = row["_month"] - 1
+        val = row["ret"]
+        z[yi][mi] = val * 100 if val is not None else None
+        text[yi][mi] = f"{val:.1%}" if val is not None else ""
+    return z, text
+
+
 class _PeriodicPlotsMixin:
     """Daily/monthly/yearly bar charts and the monthly heatmap for :class:`DataPlots`."""
 
@@ -193,16 +219,7 @@ class _PeriodicPlotsMixin:
         )
 
         years = sorted(monthly["_year"].unique().to_list())
-        z = [[None] * 12 for _ in years]
-        text = [[""] * 12 for _ in years]
-        year_idx = {y: i for i, y in enumerate(years)}
-
-        for row in monthly.iter_rows(named=True):
-            yi = year_idx[row["_year"]]
-            mi = row["_month"] - 1
-            val = row["ret"]
-            z[yi][mi] = val * 100 if val is not None else None
-            text[yi][mi] = f"{val:.1%}" if val is not None else ""
+        z, text = _monthly_heatmap_matrix(monthly, years)
 
         fig = go.Figure(
             go.Heatmap(

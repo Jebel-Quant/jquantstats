@@ -258,11 +258,26 @@ def _add_full_mode_rows(
     rows.append(("Best Day", _pct(_safe(s.best))))
     rows.append(("Worst Day", _pct(_safe(s.worst))))
 
-    # Benchmark greeks (only if benchmark is present). Without a benchmark,
-    # ``s.greeks()`` reaches ``benchmark_data.columns`` on a ``None`` benchmark
-    # and raises ``AttributeError``; we tolerate only that case and omit the
-    # rows. Any other error (malformed column, polars schema/arithmetic bug)
-    # propagates so genuine bugs are not silently swallowed.
+    _append_benchmark_greeks(rows, s)
+    _append_correlation(rows, data, all_df, date_col, asset_cols)
+
+    rows.append(("R²", _safe(s.r_squared)))
+    rows.append(("Treynor Ratio", _safe(s.treynor_ratio, periods=ppy)))
+
+
+def _append_benchmark_greeks(rows: list[tuple[str, dict[str, Any]]], s: Any) -> None:
+    """Append benchmark Beta/Alpha rows when a benchmark is present.
+
+    Without a benchmark, ``s.greeks()`` reaches ``benchmark_data.columns`` on a
+    ``None`` benchmark and raises ``AttributeError``; we tolerate only that case
+    and omit the rows. Any other error (malformed column, polars schema/
+    arithmetic bug) propagates so genuine bugs are not silently swallowed.
+
+    Args:
+        rows: Accumulator list of ``(label, values)`` tuples.
+        s: Stats object providing ``greeks()``.
+
+    """
     try:
         greeks = s.greeks()
         if greeks:  # pragma: no branch — greeks() raises without a benchmark, so falsy is unreachable
@@ -273,11 +288,29 @@ def _add_full_mode_rows(
     except AttributeError:
         pass
 
-    # Correlation against the benchmark. When the benchmark column is absent
-    # (no benchmark configured, or it is missing from the joined frame) polars
-    # raises ``ColumnNotFoundError`` and ``None.columns`` raises
-    # ``AttributeError`` — both mean "no benchmark to correlate against", so the
-    # row is omitted. Any other error propagates.
+
+def _append_correlation(
+    rows: list[tuple[str, dict[str, Any]]],
+    data: Any,
+    all_df: pl.DataFrame | None,
+    date_col: str | None,
+    asset_cols: list[str],
+) -> None:
+    """Append the per-asset correlation-against-benchmark row when possible.
+
+    When the benchmark column is absent (no benchmark configured, or it is
+    missing from the joined frame) polars raises ``ColumnNotFoundError`` and
+    ``None.columns`` raises ``AttributeError`` — both mean "no benchmark to
+    correlate against", so the row is omitted. Any other error propagates.
+
+    Args:
+        rows: Accumulator list of ``(label, values)`` tuples.
+        data: The DataLike object (used for benchmark access).
+        all_df: Combined DataFrame or ``None`` if unavailable.
+        date_col: Name of the date column or ``None`` if unavailable.
+        asset_cols: Asset column names.
+
+    """
     try:
         bench_obj = getattr(data, "benchmark", None)
         if bench_obj is not None and all_df is not None and date_col is not None:  # pragma: no branch
@@ -292,9 +325,6 @@ def _add_full_mode_rows(
             rows.append(("Correlation", corr_dict))
     except (AttributeError, pl.exceptions.ColumnNotFoundError):
         pass
-
-    rows.append(("R²", _safe(s.r_squared)))
-    rows.append(("Treynor Ratio", _safe(s.treynor_ratio, periods=ppy)))
 
 
 def _build_metrics_df(rows: list[tuple[str, dict[str, Any]]]) -> pl.DataFrame:
