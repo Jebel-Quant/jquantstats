@@ -46,7 +46,7 @@ class DataUtils:
 
     def _combined(self) -> pl.DataFrame:
         """Return index hstacked with returns (no benchmark)."""
-        return pl.concat([self._data.index, self._data.returns], how="horizontal")
+        return pl.concat([self._data.index, self._data.returns], how="horizontal_extend")
 
     def _asset_cols(self) -> list[str]:
         """Return the asset column names from returns (excluding benchmark)."""

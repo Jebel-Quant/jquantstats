@@ -597,9 +597,9 @@ class Data:
 
         """
         if self.benchmark is None:
-            return pl.concat([self.index, self.returns], how="horizontal")
+            return pl.concat([self.index, self.returns], how="horizontal_extend")
         else:
-            return pl.concat([self.index, self.returns, self.benchmark], how="horizontal")
+            return pl.concat([self.index, self.returns, self.benchmark], how="horizontal_extend")
 
     def resample(self, every: str = "1mo") -> Data:
         """Resample returns and benchmark to a different frequency.
