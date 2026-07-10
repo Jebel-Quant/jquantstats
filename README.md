@@ -1,12 +1,18 @@
 # [jQuantStats](https://jebel-quant.github.io/jquantstats): Portfolio Analytics for Quants
 
-[![PyPI version](https://badge.fury.io/py/jquantstats.svg)](https://badge.fury.io/py/jquantstats)
-[![Python](https://img.shields.io/badge/python-3.11%2B-blue)](https://pypi.org/project/jquantstats/)
-[![Downloads](https://static.pepy.tech/personalized-badge/jquantstats?period=month&units=international_system&left_color=black&right_color=orange&left_text=PyPI%20downloads%20per%20month)](https://pepy.tech/project/jquantstats)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/jebel-quant/jquantstats/blob/main/LICENSE)
-[![CodeFactor](https://www.codefactor.io/repository/github/jebel-quant/jquantstats/badge)](https://www.codefactor.io/repository/github/jebel-quant/jquantstats)
-[![Rhiza](https://img.shields.io/badge/dynamic/yaml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fjebel-quant%2Fjquantstats%2Fmain%2F.rhiza%2Ftemplate.yml&query=%24.ref&label=rhiza)](https://github.com/jebel-quant/rhiza)
+[![PyPI version](https://badge.fury.io/py/jquantstats.svg)](https://pypi.org/project/jquantstats/)
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Python versions](https://img.shields.io/badge/Python-3.11%20•%203.12%20•%203.13%20•%203.14-blue?logo=python)](https://www.python.org/)
+[![CI](https://github.com/jebel-quant/jquantstats/actions/workflows/rhiza_ci.yml/badge.svg?event=push)](https://github.com/jebel-quant/jquantstats/actions/workflows/rhiza_ci.yml)
 [![Coverage](https://jebel-quant.github.io/jquantstats/coverage-badge.svg)](https://jebel-quant.github.io/jquantstats/reports/html-coverage/)
+[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg?logo=ruff)](https://github.com/astral-sh/ruff)
+[![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
+[![CodeFactor](https://www.codefactor.io/repository/github/jebel-quant/jquantstats/badge)](https://www.codefactor.io/repository/github/jebel-quant/jquantstats)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/jebel-quant/jquantstats/badge)](https://scorecard.dev/viewer/?uri=github.com/jebel-quant/jquantstats)
+[![Rhiza](https://img.shields.io/badge/dynamic/yaml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fjebel-quant%2Fjquantstats%2Fmain%2F.rhiza%2Ftemplate.yml&query=%24.ref&label=rhiza)](https://github.com/jebel-quant/rhiza)
+[![Downloads](https://static.pepy.tech/personalized-badge/jquantstats?period=month&units=international_system&left_color=black&right_color=orange&left_text=PyPI%20downloads%20per%20month)](https://pepy.tech/project/jquantstats)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/jebel-quant/jquantstats)
 
 [![Paper](https://img.shields.io/badge/paper-jquantstats.pdf-red?logo=adobeacrobatreader)](https://github.com/jebel-quant/jquantstats/blob/paper/jquantstats.pdf)
 
