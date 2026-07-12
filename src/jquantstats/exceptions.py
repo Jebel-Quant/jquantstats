@@ -40,7 +40,7 @@ class MissingDateColumnError(JQuantStatsError, ValueError):
         jquantstats.exceptions.MissingDateColumnError: ...
     """
 
-    def __init__(self, frame_name: str, column: str | None = None, available: list[str] = []) -> None:
+    def __init__(self, frame_name: str, column: str | None = None, available: list[str] | None = None) -> None:
         """Initialize with the frame name and, optionally, the missing column and available columns."""
         available = [] if available is None else list(available)
         if column is None:
