@@ -15,6 +15,8 @@ Examples:
 
 from __future__ import annotations
 
+from typing import Any
+
 
 class JQuantStatsError(Exception):
     """Base class for all JQuantStats domain errors."""
@@ -40,6 +42,7 @@ class MissingDateColumnError(JQuantStatsError, ValueError):
 
     def __init__(self, frame_name: str, column: str | None = None, available: list[str] | None = None) -> None:
         """Initialize with the frame name and, optionally, the missing column and available columns."""
+        available = [] if available is None else list(available)
         if column is None:
             msg = f"DataFrame '{frame_name}' is missing the required 'date' column."
         else:
@@ -52,7 +55,7 @@ class MissingDateColumnError(JQuantStatsError, ValueError):
         super().__init__(msg)
         self.frame_name = frame_name
         self.column = column
-        self.available = list(available) if available is not None else None
+        self.available = available
 
 
 class InvalidCashPositionTypeError(JQuantStatsError, TypeError):
@@ -243,7 +246,7 @@ class InvalidMaxBpsError(JQuantStatsError, ValueError):
         jquantstats.exceptions.InvalidMaxBpsError: max_bps must be a positive integer, got 0.
     """
 
-    def __init__(self, max_bps: object) -> None:
+    def __init__(self, max_bps: Any) -> None:
         """Initialize with the offending value."""
         super().__init__(f"max_bps must be a positive integer, got {max_bps!r}.")
         self.max_bps = max_bps

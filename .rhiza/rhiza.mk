@@ -169,7 +169,8 @@ sync: pre-sync ## sync with template repository as defined in .rhiza/template.ym
 
 _apply-sync-schedule: ## (internal) apply RHIZA_SYNC_SCHEDULE override to GitHub Actions sync workflow
 	@if [ "$(RHIZA_SYNC_SCHEDULE)" != "0 0 * * 1" ] && [ -f .github/workflows/rhiza_sync.yml ]; then \
-		sed -i.bak "s|cron: '[^']*'|cron: '$(RHIZA_SYNC_SCHEDULE)'|" .github/workflows/rhiza_sync.yml && rm -f .github/workflows/rhiza_sync.yml.bak; \
+		sed "s|cron: '[^']*'|cron: '$(RHIZA_SYNC_SCHEDULE)'|" .github/workflows/rhiza_sync.yml > .github/workflows/rhiza_sync.yml.tmp && \
+		mv .github/workflows/rhiza_sync.yml.tmp .github/workflows/rhiza_sync.yml; \
 		printf "${BLUE}[INFO] Applied custom sync schedule: $(RHIZA_SYNC_SCHEDULE)${RESET}\n"; \
 	fi
 
@@ -182,7 +183,7 @@ summarise-sync: install-uv ## summarise differences created by sync with templat
 	@if [ -n "$(IS_MOTHER_REPO)" ]; then \
 		printf "${BLUE}[INFO] Skipping summarise-sync in rhiza repository (no template.yml by design)${RESET}\n"; \
 	else \
-		$(MAKE) install-uv; \
+		$(MAKE) install-uv && \
 		${UVX_BIN} "rhiza==$(RHIZA_VERSION)" summarise .; \
 	fi
 
