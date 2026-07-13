@@ -141,4 +141,8 @@ See the [Migration Guide](MIGRATION.md) for a complete API mapping.
 
     Full method signatures and docstrings.
 
+-   :material-history: [**Changelog**](changelog.md)
+
+    Release history and notable API changes.
+
 </div>
