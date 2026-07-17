@@ -520,6 +520,9 @@ class Data:
             DataPlots: An instance of the DataPlots class initialized with this data.
 
         """
+        # Deferred to break the data <-> accessors import cycle: _plots imports
+        # DataLike from this module, so hoisting this to module top re-forms the
+        # cycle. Keep the import local.
         from ._plots import DataPlots
 
         return DataPlots(self)
@@ -532,6 +535,7 @@ class Data:
             Stats: An instance of the Stats class initialized with this data.
 
         """
+        # Deferred to break the data <-> accessors import cycle (see .plots).
         from ._stats import Stats
 
         return Stats(self)
@@ -544,6 +548,7 @@ class Data:
             Reports: An instance of the Reports class initialized with this data.
 
         """
+        # Deferred to break the data <-> accessors import cycle (see .plots).
         from ._reports import Reports
 
         return Reports(self)
@@ -556,6 +561,7 @@ class Data:
             DataUtils: An instance of the DataUtils class initialized with this data.
 
         """
+        # Deferred to break the data <-> accessors import cycle (see .plots).
         from ._utils import DataUtils
 
         return DataUtils(self)

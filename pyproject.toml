@@ -147,3 +147,11 @@ ignore-init-method = true
 ignore-magic = true
 ignore-overloaded-functions = true
 
+# Test-layout parity (rhiza check_test_layout): tests here are organised by
+# behaviour under tests/test_jquantstats/… rather than mirroring src/ 1:1, and
+# per-module coverage is guaranteed by the 100% line+branch pytest gate above
+# (a stronger guarantee than file-mirroring). Opt out of the 1:1 mirror rule.
+[tool.check_test_layout]
+enforce = false
+reason = "Tests are organised by behaviour under tests/test_jquantstats/; per-module coverage is guaranteed by the 100% pytest coverage gate rather than 1:1 file mirroring."
+

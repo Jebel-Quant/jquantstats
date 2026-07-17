@@ -390,6 +390,11 @@ categorized metric tables, rendered via Jinja2 templates.
 
 For detailed documentation, visit [jQuantStats Documentation](https://jebel-quant.github.io/jquantstats).
 
+The public API (`Portfolio` and `Data`) follows [Semantic Versioning](https://semver.org/)
+from **v1.0.0** onwards; see the
+[API Stability & deprecation policy](https://jebel-quant.github.io/jquantstats/STABILITY/)
+for the exact stability guarantee and deprecation timeline.
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
