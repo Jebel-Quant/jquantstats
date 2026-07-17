@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import math
 
+import numpy as np
 import polars as pl
 
 from ._portfolio_base import _PortfolioMembers
+from ._stats._core import _std_is_negligible
 from .exceptions import InvalidMaxBpsError, NegativeCostBpsError
 
 
@@ -181,10 +183,6 @@ class PortfolioCostMixin(_PortfolioMembers):
         """
         if not isinstance(max_bps, int) or max_bps < 1:
             raise InvalidMaxBpsError(max_bps)
-        import numpy as np
-
-        from ._stats._core import _std_is_negligible
-
         periods = self.data._periods_per_year  # one Data object, outside the loop
         sqrt_periods = float(np.sqrt(periods))
         cost_levels = list(range(max_bps + 1))
