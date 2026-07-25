@@ -292,16 +292,21 @@ def test_exponential_stdev_defaults_span_30(varied_data):
     assert default.equals(explicit)
 
 
-def test_exponential_stdev_halflife_first_row_defined(varied_data):
-    """min_samples=1 must yield a value already at the first row (half-life mode)."""
+def test_exponential_stdev_halflife_second_row_defined(varied_data):
+    """min_samples=1 must yield a value from the second row on (half-life mode).
+
+    Row 0 is ``None`` by construction: an unbiased standard deviation of a
+    single observation is undefined (this matches ``pandas.ewm(...).std()``).
+    A larger ``min_samples`` would leave row 1 null too.
+    """
     result = varied_data.utils.exponential_stdev(window=5, is_halflife=True)
-    assert result["A"][0] is not None
+    assert result["A"][1] is not None
 
 
-def test_exponential_stdev_span_first_row_defined(varied_data):
-    """min_samples=1 must yield a value already at the first row (span mode)."""
+def test_exponential_stdev_span_second_row_defined(varied_data):
+    """min_samples=1 must yield a value from the second row on (span mode)."""
     result = varied_data.utils.exponential_stdev(window=5, is_halflife=False)
-    assert result["A"][0] is not None
+    assert result["A"][1] is not None
 
 
 def test_exponential_stdev_halflife_constant_returns_zero():
@@ -310,7 +315,8 @@ def test_exponential_stdev_halflife_constant_returns_zero():
     result = data.utils.exponential_stdev(window=5, is_halflife=True)
     values = result["A"].to_list()
     assert len(values) == 30
-    for v in values:
+    assert values[0] is None
+    for v in values[1:]:
         assert v is not None
         assert abs(v) <= TOL_FLOAT64
 
