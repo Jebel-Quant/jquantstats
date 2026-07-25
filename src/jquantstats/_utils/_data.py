@@ -284,7 +284,9 @@ class DataUtils:
 
         Returns:
             DataFrame of rolling EWMA standard deviations with the same
-            columns as the input returns.
+            columns as the input returns.  The first row is ``null``: an
+            unbiased standard deviation of a single observation is
+            undefined, as in ``pandas.Series.ewm(...).std()``.
 
         """
         asset_cols = self._asset_cols()
