@@ -5,6 +5,36 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com),
 and entries are generated from [Conventional Commits](https://www.conventionalcommits.org).
 
+## [0.10.0] - 2026-07-29
+
+### New Features
+- *(portfolio)* Add deduct_management_fee for flat annual fee deduction (#901)
+
+### Bug Fixes
+- Address quality scorecard findings (#873 #890 #891 #892) (#893)
+
+### Documentation
+- Link changelog page from landing page (#874) (#885)
+
+### Maintenance
+- Update rhiza to v1.1.3 (#882)
+- Sync with rhiza (#884)
+- Chore(deps)(deps): bump the python-dependencies group with 7 updates (#886)
+- Sync rhiza template to v1.2.0 (#887)
+- Opt out of rhiza fuzzing/scorecard/weekly workflows (#888)
+- Update rhiza to v1.2.1 (#889)
+- Split data.py god-module and decompose B(10) blocks (#871) (#894)
+- Chore(deps)(deps): bump the github-actions group with 11 updates (#895)
+- Chore(deps)(deps): bump the python-dependencies group with 4 updates (#896)
+- *(pyproject)* Modernize Python version and license metadata (#897)
+- Chore(deps)(deps): bump the python-dependencies group with 8 updates (#900)
+- Chore(deps)(deps): bump docker/login-action from 4.4.0 to 4.5.1 in the github-actions group (#899)
+- Declare version bump locations for bump-my-version
+
+### Other Changes
+- Support Python 3.14; refresh README badges; add CLAUDE.md (#881)
+- Harden Rhiza sync schedule editing and tighten exception API typing (#883)
+
 ## [0.9.7] - 2026-07-10
 
 ### New Features
@@ -47,6 +77,7 @@ and entries are generated from [Conventional Commits](https://www.conventionalco
 - Sync Rhiza template v0.19.6 → v0.19.9 (#854)
 - Delete .rhiza/tests/test_git_repo_fixture.py (#876)
 - Delete .claude/commands directory (#875)
+- Bump version 0.9.6 → 0.9.7
 
 ## [0.9.6] - 2026-06-13
 
