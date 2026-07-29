@@ -1,8 +1,8 @@
 """Tests for Portfolio cost-related functionality.
 
 Covers: cost_adjusted_returns, trading_cost_impact, position_delta_costs,
-net_cost_nav, cost_per_unit field, from_position factory, and cost-parameter
-forwarding through transforms.
+net_cost_nav, cost_per_unit field, from_position factory, cost-parameter
+forwarding through transforms, and deduct_management_fee.
 """
 
 from __future__ import annotations
@@ -496,3 +496,203 @@ def test_cost_adjusted_returns_explicit_overrides_construction_cost_bps(cost_bps
     adj_override = cost_bps_pf.cost_adjusted_returns(0.0)
     adj_base = cost_bps_pf.cost_adjusted_returns(5.0)
     assert float(adj_override["returns"].sum()) >= float(adj_base["returns"].sum())
+
+
+# ─── deduct_management_fee ────────────────────────────────────────────────────
+
+
+@pytest.fixture
+def dated_portfolio():
+    """5-day single-asset portfolio with consecutive calendar dates."""
+    start = date(2020, 1, 1)
+    dates = pl.date_range(start=start, end=start + timedelta(days=4), interval="1d", eager=True).cast(pl.Date)
+    prices = pl.DataFrame({"date": dates, "A": [100.0, 101.0, 102.0, 103.0, 104.0]})
+    pos = pl.DataFrame({"date": dates, "A": [1000.0] * 5})
+    return Portfolio(prices=prices, cashposition=pos, aum=1e5)
+
+
+@pytest.fixture
+def dated_portfolio_with_fee():
+    """5-day portfolio with annual_fee=0.01 set at construction."""
+    start = date(2020, 1, 1)
+    dates = pl.date_range(start=start, end=start + timedelta(days=4), interval="1d", eager=True).cast(pl.Date)
+    prices = pl.DataFrame({"date": dates, "A": [100.0, 101.0, 102.0, 103.0, 104.0]})
+    pos = pl.DataFrame({"date": dates, "A": [1000.0] * 5})
+    return Portfolio(prices=prices, cashposition=pos, aum=1e5, annual_fee=0.01)
+
+
+@pytest.fixture
+def undated_portfolio():
+    """5-row single-asset portfolio with no date column."""
+    prices = pl.DataFrame({"A": [100.0, 101.0, 102.0, 103.0, 104.0]})
+    pos = pl.DataFrame({"A": [1000.0] * 5})
+    return Portfolio(prices=prices, cashposition=pos, aum=1e5)
+
+
+def test_deduct_management_fee_zero_fee_equals_base_returns(dated_portfolio):
+    """deduct_management_fee(0.0) must equal base returns exactly."""
+    base = dated_portfolio.returns
+    adj = dated_portfolio.deduct_management_fee(annual_fee=0.0)
+    pt.assert_series_equal(adj["returns"], base["returns"])
+
+
+def test_deduct_management_fee_positive_fee_reduces_returns(dated_portfolio):
+    """Positive annual_fee must strictly reduce total returns."""
+    base_sum = float(dated_portfolio.returns["returns"].sum())
+    adj_sum = float(dated_portfolio.deduct_management_fee(annual_fee=0.01)["returns"].sum())
+    assert adj_sum < base_sum
+
+
+def test_deduct_management_fee_first_row_unchanged(dated_portfolio):
+    """First row deduction must be zero (no prior date)."""
+    base = dated_portfolio.returns
+    adj = dated_portfolio.deduct_management_fee(annual_fee=0.01)
+    assert float(adj["returns"][0]) == pytest.approx(float(base["returns"][0]), abs=TOL_FLOAT64)
+
+
+def test_deduct_management_fee_per_period_deduction_analytical(dated_portfolio):
+    """Each row (except the first) must be reduced by annual_fee * days / 365."""
+    annual_fee = 0.01
+    adj = dated_portfolio.deduct_management_fee(annual_fee=annual_fee)
+    base = dated_portfolio.returns
+    expected_deduction = annual_fee * 1.0 / 365.0  # consecutive calendar days → 1 day each
+    for i in range(1, adj.height):
+        actual_diff = float(base["returns"][i]) - float(adj["returns"][i])
+        assert actual_diff == pytest.approx(expected_deduction, rel=TOL_COMPOUNDING)
+
+
+def test_deduct_management_fee_sums_to_annual_fee_over_full_year():
+    """Total fee deducted over 366 consecutive daily rows (365 charged days) must equal annual_fee."""
+    start = date(2020, 1, 1)
+    # 366 rows: rows 2..366 each carry 1 day → 365 charged days summing to annual_fee
+    dates = pl.date_range(start=start, end=start + timedelta(days=365), interval="1d", eager=True).cast(pl.Date)
+    n = dates.len()
+    prices = pl.DataFrame({"date": dates, "A": pl.Series([100.0] * n)})
+    pos = pl.DataFrame({"date": dates, "A": pl.Series([1000.0] * n)})
+    pf = Portfolio(prices=prices, cashposition=pos, aum=1e5)
+
+    annual_fee = 0.0085
+    base = pf.returns
+    adj = pf.deduct_management_fee(annual_fee=annual_fee)
+    total_deducted = float((base["returns"] - adj["returns"]).sum())
+    assert total_deducted == pytest.approx(annual_fee, rel=1e-9)
+
+
+def test_deduct_management_fee_preserves_date_column(dated_portfolio):
+    """deduct_management_fee must preserve the date column when present."""
+    adj = dated_portfolio.deduct_management_fee(annual_fee=0.01)
+    assert "date" in adj.columns
+
+
+def test_deduct_management_fee_without_date_uses_one_day_per_period(undated_portfolio):
+    """Without a date column each period is assumed to span one calendar day."""
+    annual_fee = 0.01
+    adj = undated_portfolio.deduct_management_fee(annual_fee=annual_fee)
+    base = undated_portfolio.returns
+    expected_deduction = annual_fee / 365.0
+    # First row unchanged
+    assert float(adj["returns"][0]) == pytest.approx(float(base["returns"][0]), abs=TOL_FLOAT64)
+    # Subsequent rows deducted by 1/365 * annual_fee
+    for i in range(1, adj.height):
+        actual_diff = float(base["returns"][i]) - float(adj["returns"][i])
+        assert actual_diff == pytest.approx(expected_deduction, rel=TOL_COMPOUNDING)
+
+
+def test_deduct_management_fee_weekend_charges_accumulated():
+    """A weekend gap (Mon after Sat/Sun) must carry 3 days of fee deduction."""
+    # Mon 2020-01-06 → Wed 2020-01-08 → Mon 2020-01-13 (5 days elapsed over the weekend)
+    dates = [date(2020, 1, 6), date(2020, 1, 7), date(2020, 1, 8), date(2020, 1, 9), date(2020, 1, 10),
+             date(2020, 1, 13)]
+    prices = pl.DataFrame({"date": dates, "A": [100.0] * 6})
+    pos = pl.DataFrame({"date": dates, "A": [1000.0] * 6})
+    pf = Portfolio(prices=prices, cashposition=pos, aum=1e5)
+
+    annual_fee = 0.01
+    base = pf.returns
+    adj = pf.deduct_management_fee(annual_fee=annual_fee)
+    # Row 5 (2020-01-13) has 3 calendar days since 2020-01-10
+    deduction_row5 = float(base["returns"][5]) - float(adj["returns"][5])
+    assert deduction_row5 == pytest.approx(annual_fee * 3.0 / 365.0, rel=TOL_COMPOUNDING)
+
+
+def test_deduct_management_fee_defaults_to_construction_annual_fee(dated_portfolio_with_fee):
+    """deduct_management_fee() with no argument uses self.annual_fee."""
+    adj_default = dated_portfolio_with_fee.deduct_management_fee()
+    adj_explicit = dated_portfolio_with_fee.deduct_management_fee(annual_fee=0.01)
+    pt.assert_series_equal(adj_default["returns"], adj_explicit["returns"])
+
+
+def test_deduct_management_fee_explicit_overrides_construction_annual_fee(dated_portfolio_with_fee):
+    """An explicit annual_fee argument overrides self.annual_fee."""
+    adj_zero = dated_portfolio_with_fee.deduct_management_fee(annual_fee=0.0)
+    adj_fee = dated_portfolio_with_fee.deduct_management_fee(annual_fee=0.01)
+    assert float(adj_zero["returns"].sum()) >= float(adj_fee["returns"].sum())
+
+
+def test_deduct_management_fee_annual_fee_stored_at_construction():
+    """annual_fee passed to Portfolio constructor must be stored on the instance."""
+    prices = pl.DataFrame({"A": [100.0, 101.0]})
+    pos = pl.DataFrame({"A": [1000.0, 1000.0]})
+    pf = Portfolio(prices=prices, cashposition=pos, aum=1e5, annual_fee=0.0085)
+    assert pf.annual_fee == pytest.approx(0.0085)
+
+
+def test_deduct_management_fee_from_cash_position_forwards_annual_fee():
+    """from_cash_position must forward annual_fee to the Portfolio instance."""
+    prices = pl.DataFrame({"A": [100.0, 101.0]})
+    pos = pl.DataFrame({"A": [1000.0, 1000.0]})
+    pf = Portfolio.from_cash_position(prices=prices, cash_position=pos, aum=1e5, annual_fee=0.0085)
+    assert pf.annual_fee == pytest.approx(0.0085)
+
+
+def test_deduct_management_fee_negative_fee_raises(dated_portfolio):
+    """deduct_management_fee must raise NegativeAnnualFeeError for negative annual_fee."""
+    from jquantstats.exceptions import NegativeAnnualFeeError
+
+    with pytest.raises(NegativeAnnualFeeError, match="annual_fee must be non-negative"):
+        dated_portfolio.deduct_management_fee(annual_fee=-0.01)
+
+
+def test_deduct_management_fee_non_numeric_fee_raises(dated_portfolio):
+    """deduct_management_fee must raise TypeError for non-numeric annual_fee."""
+    with pytest.raises(TypeError, match="annual_fee must be a number"):
+        dated_portfolio.deduct_management_fee(annual_fee="0.01")  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="annual_fee must be a number"):
+        dated_portfolio.deduct_management_fee(annual_fee=True)  # type: ignore[arg-type]
+
+
+def test_deduct_management_fee_non_finite_fee_raises(dated_portfolio):
+    """deduct_management_fee must raise ValueError for NaN or infinite annual_fee."""
+    with pytest.raises(ValueError, match="annual_fee must be finite"):
+        dated_portfolio.deduct_management_fee(annual_fee=float("inf"))
+    with pytest.raises(ValueError, match="annual_fee must be finite"):
+        dated_portfolio.deduct_management_fee(annual_fee=float("nan"))
+
+
+def test_deduct_management_fee_composes_with_cost_adjusted_returns(dated_portfolio):
+    """deduct_management_fee(base=cost_adjusted_returns(...)) must compose linearly."""
+    annual_fee = 0.0085
+    cost_bps = 5.0
+    # Composed: first subtract trading costs, then subtract management fee
+    adj_cost = dated_portfolio.cost_adjusted_returns(cost_bps=cost_bps)
+    adj_both = dated_portfolio.deduct_management_fee(annual_fee=annual_fee, base=adj_cost)
+
+    # Sum of both deductions must equal sum of each deduction separately
+    base = dated_portfolio.returns
+    cost_deduction = float((base["returns"] - adj_cost["returns"]).sum())
+    fee_deduction = float(
+        (dated_portfolio.deduct_management_fee(annual_fee=annual_fee)["returns"] - base["returns"]).sum()
+    )
+    total_expected = float(base["returns"].sum()) + cost_deduction + fee_deduction
+    total_actual = float(adj_both["returns"].sum())
+    # Both orders must produce the same net result
+    adj_fee_first = dated_portfolio.deduct_management_fee(annual_fee=annual_fee)
+    adj_fee_then_cost = dated_portfolio.cost_adjusted_returns(cost_bps=cost_bps)
+    combined_alt_sum = float(
+        (base["returns"] - adj_both["returns"]).sum()
+    )
+    combined_seq_sum = float(
+        (base["returns"] - adj_cost["returns"]).sum() +
+        (adj_cost["returns"] - adj_both["returns"]).sum()
+    )
+    assert combined_alt_sum == pytest.approx(combined_seq_sum, rel=TOL_COMPOUNDING)
