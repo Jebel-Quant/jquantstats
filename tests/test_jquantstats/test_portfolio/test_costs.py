@@ -600,12 +600,12 @@ def test_deduct_management_fee_without_date_uses_one_day_per_period(undated_port
 
 def test_deduct_management_fee_weekend_charges_accumulated():
     """A weekend gap (Mon after Sat/Sun) must carry 3 days of fee deduction."""
-    # Mon–Fri then Mon: the gap from Fri 2020-01-10 → Mon 2020-01-13 spans 3 calendar days.
+    # Mon-Fri then Mon: the gap from Fri 2020-01-10 to Mon 2020-01-13 spans 3 calendar days.
     dates_with_weekend_gap = [
-        date(2020, 1, 6),   # Mon
-        date(2020, 1, 7),   # Tue
-        date(2020, 1, 8),   # Wed
-        date(2020, 1, 9),   # Thu
+        date(2020, 1, 6),  # Mon
+        date(2020, 1, 7),  # Tue
+        date(2020, 1, 8),  # Wed
+        date(2020, 1, 9),  # Thu
         date(2020, 1, 10),  # Fri
         date(2020, 1, 13),  # Mon (3 calendar days after Fri)
     ]
