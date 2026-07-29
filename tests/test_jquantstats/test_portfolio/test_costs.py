@@ -673,26 +673,18 @@ def test_deduct_management_fee_composes_with_cost_adjusted_returns(dated_portfol
     """deduct_management_fee(base=cost_adjusted_returns(...)) must compose linearly."""
     annual_fee = 0.0085
     cost_bps = 5.0
-    # Composed: first subtract trading costs, then subtract management fee
+    base = dated_portfolio.returns
+
+    # Apply trading costs first, then management fee
     adj_cost = dated_portfolio.cost_adjusted_returns(cost_bps=cost_bps)
     adj_both = dated_portfolio.deduct_management_fee(annual_fee=annual_fee, base=adj_cost)
 
-    # Sum of both deductions must equal sum of each deduction separately
-    base = dated_portfolio.returns
+    # Each deduction computed independently
     cost_deduction = float((base["returns"] - adj_cost["returns"]).sum())
     fee_deduction = float(
-        (dated_portfolio.deduct_management_fee(annual_fee=annual_fee)["returns"] - base["returns"]).sum()
+        (base["returns"] - dated_portfolio.deduct_management_fee(annual_fee=annual_fee)["returns"]).sum()
     )
-    total_expected = float(base["returns"].sum()) + cost_deduction + fee_deduction
-    total_actual = float(adj_both["returns"].sum())
-    # Both orders must produce the same net result
-    adj_fee_first = dated_portfolio.deduct_management_fee(annual_fee=annual_fee)
-    adj_fee_then_cost = dated_portfolio.cost_adjusted_returns(cost_bps=cost_bps)
-    combined_alt_sum = float(
-        (base["returns"] - adj_both["returns"]).sum()
-    )
-    combined_seq_sum = float(
-        (base["returns"] - adj_cost["returns"]).sum() +
-        (adj_cost["returns"] - adj_both["returns"]).sum()
-    )
-    assert combined_alt_sum == pytest.approx(combined_seq_sum, rel=TOL_COMPOUNDING)
+
+    # Total deduction when composed must equal the sum of the independent deductions
+    total_deducted = float((base["returns"] - adj_both["returns"]).sum())
+    assert total_deducted == pytest.approx(cost_deduction + fee_deduction, rel=TOL_COMPOUNDING)
