@@ -9,7 +9,7 @@ import polars as pl
 
 from ._portfolio_base import _PortfolioMembers
 from ._stats._core import _std_is_negligible
-from .exceptions import InvalidMaxBpsError, NegativeCostBpsError
+from .exceptions import InvalidMaxBpsError, NegativeAnnualFeeError, NegativeCostBpsError
 
 
 class PortfolioCostMixin(_PortfolioMembers):
@@ -139,6 +139,78 @@ class PortfolioCostMixin(_PortfolioMembers):
         base = self.returns
         daily_cost = self.turnover["turnover"] * (effective_bps / 10_000.0)
         return base.with_columns((pl.col("returns") - daily_cost).alias("returns"))
+
+    def deduct_management_fee(
+        self,
+        annual_fee: float | None = None,
+        base: pl.DataFrame | None = None,
+    ) -> pl.DataFrame:
+        """Return daily portfolio returns net of a flat annual management fee.
+
+        Management fees accrue per calendar day on total AUM regardless of
+        trading activity.  The per-period deduction is::
+
+            daily_deduction_t = annual_fee * days_elapsed_t / 365
+
+        where ``days_elapsed_t`` is the number of calendar days between row
+        *t* and the previous row.  Weekends and holidays are therefore charged
+        to the next trading day.  The first row always accrues zero (no prior
+        date), consistent with the turnover convention.
+
+        The deduction is linear and composes naturally with
+        `cost_adjusted_returns`::
+
+            adj = pf.cost_adjusted_returns(cost_bps=5)
+            net = pf.deduct_management_fee(annual_fee=0.0085, base=adj)
+
+        When no ``date`` column is present every period is assumed to span
+        exactly one calendar day.
+
+        Args:
+            annual_fee: Flat annual management fee as a fraction (e.g. 0.0085
+                for 85 bps).  Must be non-negative.  Defaults to
+                ``self.annual_fee`` set at construction time.
+            base: Returns DataFrame to deduct the fee from.  Must have the
+                same schema as `returns` (``'returns'`` column, optional
+                ``'date'`` column).  Defaults to ``self.returns``.
+
+        Returns:
+            pl.DataFrame: Same schema as *base* (or `returns`) but with the
+            ``returns`` column reduced by the pro-rata daily fee.
+
+        Raises:
+            TypeError: If ``annual_fee`` is not a number.
+            ValueError: If ``annual_fee`` is not finite (NaN or infinity).
+            NegativeAnnualFeeError: If ``annual_fee`` is negative.
+
+        Examples:
+            >>> from jquantstats.portfolio import Portfolio
+            >>> import polars as pl
+            >>> from datetime import date
+            >>> _d = [date(2020, 1, 1), date(2020, 1, 2), date(2020, 1, 3)]
+            >>> prices = pl.DataFrame({"date": _d, "A": [100.0, 110.0, 121.0]})
+            >>> pos = pl.DataFrame({"date": _d, "A": [1000.0, 1000.0, 1000.0]})
+            >>> pf = Portfolio(prices=prices, cashposition=pos, aum=1e5)
+            >>> net = pf.deduct_management_fee(annual_fee=0.0)
+            >>> float(net["returns"][1]) == float(pf.returns["returns"][1])
+            True
+        """
+        effective_fee = annual_fee if annual_fee is not None else self.annual_fee
+        if isinstance(effective_fee, bool) or not isinstance(effective_fee, int | float):
+            raise TypeError(f"annual_fee must be a number, got {type(effective_fee).__name__}")  # noqa: TRY003
+        effective_fee = float(effective_fee)
+        if not math.isfinite(effective_fee):
+            raise ValueError(f"annual_fee must be finite, got {effective_fee}")  # noqa: TRY003
+        if effective_fee < 0:
+            raise NegativeAnnualFeeError(effective_fee)
+        if base is None:
+            base = self.returns
+        if "date" in base.columns and base["date"].dtype.is_temporal():
+            days_elapsed = base["date"].diff().dt.total_days().fill_null(0).cast(pl.Float64)
+        else:
+            days_elapsed = pl.Series([0.0] + [1.0] * (base.height - 1))
+        daily_deduction = days_elapsed * (effective_fee / 365.0)
+        return base.with_columns((pl.col("returns") - daily_deduction).alias("returns"))
 
     def trading_cost_impact(self, max_bps: int = 20) -> pl.DataFrame:
         """Estimate the impact of trading costs on the Sharpe ratio.

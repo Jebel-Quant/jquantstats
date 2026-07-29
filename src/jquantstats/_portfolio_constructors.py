@@ -94,6 +94,7 @@ class PortfolioConstructorMixin(_PortfolioMembers):
             cost_per_unit: float = 0.0,
             cost_bps: float = 0.0,
             cost_model: CostModel | None = None,
+            annual_fee: float = 0.0,
         ) -> Self:
             """Create a Portfolio directly from cash positions aligned with prices."""
             ...
@@ -109,6 +110,7 @@ class PortfolioConstructorMixin(_PortfolioMembers):
         cost_per_unit: float = 0.0,
         cost_bps: float = 0.0,
         cost_model: CostModel | None = None,
+        annual_fee: float = 0.0,
     ) -> Self:
         """Create a Portfolio from per-asset risk positions.
 
@@ -140,6 +142,9 @@ class PortfolioConstructorMixin(_PortfolioMembers):
                 instance.  When supplied, its ``cost_per_unit`` and
                 ``cost_bps`` values take precedence over the individual
                 parameters above.
+            annual_fee: Flat annual management fee as a fraction of AUM
+                (e.g. 0.0085 for 85 bps p.a.).  Defaults to 0.0 (no fee).
+                Used as the default by `deduct_management_fee`.
 
         Returns:
             A Portfolio instance whose cash positions are risk_position
@@ -182,6 +187,7 @@ class PortfolioConstructorMixin(_PortfolioMembers):
             aum=aum,
             cost_per_unit=cost_per_unit,
             cost_bps=cost_bps,
+            annual_fee=annual_fee,
         )
 
     @classmethod
@@ -193,6 +199,7 @@ class PortfolioConstructorMixin(_PortfolioMembers):
         cost_per_unit: float = 0.0,
         cost_bps: float = 0.0,
         cost_model: CostModel | None = None,
+        annual_fee: float = 0.0,
     ) -> Self:
         """Create a Portfolio from share/unit positions.
 
@@ -213,6 +220,9 @@ class PortfolioConstructorMixin(_PortfolioMembers):
             cost_model: Optional `CostModel` instance.
                 When supplied, its ``cost_per_unit`` and ``cost_bps`` values
                 take precedence over the individual parameters above.
+            annual_fee: Flat annual management fee as a fraction of AUM
+                (e.g. 0.0085 for 85 bps p.a.).  Defaults to 0.0 (no fee).
+                Used as the default by `deduct_management_fee`.
 
         Returns:
             A Portfolio instance whose cash positions equal *position* x *prices*.
@@ -241,4 +251,5 @@ class PortfolioConstructorMixin(_PortfolioMembers):
             cost_per_unit=cost_per_unit,
             cost_bps=cost_bps,
             cost_model=cost_model,
+            annual_fee=annual_fee,
         )

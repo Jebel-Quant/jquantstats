@@ -22,7 +22,7 @@ Public API is unchanged:
 - Portfolio transforms — `truncate`, `lag`, `smoothed_holding`
 - Attribution — `tilt`, `timing`, `tilt_timing_decomp`
 - Turnover analysis — `turnover`, `turnover_weekly`, `turnover_summary`
-- Cost analysis — `cost_adjusted_returns`, `trading_cost_impact`
+- Cost analysis — `cost_adjusted_returns`, `trading_cost_impact`, `deduct_management_fee`
 - Utility — `correlation`
 """
 
@@ -104,7 +104,7 @@ class Portfolio(
     - Turnover: `turnover`, `turnover_weekly`,
       `turnover_summary`
     - Cost analysis: `cost_adjusted_returns`,
-      `trading_cost_impact`
+      `trading_cost_impact`, `deduct_management_fee`
     - Utility: `correlation`
 
     Attributes:
@@ -139,6 +139,13 @@ class Portfolio(
         Used by ``.cost_adjusted_returns(cost_bps)`` and ``.trading_cost_impact(max_bps)``.
         Best for: macro / fund-of-funds portfolios where cost scales with notional traded.
 
+    **Management fee (flat annual, set at construction or passed at call time):**
+        ``annual_fee: float``  — flat annual management fee as a fraction of AUM (e.g. 0.0085 for 85 bps p.a.).
+        Used by ``.deduct_management_fee(annual_fee)``.
+        The fee accrues pro-rata per calendar day (``annual_fee * days / 365``), so weekends and
+        holidays are charged to the next trading day and the deduction sums to ``annual_fee`` over a
+        full year.  Cost and fee deductions compose linearly in any order.
+
     To sweep a range of cost assumptions use ``trading_cost_impact(max_bps=20)`` (Model B).
     To compute a net-NAV curve set ``cost_per_unit`` at construction and read ``.net_cost_nav`` (Model A).
 
@@ -171,6 +178,7 @@ class Portfolio(
     aum: float
     cost_per_unit: float = 0.0
     cost_bps: float = 0.0
+    annual_fee: float = 0.0
 
     # ── Internal cache fields ─────────────────────────────────────────────────
     # All cache fields are initialised to ``None`` in ``__post_init__`` via
@@ -295,6 +303,7 @@ class Portfolio(
         cost_per_unit: float = 0.0,
         cost_bps: float = 0.0,
         cost_model: CostModel | None = None,
+        annual_fee: float = 0.0,
     ) -> Self:
         """Create a Portfolio directly from cash positions aligned with prices.
 
@@ -311,6 +320,9 @@ class Portfolio(
                 instance.  When supplied, its ``cost_per_unit`` and
                 ``cost_bps`` values take precedence over the individual
                 parameters above.
+            annual_fee: Flat annual management fee as a fraction of AUM
+                (e.g. 0.0085 for 85 bps p.a.).  Defaults to 0.0 (no fee).
+                Used as the default by `deduct_management_fee`.
 
         Returns:
             A Portfolio instance with the provided cash positions.
@@ -326,7 +338,14 @@ class Portfolio(
         if cost_model is not None:
             cost_per_unit = cost_model.cost_per_unit
             cost_bps = cost_model.cost_bps
-        return cls(prices=prices, cashposition=cash_position, aum=aum, cost_per_unit=cost_per_unit, cost_bps=cost_bps)
+        return cls(
+            prices=prices,
+            cashposition=cash_position,
+            aum=aum,
+            cost_per_unit=cost_per_unit,
+            cost_bps=cost_bps,
+            annual_fee=annual_fee,
+        )
 
     # ── Internal helpers ───────────────────────────────────────────────────────
 

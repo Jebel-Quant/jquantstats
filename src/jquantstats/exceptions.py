@@ -233,6 +233,25 @@ class NegativeCostBpsError(JQuantStatsError, ValueError):
         self.cost_bps = cost_bps
 
 
+class NegativeAnnualFeeError(JQuantStatsError, ValueError):
+    """Raised when an annual management fee is negative.
+
+    Args:
+        annual_fee: The negative fee value that was supplied.
+
+    Examples:
+        >>> raise NegativeAnnualFeeError(-0.01)
+        Traceback (most recent call last):
+            ...
+        jquantstats.exceptions.NegativeAnnualFeeError: annual_fee must be non-negative, got -0.01.
+    """
+
+    def __init__(self, annual_fee: float) -> None:
+        """Initialize with the offending fee value."""
+        super().__init__(f"annual_fee must be non-negative, got {annual_fee}.")
+        self.annual_fee = annual_fee
+
+
 class InvalidMaxBpsError(JQuantStatsError, ValueError):
     """Raised when ``max_bps`` is not a positive integer.
 

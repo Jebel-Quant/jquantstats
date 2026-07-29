@@ -34,6 +34,7 @@ class _PortfolioMembers:
         aum: float
         cost_per_unit: float
         cost_bps: float
+        annual_fee: float
 
         # Derived series / accessors defined on sibling mixins or ``Portfolio``.
         @property
