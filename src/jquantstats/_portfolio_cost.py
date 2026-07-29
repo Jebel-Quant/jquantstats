@@ -208,10 +208,7 @@ class PortfolioCostMixin(_PortfolioMembers):
         if "date" in base.columns and base["date"].dtype.is_temporal():
             days_elapsed = base["date"].diff().dt.total_days().fill_null(0).cast(pl.Float64)
         else:
-            days_elapsed = pl.concat(
-                [pl.Series([0.0]), pl.Series([1.0] * (base.height - 1))],
-                rechunk=True,
-            )
+            days_elapsed = pl.Series([0.0] + [1.0] * (base.height - 1))
         daily_deduction = days_elapsed * (effective_fee / 365.0)
         return base.with_columns((pl.col("returns") - daily_deduction).alias("returns"))
 
