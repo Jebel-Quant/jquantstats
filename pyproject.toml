@@ -153,3 +153,18 @@ ignore-overloaded-functions = true
 enforce = false
 reason = "Tests are organised by behaviour under tests/test_jquantstats/; per-module coverage is guaranteed by the 100% pytest coverage gate rather than 1:1 file mirroring."
 
+# Declares every location the release version lives, so `bump-my-version` rewrites
+# them all in one step. Without this, a bump silently touches no files and the
+# release CI fails its pyproject-version-vs-tag check.
+[tool.bumpversion]
+current_version = "0.9.7"
+
+# Anchored to the [project] table on purpose: search/replace applies to every match
+# in the file, so an unanchored `version = "..."` would also rewrite any [tool.*]
+# table that happens to share the current version number.
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+regex = true
+search = '(?ms)^\[project\]((?:(?!^\[)[\s\S])*?)^version = "{current_version}"'
+replace = '[project]\1version = "{new_version}"'
+
