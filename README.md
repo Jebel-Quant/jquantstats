@@ -12,7 +12,6 @@
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/jebel-quant/jquantstats/badge)](https://scorecard.dev/viewer/?uri=github.com/jebel-quant/jquantstats)
 [![Rhiza](https://img.shields.io/badge/dynamic/yaml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fjebel-quant%2Fjquantstats%2Fmain%2F.rhiza%2Ftemplate.yml&query=%24.ref&label=rhiza)](https://github.com/jebel-quant/rhiza)
 [![Downloads](https://static.pepy.tech/personalized-badge/jquantstats?period=month&units=international_system&left_color=black&right_color=orange&left_text=PyPI%20downloads%20per%20month)](https://pepy.tech/project/jquantstats)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/jebel-quant/jquantstats)
 
 [![Paper](https://img.shields.io/badge/paper-jquantstats.pdf-red?logo=adobeacrobatreader)](https://github.com/jebel-quant/jquantstats/blob/paper/jquantstats.pdf)
 
