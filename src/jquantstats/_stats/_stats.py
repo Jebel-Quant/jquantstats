@@ -5,8 +5,12 @@ class that combines five mixin classes:
 
 - `_BasicStatsMixin` — basic statistics,
   volatility, win/loss metrics, and risk metrics (VaR, Sharpe inputs, Kelly).
-- `_RiskStatsMixin` — Sharpe,
-  Sortino, benchmark/factor analytics (R², alpha, beta).
+- `_RiskStatsMixin` — the risk-adjusted ratio family: Sharpe, Sortino, Omega and
+  their probabilistic / smart / adjusted variants.
+- `_ConcentrationStatsMixin` — Herfindahl-Hirschman concentration of gains and
+  losses (`hhi_positive`, `hhi_negative`).
+- `_BenchmarkStatsMixin` — benchmark-relative and factor analytics (R², alpha,
+  beta, information ratio, Treynor).
 - `_DrawdownMixin` — cumulative returns, drawdown series, max drawdown, and
   per-episode drawdown details.
 - `_ReportingStatsMixin` — temporal
@@ -31,6 +35,8 @@ from typing import TYPE_CHECKING
 import polars as pl
 
 from ._basic import _BasicStatsMixin
+from ._benchmark import _BenchmarkStatsMixin
+from ._concentration import _ConcentrationStatsMixin
 from ._core import (
     _drawdown_series,
     _mean,
@@ -71,6 +77,8 @@ __all__ = [
 class Stats(
     _BasicStatsMixin,
     _RiskStatsMixin,
+    _ConcentrationStatsMixin,
+    _BenchmarkStatsMixin,
     _DrawdownMixin,
     _ReportingStatsMixin,
     _PeriodicReportingMixin,
@@ -97,6 +105,8 @@ class Stats(
 
     - `_BasicStatsMixin`
     - `_RiskStatsMixin`
+    - `_ConcentrationStatsMixin`
+    - `_BenchmarkStatsMixin`
     - `_DrawdownMixin`
     - `_ReportingStatsMixin`
     - `_PeriodicReportingMixin`

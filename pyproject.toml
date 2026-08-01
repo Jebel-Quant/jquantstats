@@ -151,7 +151,9 @@ ignore-overloaded-functions = true
 # (a stronger guarantee than file-mirroring). Opt out of the 1:1 mirror rule.
 [tool.check_test_layout]
 enforce = false
-reason = "Tests are organised by behaviour under tests/test_jquantstats/; per-module coverage is guaranteed by the 100% pytest coverage gate rather than 1:1 file mirroring."
+# Keep this string free of a literal `%`: tools that read [tool.*] tables through
+# configparser (radon, for one) treat it as interpolation syntax and crash outright.
+reason = "Tests are organised by behaviour under tests/test_jquantstats/; per-module coverage is guaranteed by the full line-and-branch pytest coverage gate rather than 1:1 file mirroring."
 
 # Declares every location the release version lives, so `bump-my-version` rewrites
 # them all in one step. Without this, a bump silently touches no files and the
