@@ -128,6 +128,38 @@ def test_plot_rolling_beta_no_benchmark_raises(data_no_benchmark):
         data_no_benchmark.plots.rolling_beta()
 
 
+def test_plot_rolling_beta_falls_back_to_frame_columns_without_returns(data):
+    """rolling_beta derives assets from `all` when the data exposes no `returns`.
+
+    `_beta_assets` prefers an explicit ``returns`` frame and otherwise takes
+    every column of ``all`` that is neither the date nor the benchmark. That
+    fallback is reachable through the `DataLike` protocol — an implementation
+    need not carry a ``returns`` attribute — so it is exercised here with a
+    proxy that hides it.
+    """
+
+    class _NoReturnsData:
+        """DataLike proxy exposing everything except ``returns``."""
+
+        def __init__(self, inner):
+            self._inner = inner
+
+        def __getattr__(self, item):
+            """Delegate every attribute except ``returns`` to the wrapped data."""
+            if item == "returns":
+                raise AttributeError(item)
+            return getattr(self._inner, item)
+
+    plots = type(data.plots)(_NoReturnsData(data))
+    fig = plots.rolling_beta(rolling_period=63, rolling_period2=None)
+
+    date_col = data.all.columns[0]
+    bench_col = data.benchmark.columns[0]
+    expected = [c for c in data.all.columns if c not in (date_col, bench_col)]
+    assert len(fig.data) == len(expected)
+    assert [trace.name for trace in fig.data] == [f"{asset} (63d)" for asset in expected]
+
+
 def test_plot_compare_no_benchmark_raises(data_no_benchmark):
     """Compare raises AttributeError when no benchmark is attached."""
     with pytest.raises(AttributeError):

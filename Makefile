@@ -9,6 +9,12 @@ MKDOCS_EXTRA_PACKAGES = --with 'mkdocstrings[python]'
 # Always include the Rhiza API (template-managed)
 include .rhiza/rhiza.mk
 
+# The optional FastAPI service under api/ (the [web] extra) is repo-owned and not
+# contributed by any template bundle, so deptry never saw it and reported its
+# dependencies as unused. Append it to the shared scan; DEPTRY_FOLDERS is the
+# accumulating variable python.mk builds up, so this must come after the include.
+DEPTRY_FOLDERS += api
+
 # Architectural import contracts (import-linter): the analytics subpackages
 # (_stats, _plots, _reports, _utils) annotate against the structural Protocols in
 # _protocol.py and must never import the concrete Data / Portfolio at runtime.

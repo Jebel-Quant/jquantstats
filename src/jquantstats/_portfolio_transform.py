@@ -36,6 +36,100 @@ class PortfolioTransformMixin(_PortfolioMembers):
             """Create a Portfolio directly from cash positions aligned with prices."""
             ...
 
+    # ── Shared construction helpers ────────────────────────────────────────────
+
+    def _rebuild(self, cash_position: pl.DataFrame, prices: pl.DataFrame | None = None) -> Self:
+        """Build a new Portfolio of the same concrete type from derived frames.
+
+        Every transform in this mixin ends the same way: hand the derived
+        frames back to ``from_cash_position`` while carrying ``aum`` and both
+        cost parameters across unchanged. Centralising that here keeps a new
+        construction parameter from having to be threaded through each
+        transform individually.
+
+        Args:
+            cash_position: The derived cash-position frame.
+            prices: The derived price frame; defaults to the current prices,
+                which the lag and smoothing transforms leave untouched.
+
+        Returns:
+            A new Portfolio of the same concrete type.
+        """
+        return type(self).from_cash_position(
+            prices=self.prices if prices is None else prices,
+            cash_position=cash_position,
+            aum=self.aum,
+            cost_per_unit=self.cost_per_unit,
+            cost_bps=self.cost_bps,
+        )
+
+    @property
+    def _numeric_assets(self) -> list[str]:
+        """Names of the numeric asset columns in the cash-position frame.
+
+        Excludes ``'date'`` and any non-numeric column, so column-wise
+        transforms touch only the asset series.
+
+        Returns:
+            The numeric asset column names, in frame order.
+        """
+        return [c for c in self.cashposition.columns if c != "date" and self.cashposition[c].dtype.is_numeric()]
+
+    @staticmethod
+    def _date_range_mask(
+        start: date | datetime | str | int | None,
+        end: date | datetime | str | int | None,
+    ) -> pl.Expr:
+        """Build the inclusive ``[start, end]`` filter over the ``'date'`` column.
+
+        Args:
+            start: Optional inclusive lower bound; no lower bound when None.
+            end: Optional inclusive upper bound; no upper bound when None.
+
+        Returns:
+            A boolean Polars expression, ``lit(True)`` when both bounds are None.
+        """
+        cond = pl.lit(True)
+        if start is not None:
+            cond = cond & (pl.col("date") >= pl.lit(start))
+        if end is not None:
+            cond = cond & (pl.col("date") <= pl.lit(end))
+        return cond
+
+    @staticmethod
+    def _row_slice_bounds(
+        start: date | datetime | str | int | None,
+        end: date | datetime | str | int | None,
+        height: int,
+    ) -> tuple[int, int]:
+        """Resolve integer row bounds into a ``(offset, length)`` slice.
+
+        Used when the portfolio has no ``'date'`` column and truncation falls
+        back to 0-based row indexing.
+
+        Args:
+            start: Optional inclusive lower row index; 0 when None.
+            end: Optional inclusive upper row index; the last row when None.
+            height: Row count of the frame being sliced.
+
+        Returns:
+            The ``(offset, length)`` pair to pass to ``DataFrame.slice``.
+            ``length`` is clamped at 0 so an inverted range yields an empty
+            frame rather than a negative slice.
+
+        Raises:
+            IntegerIndexBoundError: When a supplied bound is not an integer.
+        """
+        if start is not None and not isinstance(start, int):
+            raise IntegerIndexBoundError("start", type(start).__name__)
+        if end is not None and not isinstance(end, int):
+            raise IntegerIndexBoundError("end", type(end).__name__)
+        row_start = int(start) if start is not None else 0
+        row_end = int(end) + 1 if end is not None else height
+        return row_start, max(0, row_end - row_start)
+
+    # ── Transforms ─────────────────────────────────────────────────────────────
+
     def truncate(
         self,
         start: date | datetime | str | int | None = None,
@@ -71,32 +165,15 @@ class PortfolioTransformMixin(_PortfolioMembers):
             TypeError: When the portfolio has no ``'date'`` column and a
                 non-integer bound is supplied.
         """
-        has_date = "date" in self.prices.columns
-        if has_date:
-            cond = pl.lit(True)
-            if start is not None:
-                cond = cond & (pl.col("date") >= pl.lit(start))
-            if end is not None:
-                cond = cond & (pl.col("date") <= pl.lit(end))
+        if "date" in self.prices.columns:
+            cond = self._date_range_mask(start, end)
             pr = self.prices.filter(cond)
             cp = self.cashposition.filter(cond)
         else:
-            if start is not None and not isinstance(start, int):
-                raise IntegerIndexBoundError("start", type(start).__name__)
-            if end is not None and not isinstance(end, int):
-                raise IntegerIndexBoundError("end", type(end).__name__)
-            row_start = int(start) if start is not None else 0
-            row_end = int(end) + 1 if end is not None else self.prices.height
-            length = max(0, row_end - row_start)
-            pr = self.prices.slice(row_start, length)
-            cp = self.cashposition.slice(row_start, length)
-        return type(self).from_cash_position(
-            prices=pr,
-            cash_position=cp,
-            aum=self.aum,
-            cost_per_unit=self.cost_per_unit,
-            cost_bps=self.cost_bps,
-        )
+            offset, length = self._row_slice_bounds(start, end, self.prices.height)
+            pr = self.prices.slice(offset, length)
+            cp = self.cashposition.slice(offset, length)
+        return self._rebuild(prices=pr, cash_position=cp)
 
     def lag(self, n: int) -> Self:
         """Return a new Portfolio with cash positions lagged by ``n`` steps.
@@ -124,15 +201,8 @@ class PortfolioTransformMixin(_PortfolioMembers):
         if n == 0:
             return self
 
-        assets = [c for c in self.cashposition.columns if c != "date" and self.cashposition[c].dtype.is_numeric()]
-        cp_lagged = self.cashposition.with_columns(pl.col(c).shift(n) for c in assets)
-        return type(self).from_cash_position(
-            prices=self.prices,
-            cash_position=cp_lagged,
-            aum=self.aum,
-            cost_per_unit=self.cost_per_unit,
-            cost_bps=self.cost_bps,
-        )
+        cp_lagged = self.cashposition.with_columns(pl.col(c).shift(n) for c in self._numeric_assets)
+        return self._rebuild(cash_position=cp_lagged)
 
     def smoothed_holding(self, n: int) -> Self:
         """Return a new Portfolio with cash positions smoothed by a rolling mean.
@@ -160,18 +230,11 @@ class PortfolioTransformMixin(_PortfolioMembers):
         if n == 0:
             return self
 
-        assets = [c for c in self.cashposition.columns if c != "date" and self.cashposition[c].dtype.is_numeric()]
         window = n + 1
         cp_smoothed = self.cashposition.with_columns(
-            pl.col(c).rolling_mean(window_size=window, min_samples=1).alias(c) for c in assets
+            pl.col(c).rolling_mean(window_size=window, min_samples=1).alias(c) for c in self._numeric_assets
         )
-        return type(self).from_cash_position(
-            prices=self.prices,
-            cash_position=cp_smoothed,
-            aum=self.aum,
-            cost_per_unit=self.cost_per_unit,
-            cost_bps=self.cost_bps,
-        )
+        return self._rebuild(cash_position=cp_smoothed)
 
     # ── Utility ────────────────────────────────────────────────────────────────
 

@@ -17,6 +17,11 @@ returns series, regardless of the specific values.  Examples include:
 - Average return is positive when every return is strictly positive
 - CAGR is non-negative when all returns are non-negative
 - lag(0) is a no-op on Portfolio: cashposition is unchanged
+- Ordering invariants: worst ≤ best, CVaR ≤ VaR, avg_drawdown ≥ max_drawdown
+- Bounded-ratio invariants: exposure and monthly_win_rate lie in [0, 1]
+- Capture ratios against the series itself are exactly 1 (self-capture identity)
+- summary() agrees cell-for-cell with the metric methods it tabulates
+- truncate(None, None) and smoothed_holding(0) are no-ops on Portfolio
 """
 
 import math
@@ -370,3 +375,184 @@ def test_lag_zero_is_identity_property(data_tuple: tuple[list[float], list[float
     pt.assert_frame_equal(lagged.cashposition, portfolio.cashposition)
     pt.assert_frame_equal(lagged.prices, portfolio.prices)
     assert lagged.aum == portfolio.aum
+
+
+# ── Ordering invariants ──────────────────────────────────────────────────────
+
+
+@pytest.mark.property
+@given(returns=st.lists(_general_returns, min_size=10, max_size=50))
+@settings(max_examples=100)
+def test_worst_never_exceeds_best(returns: list[float]) -> None:
+    """The worst single-period return is never greater than the best.
+
+    Both are order statistics of the same series, so ``min ≤ max`` holds by
+    definition for any non-empty series.
+    """
+    data = Data.from_returns(returns=_make_returns_df(returns))
+    best = data.stats.best()["Asset"]
+    worst = data.stats.worst()["Asset"]
+    assert worst <= best, f"Expected worst <= best, got worst={worst}, best={best}"
+
+
+@pytest.mark.property
+@given(returns=st.lists(_general_returns, min_size=10, max_size=50))
+@settings(max_examples=100)
+def test_conditional_var_at_least_as_extreme_as_var(returns: list[float]) -> None:
+    """CVaR ≤ VaR: the mean of the tail is at least as bad as the tail's edge.
+
+    Conditional value-at-risk averages the losses beyond the VaR threshold.
+    Every observation in that average is ≤ the threshold, so the mean cannot
+    exceed it. Both are expressed as signed returns, so "worse" means smaller.
+    """
+    data = Data.from_returns(returns=_make_returns_df(returns))
+    var = data.stats.value_at_risk()["Asset"]
+    cvar = data.stats.conditional_value_at_risk()["Asset"]
+    assume(not math.isnan(var) and not math.isnan(cvar))
+    assert cvar <= var + TOL_PINNED, f"Expected cvar <= var, got cvar={cvar}, var={var}"
+
+
+@pytest.mark.property
+@given(returns=st.lists(_general_returns, min_size=10, max_size=50))
+@settings(max_examples=100)
+def test_avg_drawdown_is_shallower_than_max_drawdown(returns: list[float]) -> None:
+    """The average drawdown is never deeper than the maximum drawdown.
+
+    Both are reported as negative fractions, so "shallower" means greater:
+    the mean of the underwater series cannot be below its own minimum.
+    """
+    data = Data.from_returns(returns=_make_returns_df(returns))
+    avg_dd = data.stats.avg_drawdown()["Asset"]
+    max_dd = data.stats.max_drawdown()["Asset"]
+    assume(not math.isnan(avg_dd) and not math.isnan(max_dd))
+    assert avg_dd >= max_dd - TOL_PINNED, f"Expected avg_drawdown >= max_drawdown, got {avg_dd} < {max_dd}"
+
+
+# ── Bounded ratios ───────────────────────────────────────────────────────────
+
+
+@pytest.mark.property
+@given(returns=st.lists(_general_returns, min_size=10, max_size=50))
+@settings(max_examples=100)
+def test_exposure_in_unit_interval(returns: list[float]) -> None:
+    """Exposure is a fraction of observed periods, so it lies in [0, 1]."""
+    data = Data.from_returns(returns=_make_returns_df(returns))
+    exposure = data.stats.exposure()["Asset"]
+    assert 0.0 <= exposure <= 1.0, f"Expected exposure in [0, 1], got {exposure}"
+
+
+@pytest.mark.property
+@given(returns=st.lists(_general_returns, min_size=40, max_size=120))
+@settings(max_examples=50)
+def test_monthly_win_rate_in_unit_interval(returns: list[float]) -> None:
+    """Monthly win rate is a fraction of calendar months, so it lies in [0, 1].
+
+    The series is generated with one observation per day from a fixed start,
+    so a 40–120 element run always spans at least two calendar months.
+    """
+    data = Data.from_returns(returns=_make_returns_df(returns))
+    rate = data.stats.monthly_win_rate()["Asset"]
+    assume(not math.isnan(rate))
+    assert 0.0 <= rate <= 1.0, f"Expected monthly_win_rate in [0, 1], got {rate}"
+
+
+# ── Capture ratios ───────────────────────────────────────────────────────────
+
+
+@pytest.mark.property
+@given(returns=st.lists(_general_returns, min_size=10, max_size=50))
+@settings(max_examples=100)
+def test_self_capture_is_unity(returns: list[float]) -> None:
+    """Capturing against oneself gives exactly 1, in both up and down markets.
+
+    Up- and down-capture divide the asset's geometric mean over the selected
+    periods by the benchmark's over the same periods. When the benchmark *is*
+    the asset, numerator and denominator are the same number.
+    """
+    df = _make_returns_df(returns)
+    data = Data.from_returns(returns=df)
+    own = df["Asset"]
+
+    for name, ratio in (("up", data.stats.up_capture(own)), ("down", data.stats.down_capture(own))):
+        value = ratio["Asset"]
+        # NaN is the documented result when the benchmark has no period of that
+        # sign — nothing to capture, so there is no ratio to check.
+        if not math.isnan(value):
+            assert value == pytest.approx(1.0, rel=TOL_PARITY), f"Expected {name}_capture == 1, got {value}"
+
+
+# ── The summary table agrees with its sources ────────────────────────────────
+
+
+@pytest.mark.property
+@given(returns=st.lists(_general_returns, min_size=40, max_size=120))
+@settings(max_examples=25)
+def test_summary_matches_the_metric_methods_it_tabulates(returns: list[float]) -> None:
+    """Every summary row reproduces the metric method of the same name.
+
+    `summary` is a facade over the other mixins; nothing stops a row from
+    drifting to a stale or wrongly-named source. Comparing the table against
+    a direct call per metric is what makes that drift fail the suite.
+
+    Where the direct call raises — an all-zero series divides by zero in
+    `win_rate`, for instance — the documented contract is that `summary`
+    substitutes NaN rather than propagating, so that is asserted instead.
+    """
+    data = Data.from_returns(returns=_make_returns_df(returns))
+    stats = data.stats
+    table = stats.summary()
+    tabulated = dict(zip(table["metric"].to_list(), table["Asset"].to_list(), strict=True))
+
+    for metric in ("volatility", "win_rate", "best", "worst", "max_drawdown", "avg_drawdown", "sharpe"):
+        reported = tabulated[metric]
+        try:
+            direct = getattr(stats, metric)()["Asset"]
+        except Exception:
+            assert reported is None or math.isnan(reported), (
+                f"{metric}() raised, so summary must report NaN, got {reported}"
+            )
+            continue
+
+        if direct is None or (isinstance(direct, float) and math.isnan(direct)):
+            assert reported is None or math.isnan(reported), f"{metric}: expected NaN/None, got {reported}"
+        else:
+            assert reported == pytest.approx(direct, rel=TOL_PARITY), (
+                f"summary row {metric!r} = {reported} but {metric}() = {direct}"
+            )
+
+
+# ── Portfolio transform identities ───────────────────────────────────────────
+
+
+@pytest.mark.property
+@given(
+    data_tuple=st.integers(min_value=5, max_value=20).flatmap(
+        lambda n: st.tuples(
+            st.lists(_pos_price, min_size=n, max_size=n),
+            st.lists(_any_position, min_size=n, max_size=n),
+        )
+    )
+)
+@settings(max_examples=50)
+def test_unbounded_truncate_and_zero_smoothing_are_identities(
+    data_tuple: tuple[list[float], list[float]],
+) -> None:
+    """`truncate(None, None)` and `smoothed_holding(0)` leave the portfolio alone.
+
+    An unbounded truncation selects every row, and smoothing over a window of
+    one averages each weight with nothing. Both must therefore round-trip to a
+    data-identical Portfolio.
+    """
+    prices_list, positions_list = data_tuple
+    n = len(prices_list)
+    start = date(2020, 1, 1)
+    dates = [start + timedelta(days=i) for i in range(n)]
+
+    prices_df = pl.DataFrame({"date": dates, "Asset": pl.Series(prices_list, dtype=pl.Float64)})
+    positions_df = pl.DataFrame({"date": dates, "Asset": pl.Series(positions_list, dtype=pl.Float64)})
+    portfolio = Portfolio(prices=prices_df, cashposition=positions_df, aum=1e5)
+
+    for derived in (portfolio.truncate(), portfolio.smoothed_holding(0)):
+        pt.assert_frame_equal(derived.cashposition, portfolio.cashposition)
+        pt.assert_frame_equal(derived.prices, portfolio.prices)
+        assert derived.aum == portfolio.aum

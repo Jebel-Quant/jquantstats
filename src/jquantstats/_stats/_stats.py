@@ -13,9 +13,10 @@ class that combines five mixin classes:
   beta, information ratio, Treynor).
 - `_DrawdownMixin` — cumulative returns, drawdown series, max drawdown, and
   per-episode drawdown details.
-- `_ReportingStatsMixin` — temporal
-  reporting, Calmar, recovery factor, capture ratios, annual breakdown, and
-  summary.
+- `_ReportingStatsMixin` — temporal reporting: CAGR, expected return, RAR,
+  Calmar, recovery factor, drawdown duration, monthly win rate.
+- `_CaptureStatsMixin` — up- and down-market capture ratios.
+- `_SummaryStatsMixin` — the tidy `summary` table and its `annual_breakdown`.
 - `_PeriodicReportingMixin` — period-bucketed tables: monthly-returns pivot,
   distribution across calendar frequencies, benchmark comparison, worst-N periods.
 - `_RollingStatsMixin` — rolling-window
@@ -36,6 +37,7 @@ import polars as pl
 
 from ._basic import _BasicStatsMixin
 from ._benchmark import _BenchmarkStatsMixin
+from ._capture import _CaptureStatsMixin
 from ._concentration import _ConcentrationStatsMixin
 from ._core import (
     _drawdown_series,
@@ -56,6 +58,7 @@ from ._performance import _RiskStatsMixin
 from ._periodic import _PeriodicReportingMixin
 from ._reporting import _ReportingStatsMixin
 from ._rolling import _RollingStatsMixin
+from ._summary import _SummaryStatsMixin
 
 if TYPE_CHECKING:
     from ..data import Data
@@ -81,6 +84,8 @@ class Stats(
     _BenchmarkStatsMixin,
     _DrawdownMixin,
     _ReportingStatsMixin,
+    _CaptureStatsMixin,
+    _SummaryStatsMixin,
     _PeriodicReportingMixin,
     _RollingStatsMixin,
     _MonteCarloStatsMixin,
@@ -109,6 +114,8 @@ class Stats(
     - `_BenchmarkStatsMixin`
     - `_DrawdownMixin`
     - `_ReportingStatsMixin`
+    - `_CaptureStatsMixin`
+    - `_SummaryStatsMixin`
     - `_PeriodicReportingMixin`
     - `_RollingStatsMixin`
     - `_MonteCarloStatsMixin`
