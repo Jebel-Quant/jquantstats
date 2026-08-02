@@ -95,9 +95,20 @@ include = [
 [tool.bandit]
 exclude_dirs = ["src/tests"]  # Exclude test directories from security scanning
 
-# Ignore specific dependency issues
+# Ignore specific dependency issues.
+#
+# DEP002 flags a declared dependency with no import site. The three below have
+# none by design, so the ignore records a fact rather than hiding a gap:
+#   kaleido           - Plotly's static image-export backend. Selected at runtime
+#                       by plotly.io, never imported by us.
+#   uvicorn           - ASGI server for api/app.py. Invoked as a command
+#                       (`uvicorn api.app:app`), not imported.
+#   python-multipart  - parses multipart/form-data for FastAPI's Form/UploadFile.
+#                       Imported by Starlette, never by us.
+# fastapi is deliberately absent: api/ is now part of the deptry scan (see the
+# DEPTRY_FOLDERS line in the Makefile), so its import there is observed directly.
 [tool.deptry.per_rule_ignores]
-DEP002 = ["kaleido", "fastapi", "uvicorn", "python-multipart"]  # DEP002: Unused direct dependencies
+DEP002 = ["kaleido", "uvicorn", "python-multipart"]
 
 # Package to module name mapping
 [tool.deptry.package_module_name_map]

@@ -16,12 +16,53 @@ if TYPE_CHECKING:
     from jquantstats._protocol import DataLike
 
 
+def _rolling_beta_expr(asset: str, bench_col: str, window: int) -> pl.Expr:
+    """Trailing-window OLS beta of *asset* against *bench_col*.
+
+    Beta is ``cov(asset, bench) / var(bench)``, expanded into rolling means so
+    the whole estimate is a single Polars expression.
+
+    Args:
+        asset: Asset column name.
+        bench_col: Benchmark column name.
+        window: Trailing window size in rows.
+
+    Returns:
+        An expression aliased ``beta``.
+    """
+    mean_x = pl.col(asset).rolling_mean(window_size=window)
+    mean_y = pl.col(bench_col).rolling_mean(window_size=window)
+    mean_xy = (pl.col(asset) * pl.col(bench_col)).rolling_mean(window_size=window)
+    mean_y2 = (pl.col(bench_col) ** 2).rolling_mean(window_size=window)
+    return ((mean_xy - mean_x * mean_y) / (mean_y2 - mean_y**2)).alias("beta")
+
+
 class _RollingPlotsMixin:
     """Rolling-window metric plots for :class:`DataPlots`."""
 
     __slots__ = ()
 
     _data: DataLike
+
+    def _beta_assets(self, df: pl.DataFrame, date_col: str, bench_col: str) -> list[str]:
+        """Asset columns to plot beta for.
+
+        Prefers the explicit ``returns`` frame when the data exposes one, and
+        otherwise falls back to every column of *df* that is neither the date
+        nor the benchmark.
+
+        Args:
+            df: The combined index/returns/benchmark frame.
+            date_col: Name of the date column.
+            bench_col: Name of the benchmark column.
+
+        Returns:
+            The asset column names.
+        """
+        returns_df = getattr(self._data, "returns", None)
+        if returns_df is not None:
+            return list(returns_df.columns)
+        return [c for c in df.columns if c != date_col and c != bench_col]
 
     def rolling_sharpe(
         self,
@@ -219,12 +260,7 @@ class _RollingPlotsMixin:
             raise NoBenchmarkError
 
         bench_col = benchmark_df.columns[0]
-        returns_df = getattr(self._data, "returns", None)
-        assets = (
-            list(returns_df.columns)
-            if returns_df is not None
-            else [c for c in df.columns if c != date_col and c != bench_col]
-        )
+        assets = self._beta_assets(df, date_col, bench_col)
         colors = _ticker_colors(assets)
         windows = [w for w in (rolling_period, rolling_period2) if w is not None]
         line_styles = ["solid", "dash"]
@@ -232,13 +268,7 @@ class _RollingPlotsMixin:
         fig = go.Figure()
         for asset in assets:
             for w, dash in zip(windows, line_styles, strict=False):
-                mean_x = pl.col(asset).rolling_mean(window_size=w)
-                mean_y = pl.col(bench_col).rolling_mean(window_size=w)
-                mean_xy = (pl.col(asset) * pl.col(bench_col)).rolling_mean(window_size=w)
-                mean_y2 = (pl.col(bench_col) ** 2).rolling_mean(window_size=w)
-                beta_expr = ((mean_xy - mean_x * mean_y) / (mean_y2 - mean_y**2)).alias("beta")
-
-                beta_df = df.with_columns(beta_expr)
+                beta_df = df.with_columns(_rolling_beta_expr(asset, bench_col, w))
                 label = f"{asset} ({w}d)"
                 fig.add_trace(
                     go.Scatter(

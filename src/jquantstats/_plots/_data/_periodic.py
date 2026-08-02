@@ -7,10 +7,26 @@ from typing import TYPE_CHECKING
 import plotly.graph_objects as go
 import polars as pl
 
-from ._styling import _apply_base_layout, _bar_colors, _hex_to_rgba, _ticker_colors
+from ._styling import _apply_base_layout, _bar_colors, _ticker_colors, _yearly_bar_colors
 
 if TYPE_CHECKING:
     from jquantstats._protocol import DataLike
+
+
+def _period_agg_exprs(tickers: list[str], compounded: bool) -> list[pl.Expr]:
+    """Per-ticker aggregation expressions for a period bucket.
+
+    Args:
+        tickers: Asset column names to aggregate.
+        compounded: Compound returns within the bucket when True, sum them
+            when False.
+
+    Returns:
+        One aliased expression per ticker.
+    """
+    if compounded:
+        return [((1.0 + pl.col(t)).product() - 1.0).alias(t) for t in tickers]
+    return [pl.col(t).sum().alias(t) for t in tickers]
 
 
 def _monthly_heatmap_matrix(
@@ -103,21 +119,14 @@ class _PeriodicPlotsMixin:
         tickers = [c for c in df.columns if c != date_col]
         colors = _ticker_colors(tickers)
 
-        agg_exprs = (
-            [((1.0 + pl.col(t)).product() - 1.0).alias(t) for t in tickers]
-            if compounded
-            else [pl.col(t).sum().alias(t) for t in tickers]
-        )
+        agg_exprs = _period_agg_exprs(tickers, compounded)
         yearly = (
             df.with_columns(pl.col(date_col).dt.year().alias("_year")).group_by("_year").agg(agg_exprs).sort("_year")
         )
 
         fig = go.Figure()
         for ticker in tickers:
-            values = yearly[ticker].to_list()
-            bar_colors = [
-                colors[ticker] if v is not None and v >= 0 else _hex_to_rgba(colors[ticker], 0.5) for v in values
-            ]
+            bar_colors = _yearly_bar_colors(yearly[ticker].to_list(), colors[ticker])
             fig.add_trace(
                 go.Bar(
                     x=yearly["_year"],
@@ -153,9 +162,7 @@ class _PeriodicPlotsMixin:
 
         monthly = df.group_by_dynamic(
             index_column=date_col, every="1mo", period="1mo", closed="right", label="right"
-        ).agg(
-            [((1.0 + pl.col(t)).product() - 1.0).alias(t) if compounded else pl.col(t).sum().alias(t) for t in tickers]
-        )
+        ).agg(_period_agg_exprs(tickers, compounded))
 
         fig = go.Figure()
         for ticker in tickers:

@@ -112,6 +112,25 @@ def _bar_colors(values: list[float | None], positive_color: str, single_asset: b
     return [positive_color if v is not None and v > 0 else negative_color for v in values]
 
 
+def _yearly_bar_colors(values: list[float | None], positive_color: str) -> list[str]:
+    """Bar colors for the yearly-returns chart.
+
+    Deliberately distinct from `_bar_colors`: the yearly chart treats a flat
+    zero year as positive (``>= 0``) and fades negatives to alpha 0.5 rather
+    than 0.4, so the two cannot share an implementation without changing what
+    is rendered.
+
+    Args:
+        values: The per-year return values; ``None`` counts as negative.
+        positive_color: The asset's base color.
+
+    Returns:
+        One color string per value.
+    """
+    negative_color = _hex_to_rgba(positive_color, 0.5)
+    return [positive_color if v is not None and v >= 0 else negative_color for v in values]
+
+
 def _compute_drawdown_periods(prices: list[float], n: int) -> list[dict[str, Any]]:
     """Identify the top *n* drawdown periods from a cumulative price series.
 
