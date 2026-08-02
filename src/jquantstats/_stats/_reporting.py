@@ -490,11 +490,14 @@ class _ReportingStatsMixin:
         Returns:
             The summary DataFrame with an added ``year`` column.
         """
-        from ..data import Data
-
+        # Construct the sub-period Data via type(self._data) rather than importing
+        # the concrete class: a lazy `from ..data import Data` would put the upper
+        # layer back into this subpackage's import graph, which is exactly the
+        # coupling _protocol.py exists to prevent. Mirrors the type(self) call below.
+        data_factory = cast(Any, type(self._data))
         sub_returns = sub_all.select(self._data.returns.columns)
         sub_benchmark = sub_all.select(self._data.benchmark.columns) if self._data.benchmark is not None else None
-        sub_data = Data(returns=sub_returns, index=sub_all.select(index_cols), benchmark=sub_benchmark)
+        sub_data = data_factory(returns=sub_returns, index=sub_all.select(index_cols), benchmark=sub_benchmark)
         summary: pl.DataFrame = cast(Any, type(self))(sub_data).summary()
         return summary.with_columns(pl.lit(label).alias("year"))
 

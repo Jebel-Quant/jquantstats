@@ -28,12 +28,7 @@ Public API is unchanged:
 
 import dataclasses
 from datetime import date, datetime
-from typing import TYPE_CHECKING, Self, cast
-
-if TYPE_CHECKING:
-    from ._stats import Stats as Stats
-    from ._utils import PortfolioUtils as PortfolioUtils
-    from .data import Data as Data
+from typing import Self, cast
 
 import polars as pl
 
@@ -47,6 +42,9 @@ from ._portfolio_nav import PortfolioNavMixin
 from ._portfolio_transform import PortfolioTransformMixin
 from ._portfolio_turnover import PortfolioTurnoverMixin
 from ._reports import Report
+from ._stats import Stats as Stats
+from ._utils import PortfolioUtils as PortfolioUtils
+from .data import Data as Data
 from .exceptions import (
     InvalidCashPositionTypeError,
     InvalidPricesTypeError,
@@ -216,8 +214,6 @@ class Portfolio(
         Returns:
             A `Data` instance backed by *ret*.
         """
-        from .data import Data
-
         returns_only = ret.select("returns")
         if "date" in ret.columns:
             return Data(returns=returns_only, index=ret.select("date"))
@@ -466,6 +462,4 @@ class Portfolio(
 
         The result is cached after first access so repeated calls are O(1).
         """
-        from ._utils import PortfolioUtils
-
         return PortfolioUtils(self)

@@ -69,6 +69,7 @@ test = [
 lint = [
     "pre-commit>=4.0",
     "ty>=0.0.30",
+    "import-linter>=2.0",  # enforces the layering contracts in [tool.importlinter] via `make arch`
 ]
 
 
@@ -170,3 +171,36 @@ regex = true
 search = '(?ms)^\[project\]((?:(?!^\[)[\s\S])*?)^version = "{current_version}"'
 replace = '[project]\1version = "{new_version}"'
 
+
+# Architectural import contracts (import-linter), run via `make arch` and hooked
+# into `make test`. These encode the layering that src/jquantstats/_protocol.py
+# describes in prose: the analytics subpackages annotate against the structural
+# Protocols and must never reach for the concrete Data / Portfolio classes.
+#
+# Type-checking-only imports are excluded, because `if TYPE_CHECKING: from ..data
+# import Data` is exactly the sanctioned pattern here — it costs nothing at
+# runtime and forms no import cycle. Only real runtime imports are contract
+# violations.
+[tool.importlinter]
+root_package = "jquantstats"
+exclude_type_checking_imports = true
+
+[[tool.importlinter.contracts]]
+name = "analytics subpackages must not import the concrete Data/Portfolio at runtime"
+type = "forbidden"
+source_modules = [
+    "jquantstats._stats",
+    "jquantstats._plots",
+    "jquantstats._reports",
+    "jquantstats._utils",
+]
+forbidden_modules = [
+    "jquantstats.data",
+    "jquantstats.portfolio",
+]
+
+[[tool.importlinter.contracts]]
+name = "the Data reshape mixin must not import Data"
+type = "forbidden"
+source_modules = ["jquantstats._data_reshape"]
+forbidden_modules = ["jquantstats.data"]
