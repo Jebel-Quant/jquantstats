@@ -121,12 +121,9 @@ local.mk
 
 .bandit-baseline.json
 
-report.html
-/demo_report.py
-/positions.csv
-/prices.csv
-LICENSES.md
-/test_output/
 
-# local planning file
-plan.md
+# Rust (rust-core bundle). Kept in core rather than the language layer because
+# .gitignore has one owner and git opens it with O_NOFOLLOW, so it cannot be a
+# per-layer file. These entries are inert in a Python repo.
+target/
+**/*.rs.bk

@@ -13,7 +13,8 @@ Validates that pyproject.toml:
 - includes at least one Python version classifier
 - declares a [dependency-groups] test group containing pytest
 - declares a [dependency-groups] lint group
-- version matches the latest git tag (vX.Y.Z → X.Y.Z)
+- carries a [tool.bumpversion] table bump-my-version can actually discover
+- version matches the latest git tag (vX.Y.Z → X.Y.Z), and that tag is reachable
 """
 
 from __future__ import annotations
@@ -31,6 +32,34 @@ _GIT = shutil.which("git") or "/usr/bin/git"
 
 _SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+")
 _REQUIRED_PROJECT_FIELDS = ("name", "version", "description", "readme", "requires-python", "license", "authors")
+
+# The only filenames bump-my-version auto-discovers. Anything else — including the
+# `.rhiza/.cfg.toml` older template versions shipped — is read solely when passed
+# with --config-file, which nothing in this template does.
+_DISCOVERABLE_CONFIGS = (".bumpversion.toml", ".bumpversion.cfg", "setup.cfg", "pyproject.toml")
+
+
+def _has_bumpversion_section(path: Path) -> bool:
+    """Report whether a config file carries a bumpversion section at all.
+
+    Args:
+        path: Candidate config file; a missing or malformed file counts as absent.
+
+    Returns:
+        True when the file declares ``[tool.bumpversion]`` (TOML) or ``[bumpversion]``
+        (INI). ``.bumpversion.toml`` nests the table under ``[tool]`` just as
+        pyproject.toml does.
+    """
+    if not path.is_file():
+        return False
+    if path.suffix == ".cfg":
+        return "[bumpversion]" in path.read_text(encoding="utf-8")
+    try:
+        with path.open("rb") as handle:
+            data = tomllib.load(handle)
+    except tomllib.TOMLDecodeError:
+        return False
+    return isinstance(data.get("tool", {}).get("bumpversion"), dict)
 
 
 @pytest.fixture(scope="module")
@@ -197,6 +226,98 @@ class TestDependencyGroups:
         assert "lint" in dependency_groups, "[dependency-groups] must include a 'lint' group"
 
 
+class TestBumpversionConfigIsDiscoverable:
+    """The release flow must find a version config, not silently invent one (#1453).
+
+    bump-my-version searches four filenames and stops. When it finds none it does
+    **not** fail — it falls back to ``git describe`` and reports the last reachable
+    tag as the current version. Release tooling then computes bump candidates from
+    that number rather than the project's, which is how a repo at 0.7.0 with a
+    newest reachable tag of v0.6.4 gets offered "minor → v0.7.0", a version it has
+    already published.
+
+    Once a ``[tool.bumpversion]`` table exists in pyproject.toml, bump-my-version
+    reads and rewrites PEP 621 ``[project].version`` natively, so the minimum
+    workable config is three lines and duplicates the version string nowhere::
+
+        [tool.bumpversion]
+        allow_dirty = false
+        # /rhiza:release commits and tags itself so the changelog lands in the
+        # bump commit.
+        commit = false
+        tag = false
+
+    Add a ``[[tool.bumpversion.files]]`` entry per *additional* location (a plugin
+    manifest, a self-referencing CI stub pin) — never for ``[project].version``
+    itself.
+    """
+
+    @pytest.fixture
+    def declared_version(self, project: dict) -> str:
+        """The statically declared project version, or skip when it is dynamic."""
+        version = project.get("version")
+        if not isinstance(version, str):
+            pytest.skip("[project].version is dynamic — no static location to bump")
+        return version
+
+    def test_a_discoverable_config_exists(self, root: Path, pyproject: dict, declared_version: str) -> None:
+        """A bumpversion section must live in a file bump-my-version actually reads."""
+        found = [name for name in _DISCOVERABLE_CONFIGS if _has_bumpversion_section(root / name)]
+        hint = ""
+        if (root / ".rhiza" / ".cfg.toml").is_file():
+            hint = (
+                " A leftover .rhiza/.cfg.toml is present: that path is never auto-discovered "
+                "(it predates the fix for issue #1453) and can be deleted."
+            )
+        assert found, (
+            f"pyproject.toml declares version {declared_version!r} but no bumpversion config "
+            f"was found in any file bump-my-version searches ({', '.join(_DISCOVERABLE_CONFIGS)}). "
+            f"It will silently fall back to `git describe`, so a release can be cut at a version "
+            f"that already exists. Add a [tool.bumpversion] table to pyproject.toml.{hint}"
+        )
+
+    def test_pyproject_is_the_config_that_wins(self, root: Path, declared_version: str) -> None:
+        """No earlier-searched file may shadow pyproject.toml's table.
+
+        Search order is significant: a ``.bumpversion.toml`` beats pyproject.toml and
+        takes ``[project].version`` out of the picture, so the two version numbers can
+        then drift apart unnoticed. A Python project keeps its version in one place.
+        """
+        shadowing = [
+            name for name in _DISCOVERABLE_CONFIGS if name != "pyproject.toml" and _has_bumpversion_section(root / name)
+        ]
+        assert not shadowing, (
+            f"{shadowing} is searched before pyproject.toml and would shadow its "
+            f"[tool.bumpversion] table, detaching the bump from [project].version "
+            f"({declared_version!r})"
+        )
+
+    def test_config_does_not_duplicate_the_version(self, pyproject: dict, declared_version: str) -> None:
+        """``current_version`` is redundant in pyproject.toml, and drifts once stale."""
+        section = pyproject.get("tool", {}).get("bumpversion")
+        if not isinstance(section, dict):
+            pytest.skip("no [tool.bumpversion] table — reported by test_a_discoverable_config_exists")
+        declared_in_config = section.get("current_version")
+        assert declared_in_config in (None, declared_version), (
+            f"[tool.bumpversion].current_version is {declared_in_config!r} but "
+            f"[project].version is {declared_version!r}; bumping from the stale value cannot "
+            f"match the version in the file. Drop current_version — bump-my-version reads "
+            f"[project].version natively."
+        )
+
+    def test_the_release_flow_owns_the_commit_and_the_tag(self, pyproject: dict) -> None:
+        """``/rhiza:release`` folds the changelog into the bump commit and tags it itself."""
+        section = pyproject.get("tool", {}).get("bumpversion")
+        if not isinstance(section, dict):
+            pytest.skip("no [tool.bumpversion] table — reported by test_a_discoverable_config_exists")
+        for key in ("commit", "tag"):
+            assert section.get(key, False) is False, (
+                f"[tool.bumpversion].{key} must be false: the release flow commits and tags "
+                f"itself so the changelog lands in the bump commit, and a bare "
+                f"`bump-my-version bump` would otherwise add a second commit and a duplicate tag"
+            )
+
+
 class TestGitTagVersion:
     """Tests for harmony between the latest git tag and pyproject.toml version."""
 
@@ -221,4 +342,43 @@ class TestGitTagVersion:
         assert tag_version == pyproject_version, (
             f"Latest git tag {latest_tag!r} (→ {tag_version!r}) does not match "
             f"[project].version {pyproject_version!r} in pyproject.toml"
+        )
+
+    def test_latest_tag_is_reachable_from_a_branch(self, latest_tag: str, root: Path) -> None:
+        """The newest tag must sit on a commit some branch contains (#1454).
+
+        ``git tag --list`` above happily reports an orphaned tag, which is how this
+        suite once stayed green on a repo where ``git describe`` disagreed. A release
+        cut on a branch that is then squash-merged leaves its tag on the pre-squash
+        commit while the content lands on the default branch under a new SHA; no
+        branch contains the tagged commit any more. The consequence is not cosmetic —
+        git-cliff cannot place a boundary at an unreachable tag, so regenerating
+        CHANGELOG.md deletes that version's section and folds its commits into the
+        next release.
+        """
+        if (
+            subprocess.run(  # nosec B603
+                [_GIT, "rev-parse", "--is-shallow-repository"], capture_output=True, text=True, cwd=root
+            ).stdout.strip()
+            == "true"
+        ):
+            pytest.skip("shallow clone — the commit graph is incomplete")
+
+        commit = subprocess.run(  # nosec B603
+            [_GIT, "rev-parse", f"{latest_tag}^{{commit}}"], capture_output=True, text=True, cwd=root
+        )
+        if commit.returncode != 0:
+            pytest.skip(f"tagged commit for {latest_tag} is not present locally")
+
+        contains = subprocess.run(  # nosec B603
+            [_GIT, "branch", "-a", "--contains", commit.stdout.strip(), "--format=%(refname:short)"],
+            capture_output=True,
+            text=True,
+            cwd=root,
+        )
+        assert contains.stdout.strip(), (
+            f"Tag {latest_tag} points at {commit.stdout.strip()[:12]}, which no branch contains. "
+            f"It is most likely the pre-squash commit of a squash-merged release branch: "
+            f"`git describe` skips this release and regenerating CHANGELOG.md will delete its "
+            f"section. Re-tag the merged commit and delete the orphaned tag."
         )

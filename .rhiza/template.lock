@@ -1,7 +1,7 @@
-sha: e5d7005e2d9fc3d5a23b96d13b203b4f2afe3cce
+sha: 65f3c209dcaafc6dbc7763eb0d022125379292c8
 repo: jebel-quant/rhiza
 host: github
-ref: v1.2.5
+ref: v1.3.0
 include: []
 exclude:
 - bundles/github/.github/workflows/rhiza_fuzzing.yml
@@ -38,7 +38,6 @@ files:
 - .gitignore
 - .pre-commit-config.yaml
 - .python-version
-- .rhiza/.cfg.toml
 - .rhiza/.env
 - .rhiza/.gitignore
 - .rhiza/CODE_OF_CONDUCT.md
@@ -56,6 +55,7 @@ files:
 - .rhiza/make.d/github.mk
 - .rhiza/make.d/marimo.mk
 - .rhiza/make.d/paper.mk
+- .rhiza/make.d/python.mk
 - .rhiza/make.d/quality.mk
 - .rhiza/make.d/test.mk
 - .rhiza/rhiza.mk
@@ -76,5 +76,5 @@ files:
 - docs/mkdocs-base.yml
 - pytest.ini
 - ruff.toml
-synced_at: '2026-07-30T04:16:36Z'
+synced_at: '2026-08-02T16:56:56Z'
 strategy: merge
