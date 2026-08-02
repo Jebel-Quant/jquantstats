@@ -1,4 +1,18 @@
-"""Performance and risk-adjusted return metrics for financial data."""
+"""Risk-adjusted return ratios for financial data.
+
+This module owns the ratio family: Sharpe and Sortino, Omega, and the
+probabilistic / smart / adjusted variants derived from them. Two concerns that
+previously shared this module were split out, taking it from 714 lines to ~460:
+
+- concentration (HHI) → :mod:`jquantstats._stats._concentration`
+- benchmark-relative and factor metrics → :mod:`jquantstats._stats._benchmark`
+
+What remains is deliberately kept together: the ``probabilistic_*``, ``smart_*``
+and ``adjusted_*`` methods are all defined in terms of the base ``sharpe`` and
+``sortino`` ratios above them (via ``_probabilistic_ratio_from_base``), so
+splitting them further would separate derived metrics from the ones they derive
+from.
+"""
 
 from __future__ import annotations
 
@@ -9,9 +23,8 @@ import numpy as np
 import polars as pl
 from scipy.stats import norm
 
-from ..exceptions import NoBenchmarkError
 from ._core import _mean, _std_is_negligible, _to_float, columnwise_stat
-from ._internals import _annualization_factor, _comp_return, _downside_deviation
+from ._internals import _annualization_factor, _downside_deviation
 
 if TYPE_CHECKING:
     from ..data import Data
@@ -20,24 +33,18 @@ if TYPE_CHECKING:
 
 
 class _RiskStatsMixin:
-    """Mixin providing risk-adjusted return and benchmark/factor metrics.
+    """Mixin providing risk-adjusted return ratios.
 
-    Covers: Sharpe ratio, Sortino ratio, adjusted Sortino, probabilistic ratios,
-    concentration (HHI), R-squared, information ratio, and Greeks (alpha/beta).
+    Covers: Sharpe ratio, Sortino ratio, Omega, adjusted Sortino, and the
+    probabilistic / smart variants of each.
 
     Cross-mixin dependencies:
         - _BasicStatsMixin: geometric_mean, autocorr_penalty
 
-    **Concentration metrics (intentionally public, optional use)**
-
-    ``hhi_positive`` and ``hhi_negative`` implement the
-    Herfindahl-Hirschman Index applied to the signed distribution of returns.
-    They measure *temporal* concentration of gains and losses respectively —
-    a value near 0 means returns are spread evenly across periods; a value
-    near 1 means a single period dominates.  These metrics are not included
-    in ``summary()`` by default because they are supplemental diagnostics
-    rather than standard risk-adjusted-return measures, but they are fully
-    supported as part of the public ``Stats`` API.
+    Sibling mixins split out of this one, both composed into the same ``Stats``
+    class so the public API is unchanged:
+        - _ConcentrationStatsMixin: hhi_positive, hhi_negative
+        - _BenchmarkStatsMixin: r_squared, information_ratio, greeks, treynor_ratio
     """
 
     _data: Data
@@ -173,72 +180,6 @@ class _RiskStatsMixin:
         if var_bench_sr <= 0:
             return float("nan")  # pragma: no cover  # indeterminate: non-positive variance
         return float(norm.cdf((observed_sr - benchmark_sr) / np.sqrt(var_bench_sr)))
-
-    # ── Concentration metrics (HHI) ───────────────────────────────────────────
-
-    @columnwise_stat
-    def hhi_positive(self, series: pl.Series) -> float:
-        r"""Calculate the Herfindahl-Hirschman Index (HHI) for positive returns.
-
-        This quantifies how concentrated the positive returns are in a series.
-
-        .. math::
-            w^{\plus} = \frac{r_{t}^{\plus}}{\sum{r_{t}^{\plus}}} \\
-            HHI^{\plus} = \frac{N_{\plus} \sum{(w^{\plus})^2} - 1}{N_{\plus} - 1}
-
-        where:
-            - \(r_{t}^{\plus}\) are the positive returns
-            - \(N_{\plus}\) is the number of positive returns
-            - \(w^{\plus}\) are the weights of positive returns
-
-        Args:
-            series (pl.Series): The series to calculate HHI for.
-
-        Returns:
-            float: The HHI value for positive returns. Returns NaN if fewer than 3
-                positive returns are present.
-
-        Note:
-            Values range from 0 (perfectly diversified gains) to 1 (all gains
-            concentrated in a single period).
-        """
-        positive_returns = series.filter(series > 0).drop_nans()
-        if positive_returns.len() <= 2:
-            return float("nan")  # indeterminate: fewer than 3 positive returns
-        weight = positive_returns / positive_returns.sum()
-        return float((weight.len() * (weight**2).sum() - 1) / (weight.len() - 1))
-
-    @columnwise_stat
-    def hhi_negative(self, series: pl.Series) -> float:
-        r"""Calculate the Herfindahl-Hirschman Index (HHI) for negative returns.
-
-        This quantifies how concentrated the negative returns are in a series.
-
-        .. math::
-            w^{\minus} = \frac{r_{t}^{\minus}}{\sum{r_{t}^{\minus}}} \\
-            HHI^{\minus} = \frac{N_{\minus} \sum{(w^{\minus})^2} - 1}{N_{\minus} - 1}
-
-        where:
-            - \(r_{t}^{\minus}\) are the negative returns
-            - \(N_{\minus}\) is the number of negative returns
-            - \(w^{\minus}\) are the weights of negative returns
-
-        Args:
-            series (pl.Series): The returns series to calculate HHI for.
-
-        Returns:
-            float: The HHI value for negative returns. Returns NaN if fewer than 3
-                negative returns are present.
-
-        Note:
-            Values range from 0 (perfectly diversified losses) to 1 (all losses
-            concentrated in a single period).
-        """
-        negative_returns = series.filter(series < 0).drop_nans()
-        if negative_returns.len() <= 2:
-            return float("nan")  # indeterminate: fewer than 3 negative returns
-        weight = negative_returns / negative_returns.sum()
-        return float((weight.len() * (weight**2).sum() - 1) / (weight.len() - 1))
 
     @columnwise_stat
     def sortino(self, series: pl.Series, periods: int | float | None = None) -> float:
@@ -525,190 +466,3 @@ class _RiskStatsMixin:
         """
         sortino_data = self.sortino(periods=periods)
         return {k: v / np.sqrt(2) for k, v in sortino_data.items()}
-
-    # ── Benchmark & factor ────────────────────────────────────────────────────
-
-    @columnwise_stat
-    def r_squared(self, series: pl.Series, benchmark: str | None = None) -> float:
-        """Measure the straight line fit of the equity curve.
-
-        Args:
-            series (pl.Series): The series to calculate R-squared for.
-            benchmark (str, optional): The benchmark column name. Defaults to None.
-
-        Returns:
-            float: The R-squared value.
-
-        Raises:
-            AttributeError: If no benchmark data is available.
-
-        """
-        if self._data.benchmark is None:
-            raise NoBenchmarkError
-
-        benchmark_col = benchmark or self._data.benchmark.columns[0]
-
-        # Evaluate both series and benchmark as Series
-        all_data = self.all
-        dframe = all_data.select([series, pl.col(benchmark_col).alias("benchmark")]).drop_nulls()
-
-        matrix = dframe.to_numpy()
-        # Get actual Series
-
-        strategy_np = matrix[:, 0]
-        benchmark_np = matrix[:, 1]
-
-        corr_matrix = np.corrcoef(strategy_np, benchmark_np)
-        r = corr_matrix[0, 1]
-        return float(r**2)
-
-    @columnwise_stat
-    def information_ratio(
-        self,
-        series: pl.Series,
-        periods_per_year: int | float | None = None,
-        benchmark: str | None = None,
-        annualise: bool = False,
-    ) -> float:
-        """Calculate the information ratio.
-
-        This is essentially the risk return ratio of the net profits.
-
-        Args:
-            series (pl.Series): The series to calculate information ratio for.
-            periods_per_year (int, optional): Number of periods per year. Defaults to 252.
-            benchmark (str, optional): The benchmark column name. Defaults to None.
-            annualise (bool, optional): Whether to annualise the ratio by multiplying by
-                ``sqrt(periods_per_year)``. Defaults to ``True``.  Set to ``False`` to
-                obtain the raw (non-annualised) information ratio, which matches the value
-                returned by ``qs.stats.information_ratio``.
-
-        Returns:
-            float: The information ratio value.
-
-        """
-        if self._data.benchmark is None:
-            raise NoBenchmarkError
-
-        ppy = periods_per_year or self._data._periods_per_year
-
-        benchmark_col = benchmark or self._data.benchmark.columns[0]
-        all_series = self.all
-        valid_pairs = pl.DataFrame({"strategy": series, "benchmark": all_series[benchmark_col]}).drop_nulls()
-        active = valid_pairs["strategy"] - valid_pairs["benchmark"]
-
-        mean_f = _mean(active)
-        std_val = cast(float, active.std())
-
-        try:
-            std_f = std_val if std_val is not None else 1.0
-            ir = mean_f / std_f
-            return float(ir * (ppy**0.5) if annualise else ir)
-        except ZeroDivisionError:
-            return 0.0
-
-    @columnwise_stat
-    def greeks(
-        self, series: pl.Series, periods_per_year: int | float | None = None, benchmark: str | None = None
-    ) -> dict[str, float]:
-        """Calculate alpha and beta of the portfolio.
-
-        Args:
-            series (pl.Series): The series to calculate greeks for.
-            periods_per_year (int, optional): Number of periods per year. Defaults to 252.
-            benchmark (str, optional): The benchmark column name. Defaults to None.
-
-        Returns:
-            dict[str, float]: Dictionary containing alpha and beta values.
-
-
-        Returns NaN when:
-            Both alpha and beta are ``float("nan")`` when the benchmark variance
-            is zero.
-        """
-        ppy = periods_per_year or self._data._periods_per_year
-
-        benchmark_data = cast(pl.DataFrame, self._data.benchmark)
-        benchmark_col = benchmark or benchmark_data.columns[0]
-
-        # Evaluate both series and benchmark as Series
-        all_data = self.all
-        dframe = all_data.select([series, pl.col(benchmark_col).alias("benchmark")]).drop_nulls()
-        matrix = dframe.to_numpy()
-
-        # Get actual Series
-        strategy_np = matrix[:, 0]
-        benchmark_np = matrix[:, 1]
-
-        # 2x2 covariance matrix: [[var_strategy, cov], [cov, var_benchmark]]
-        cov_matrix = np.cov(strategy_np, benchmark_np)
-
-        cov = cov_matrix[0, 1]
-        var_benchmark = cov_matrix[1, 1]
-
-        beta = float(cov / var_benchmark) if var_benchmark != 0 else float("nan")
-        alpha = float(np.mean(strategy_np) - beta * np.mean(benchmark_np))
-
-        return {"alpha": float(alpha * ppy), "beta": beta}
-
-    @columnwise_stat
-    def treynor_ratio(
-        self,
-        series: pl.Series,
-        periods: int | float | None = None,
-        benchmark: str | None = None,
-    ) -> float:
-        """Treynor ratio: annualised excess return divided by beta.
-
-        Measures return per unit of systematic (market) risk. Unlike the Sharpe
-        ratio, which divides by total volatility, the Treynor ratio divides by
-        beta — making it most meaningful for well-diversified portfolios.
-
-        Args:
-            series (pl.Series): The returns series for one asset.
-            periods (int | float, optional): Periods per year for CAGR
-                annualisation. Defaults to the value inferred from the data.
-            benchmark (str, optional): Benchmark column name. Defaults to the
-                first benchmark column.
-
-        Returns:
-            float: Treynor ratio, or ``nan`` when beta is zero or the benchmark
-                is unavailable.
-
-        Raises:
-            AttributeError: If no benchmark data is attached.
-
-        Returns NaN when:
-            ``float("nan")`` when the benchmark variance or beta is zero, the
-            series is empty, or the compounded NAV is non-positive.
-        """
-        if self._data.benchmark is None:
-            raise NoBenchmarkError
-
-        ppy = periods or self._data._periods_per_year
-
-        benchmark_data = self._data.benchmark
-        benchmark_col = benchmark or benchmark_data.columns[0]
-
-        all_data = self.all
-        dframe = all_data.select([series, pl.col(benchmark_col).alias("_bench")]).drop_nulls()
-        matrix = dframe.to_numpy()
-        strategy_np = matrix[:, 0]
-        benchmark_np = matrix[:, 1]
-
-        cov_matrix = np.cov(strategy_np, benchmark_np)
-        var_benchmark = cov_matrix[1, 1]
-        if var_benchmark == 0:
-            return float("nan")
-        beta = float(cov_matrix[0, 1] / var_benchmark)
-        if beta == 0:
-            return float("nan")
-
-        n = len(series)
-        if n == 0:
-            return float("nan")  # pragma: no cover
-        nav_final = 1.0 + _comp_return(series)
-        if nav_final <= 0:
-            return float("nan")
-        cagr = float(nav_final ** (ppy / n) - 1.0)
-        return cagr / beta

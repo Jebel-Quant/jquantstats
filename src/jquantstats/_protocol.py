@@ -5,7 +5,17 @@ Design rationale
 The analytics subpackages (``_stats``, ``_plots``, ``_reports``, ``_utils``)
 must not import the concrete `Data` / `Portfolio` classes at runtime — that
 would create circular imports, since those classes compose the subpackages.
-Instead, each consumer annotates against a structural Protocol:
+
+**This is enforced, not just documented.** ``[tool.importlinter]`` in
+``pyproject.toml`` declares it as a contract that ``make arch`` checks and
+``make test`` runs, so a layering inversion fails CI rather than review. Imports
+under ``if TYPE_CHECKING:`` are excluded from the contract — annotating against
+the concrete class costs nothing at runtime and forms no cycle, so it stays
+allowed. Where a subpackage needs to *construct* a `Data` (rather than annotate
+one), it goes through ``type(self._data)`` instead of importing the class; see
+``_stats/_reporting.py::_summary_frame`` and ``_data_reshape.py::_rebuild``.
+
+Each consumer annotates against a structural Protocol:
 
 - `DataLike` and `StatsLike` (this module) are shared by every subpackage —
   there is exactly one definition of each.

@@ -4,19 +4,22 @@
 existing one. They are factored out of ``data.py`` to keep that module focused
 on construction and accessors; the mixin only reads the three dataclass fields
 (``returns``, ``index``, ``benchmark``) and rebuilds via `_rebuild`, which
-imports `Data` lazily to avoid re-forming the ``data`` ↔ mixin import cycle.
+constructs through ``type(self)`` so `Data` never enters this module's import
+graph — not even lazily.
 """
 
 from __future__ import annotations
 
 from datetime import date, datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import polars as pl
 
 from .exceptions import IntegerIndexBoundError
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from .data import Data
 
 
@@ -46,8 +49,11 @@ class _ReshapeMixin:
     ) -> Data:
         """Build a fresh `Data` from the given frames.
 
-        `Data` is imported lazily so this module stays importable from
-        ``data.py`` without a cycle.
+        Constructs via ``type(self)`` rather than importing `Data`. This mixin is
+        only ever mixed into `Data`, so ``type(self)`` *is* the concrete class at
+        runtime — which keeps `Data` out of this module's import graph entirely
+        (a lazy import still puts it there) and rebuilds a subclass as its own
+        type rather than downcasting it to `Data`.
 
         Args:
             returns: Returns frame for the new object.
@@ -57,9 +63,8 @@ class _ReshapeMixin:
         Returns:
             Data: A new `Data` built from the supplied frames.
         """
-        from .data import Data
-
-        return Data(returns=returns, index=index, benchmark=benchmark)
+        factory = cast("Callable[..., Data]", type(self))
+        return factory(returns=returns, index=index, benchmark=benchmark)
 
     def resample(self, every: str = "1mo") -> Data:
         """Resample returns and benchmark to a different frequency.

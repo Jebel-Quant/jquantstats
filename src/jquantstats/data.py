@@ -5,12 +5,16 @@ from __future__ import annotations
 import dataclasses
 from collections.abc import Iterator
 from datetime import timedelta
-from typing import TYPE_CHECKING, Literal, cast
+from typing import Literal, cast
 
 import polars as pl
 
 from ._data_reshape import _ReshapeMixin
+from ._plots import DataPlots
+from ._reports import Reports
+from ._stats import Stats
 from ._types import NativeFrame, NativeFrameOrScalar
+from ._utils import DataUtils
 from ._utils._construction import (
     _align_returns_benchmark,
     _apply_null_strategy,
@@ -22,12 +26,6 @@ from ._utils._construction import (
 from ._utils._construction import (
     interpolate as interpolate,  # re-exported for `from jquantstats import interpolate`
 )
-
-if TYPE_CHECKING:
-    from ._plots import DataPlots
-    from ._reports import Reports
-    from ._stats import Stats
-    from ._utils import DataUtils
 
 
 @dataclasses.dataclass(frozen=True, slots=True)
@@ -302,11 +300,6 @@ class Data(_ReshapeMixin):
             DataPlots: An instance of the DataPlots class initialized with this data.
 
         """
-        # Deferred to break the data <-> accessors import cycle: _plots imports
-        # DataLike from this module, so hoisting this to module top re-forms the
-        # cycle. Keep the import local.
-        from ._plots import DataPlots
-
         return DataPlots(self)
 
     @property
@@ -317,9 +310,6 @@ class Data(_ReshapeMixin):
             Stats: An instance of the Stats class initialized with this data.
 
         """
-        # Deferred to break the data <-> accessors import cycle (see .plots).
-        from ._stats import Stats
-
         return Stats(self)
 
     @property
@@ -330,9 +320,6 @@ class Data(_ReshapeMixin):
             Reports: An instance of the Reports class initialized with this data.
 
         """
-        # Deferred to break the data <-> accessors import cycle (see .plots).
-        from ._reports import Reports
-
         return Reports(self)
 
     @property
@@ -343,9 +330,6 @@ class Data(_ReshapeMixin):
             DataUtils: An instance of the DataUtils class initialized with this data.
 
         """
-        # Deferred to break the data <-> accessors import cycle (see .plots).
-        from ._utils import DataUtils
-
         return DataUtils(self)
 
     @property
