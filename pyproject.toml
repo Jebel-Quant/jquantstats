@@ -78,9 +78,10 @@ test = [
     "syrupy>=4.9.1",
     "python-dotenv>=1.0",
 ]
-lint = [
-    "import-linter>=2.0",  # enforces the layering contracts in [tool.importlinter] via `make arch`, which runs `uv run --group lint lint-imports`
-]
+# There is no `lint` group: nothing resolves one from the project environment. ruff runs
+# through the pre-commit hooks `make fmt` executes via uvx, and import-linter — which
+# enforces the [tool.importlinter] contracts — is injected by `make arch` as
+# `uv run --with import-linter lint-imports`.
 
 
 # Build system configuration

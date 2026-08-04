@@ -23,7 +23,7 @@ DEPTRY_FOLDERS += api
 .PHONY: arch
 arch: install ## enforce layer boundaries with import-linter (accessors ⇏ Data/Portfolio)
 	@printf "${BLUE}[INFO] Checking architectural import contracts (import-linter)${RESET}\n"
-	@${UV_BIN} run --group lint lint-imports
+	@${UV_BIN} run --with import-linter lint-imports
 
 test:: arch
 
