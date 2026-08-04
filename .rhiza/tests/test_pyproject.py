@@ -13,21 +13,20 @@ Validates that pyproject.toml:
 - includes at least one Python version classifier
 - declares a [dependency-groups] test group containing pytest
 - carries a [tool.bumpversion] table bump-my-version can actually discover
-- version matches the latest git tag (vX.Y.Z → X.Y.Z), and that tag is reachable
+- version matches the latest git tag (vX.Y.Z → X.Y.Z)
+
+Reachability of that tag lives in ``test_release_tags.py``, shipped by ``core``: the
+invariant holds for every language layer, not just this one.
 """
 
 from __future__ import annotations
 
 import re
-import shutil
-import subprocess  # nosec B404
 import tomllib
 from pathlib import Path
 
 import pytest
 from packaging.version import Version
-
-_GIT = shutil.which("git") or "/usr/bin/git"
 
 _SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+")
 _REQUIRED_PROJECT_FIELDS = ("name", "version", "description", "readme", "requires-python", "license", "authors")
@@ -324,21 +323,12 @@ class TestBumpversionConfigIsDiscoverable:
 
 
 class TestGitTagVersion:
-    """Tests for harmony between the latest git tag and pyproject.toml version."""
+    """Tests for harmony between the latest git tag and pyproject.toml version.
 
-    @pytest.fixture
-    def latest_tag(self, root: Path) -> str:
-        """Return the latest semver git tag, or skip if none exist."""
-        result = subprocess.run(  # nosec B603
-            [_GIT, "tag", "--list", "v*", "--sort=-version:refname"],
-            capture_output=True,
-            text=True,
-            cwd=root,
-        )
-        tags = [line.strip() for line in result.stdout.splitlines() if line.strip()]
-        if not tags:
-            pytest.skip("No version tags found in repository")
-        return tags[0]
+    Reachability of that tag is asserted by ``test_release_tags.py``, which ``core``
+    ships: the invariant is about git rather than about Python, and all three language
+    layers need it.
+    """
 
     def test_latest_tag_matches_pyproject_version(self, latest_tag: str, project: dict) -> None:
         """The latest git tag (vX.Y.Z) must match [project].version in pyproject.toml."""
@@ -347,43 +337,4 @@ class TestGitTagVersion:
         assert tag_version == pyproject_version, (
             f"Latest git tag {latest_tag!r} (→ {tag_version!r}) does not match "
             f"[project].version {pyproject_version!r} in pyproject.toml"
-        )
-
-    def test_latest_tag_is_reachable_from_a_branch(self, latest_tag: str, root: Path) -> None:
-        """The newest tag must sit on a commit some branch contains (#1454).
-
-        ``git tag --list`` above happily reports an orphaned tag, which is how this
-        suite once stayed green on a repo where ``git describe`` disagreed. A release
-        cut on a branch that is then squash-merged leaves its tag on the pre-squash
-        commit while the content lands on the default branch under a new SHA; no
-        branch contains the tagged commit any more. The consequence is not cosmetic —
-        git-cliff cannot place a boundary at an unreachable tag, so regenerating
-        CHANGELOG.md deletes that version's section and folds its commits into the
-        next release.
-        """
-        if (
-            subprocess.run(  # nosec B603
-                [_GIT, "rev-parse", "--is-shallow-repository"], capture_output=True, text=True, cwd=root
-            ).stdout.strip()
-            == "true"
-        ):
-            pytest.skip("shallow clone — the commit graph is incomplete")
-
-        commit = subprocess.run(  # nosec B603
-            [_GIT, "rev-parse", f"{latest_tag}^{{commit}}"], capture_output=True, text=True, cwd=root
-        )
-        if commit.returncode != 0:
-            pytest.skip(f"tagged commit for {latest_tag} is not present locally")
-
-        contains = subprocess.run(  # nosec B603
-            [_GIT, "branch", "-a", "--contains", commit.stdout.strip(), "--format=%(refname:short)"],
-            capture_output=True,
-            text=True,
-            cwd=root,
-        )
-        assert contains.stdout.strip(), (
-            f"Tag {latest_tag} points at {commit.stdout.strip()[:12]}, which no branch contains. "
-            f"It is most likely the pre-squash commit of a squash-merged release branch: "
-            f"`git describe` skips this release and regenerating CHANGELOG.md will delete its "
-            f"section. Re-tag the merged commit and delete the orphaned tag."
         )
