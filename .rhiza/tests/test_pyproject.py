@@ -12,7 +12,6 @@ Validates that pyproject.toml:
 - provides [project.urls] with Homepage and Repository
 - includes at least one Python version classifier
 - declares a [dependency-groups] test group containing pytest
-- declares a [dependency-groups] lint group
 - carries a [tool.bumpversion] table bump-my-version can actually discover
 - version matches the latest git tag (vX.Y.Z → X.Y.Z), and that tag is reachable
 """
@@ -200,7 +199,17 @@ class TestProjectClassifiers:
 
 
 class TestDependencyGroups:
-    """Tests for [dependency-groups] — ensures required groups are declared."""
+    """Tests for [dependency-groups] — ensures required groups are declared.
+
+    Only ``test`` is required, and only because ``make test`` has to have somewhere to
+    find pytest. There was a ``test_lint_group_present`` here until #1484, and it is
+    worth saying why it went: rhiza provisions every linter through prek/uvx, so the
+    group it demanded had nothing legitimate to hold, and the mother repo satisfied it
+    with a literal ``lint = []``. A required-group check that the reference
+    implementation can only pass by declaring an empty list is testing a convention
+    rather than a working project, so a project may still declare ``lint`` — nothing
+    reads it.
+    """
 
     @pytest.fixture
     def dependency_groups(self, pyproject: dict) -> dict:
@@ -220,10 +229,6 @@ class TestDependencyGroups:
         assert any("pytest" in str(dep).lower() for dep in test_deps), (
             "[dependency-groups.test] must list pytest as a dependency"
         )
-
-    def test_lint_group_present(self, dependency_groups: dict) -> None:
-        """A 'lint' dependency group must be declared."""
-        assert "lint" in dependency_groups, "[dependency-groups] must include a 'lint' group"
 
 
 class TestBumpversionConfigIsDiscoverable:

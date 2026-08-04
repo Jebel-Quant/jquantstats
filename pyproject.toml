@@ -43,34 +43,45 @@ web = [
 ]
 
 [dependency-groups]
+# A group here earns its place only when something has to be present in the project
+# *environment*. Every rhiza gate provisions its own tooling on the fly — `uv run
+# --with pytest --with pytest-cov ...` in the `test` target, `--with ty` in
+# `typecheck`, `--with interrogate` in `docs-coverage`, `uvx pre-commit` in `fmt` —
+# so a tool named by a `--with` flag must NOT be declared: the declaration only
+# duplicates the pin (and can conflict with it, as `pytest-benchmark==5.2.3`
+# pinned by the `benchmark` target would).
+#
+# Two things do qualify: a library the test suite imports under a gate that does
+# not inject it, and an import deptry resolves in DEPTRY_FOLDERS (src + book).
 dev = [
     "pandas>=2.2.3",       # required by quantstats (comparison tests only — not a runtime dependency)
-    "pyarrow>=22.0.0",
+    "pyarrow>=22.0.0",     # polars' .to_pandas() (used all over tests/test_migration) imports it; polars declares it only under [pyarrow]
     "yfinance==1.5.2",
-    "ipython==9.16.0",
     "quantstats==0.0.81",  # reference implementation used in test_quantstats.py for metric validation
-    "httpx>=0.28.1",
-    "marimo>=0.23.6",
+    "httpx>=0.28.1",       # starlette's TestClient needs it present; starlette declares it only under [full]
+    "marimo>=0.23.6",      # book/ notebooks import it and deptry scans MARIMO_FOLDER — DEP001 without this
 ]
 test = [
+    # pytest itself is injected by every pytest-backed target, but stays declared so
+    # a bare `uv run pytest tests/...` works. Most of its plugins are not: cov, html,
+    # mock, xdist, benchmark and pygal all arrive via `--with`.
     "pytest>=8.0",
-    "pytest-cov>=6.0",
-    "pytest-html>=4.0",
-    "pytest-mock>=3.0",
-    "pytest-xdist>=3.0",
+    # pytest.ini sets a global `timeout = 60`, and `benchmark`, `hypothesis-test` and
+    # `stress` run pytest WITHOUT injecting this plugin — without it they warn
+    # "Unknown config option: timeout" and a hanging test hangs forever.
     "pytest-timeout>=2.0",
-    "pytest-benchmark>=5.2.3",
-    "mutmut==2.5.1",       # pinned: the 3.x CLI is incompatible with bin/mutation_gate.py
+    "mutmut==2.5.1",       # pinned: the 3.x CLI is incompatible with bin/mutation_gate.py, which runs it from the project env (no --with)
+    # Imported by tests that `make test` collects, and `make test` injects neither.
+    # hypothesis in particular is reached through pytest.importorskip, so dropping it
+    # would not fail the suite — it would silently skip the property tests.
     "hypothesis>=6.150.0",
     "syrupy>=4.9.1",
-    "pygal>=3.1.0",
     "python-dotenv>=1.0",
 ]
-lint = [
-    "pre-commit>=4.0",
-    "ty>=0.0.30",
-    "import-linter>=2.0",  # enforces the layering contracts in [tool.importlinter] via `make arch`
-]
+# There is no `lint` group: nothing resolves one from the project environment. ruff runs
+# through the pre-commit hooks `make fmt` executes via uvx, and import-linter — which
+# enforces the [tool.importlinter] contracts — is injected by `make arch` as
+# `uv run --with import-linter lint-imports`.
 
 
 # Build system configuration
@@ -122,7 +133,6 @@ kaleido = "kaleido"
 fastapi = "fastapi"
 uvicorn = "uvicorn"
 yfinance = "yfinance"
-ipython = "ipython"
 quantstats = "quantstats"
 marimo = "marimo"
 hypothesis = "hypothesis"
