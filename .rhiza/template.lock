@@ -1,7 +1,7 @@
-sha: 65f3c209dcaafc6dbc7763eb0d022125379292c8
+sha: 996d5df684d8967907d883e43e0d28376b0ac140
 repo: jebel-quant/rhiza
 host: github
-ref: v1.3.0
+ref: v1.3.2
 include: []
 exclude:
 - bundles/github/.github/workflows/rhiza_fuzzing.yml
@@ -64,7 +64,9 @@ files:
 - .rhiza/tests/conftest.py
 - .rhiza/tests/test_docstrings.py
 - .rhiza/tests/test_pyproject.py
+- .rhiza/tests/test_readme.py
 - .rhiza/tests/test_readme_validation.py
+- .rhiza/tests/test_release_tags.py
 - LICENSE
 - Makefile
 - SECURITY.md
@@ -76,5 +78,6 @@ files:
 - docs/mkdocs-base.yml
 - pytest.ini
 - ruff.toml
-synced_at: '2026-08-02T16:56:56Z'
+- tests/test_rhiza_packaging.py
+synced_at: '2026-08-04T16:50:42Z'
 strategy: merge
