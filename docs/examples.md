@@ -1,5 +1,9 @@
 # Examples
 
+Looking for what the charts actually look like? The [Chart
+Gallery](gallery.md) has every figure the library draws, each labelled with the
+call that produced it.
+
 Five interactive [marimo](https://marimo.io) notebooks ship with the
 repository under `book/marimo/notebooks/`. Each is rendered into the
 documentation (links below) and can be run locally:

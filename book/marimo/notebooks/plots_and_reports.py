@@ -252,7 +252,7 @@ def cell_dp_heatmap_show(fig_heatmap) -> None:
 @app.cell
 def cell_dp_histogram_header() -> None:
     """DataPlots — histogram header."""
-    mo.md("### 8 · `histogram` — return histogram with KDE overlay")
+    mo.md("### 8 · `histogram` — overlaid return histograms, one per series")
     return
 
 

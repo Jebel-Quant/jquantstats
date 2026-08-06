@@ -11,6 +11,7 @@ copyright: Copyright &copy; 2024–2026 Jebel Quant Research
 nav:
   - Home: index.md
   - Getting Started: getting_started.md
+  - Chart Gallery: gallery.md
   - Guides:
     - Cost Models: cost_models.md
     - Migration from QuantStats: MIGRATION.md

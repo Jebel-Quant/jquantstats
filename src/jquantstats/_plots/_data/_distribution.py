@@ -22,10 +22,12 @@ class _DistributionPlotsMixin:
     _data: DataLike
 
     def histogram(self, title: str = "Returns Distribution", bins: int = 50) -> go.Figure:
-        """Return histogram with a kernel density overlay.
+        """Overlaid return histograms, one per series.
 
-        Each asset is shown as a semi-transparent histogram overlaid on the
-        same axes so distributions can be compared visually.
+        Each asset (and the benchmark, when present) is drawn as a
+        semi-transparent histogram on shared axes, so the distributions can be
+        compared directly — a fat-tailed asset against a tightly peaked
+        benchmark, for instance.
 
         Args:
             title: Chart title. Defaults to ``"Returns Distribution"``.
