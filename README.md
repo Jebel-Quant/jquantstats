@@ -189,9 +189,13 @@ pf_smooth = pf.smoothed_holding(n=5)
 
 ## Dashboard Preview
 
-![Portfolio Performance Dashboard](https://raw.githubusercontent.com/jebel-quant/jquantstats/main/docs/assets/dashboard.png)
+![Portfolio Performance Dashboard](https://raw.githubusercontent.com/jebel-quant/jquantstats/main/docs/assets/dashboard.webp)
 
 > *Interactive Plotly dashboard — cumulative returns, drawdowns, and monthly return heatmaps in a single view. Charts are fully interactive (zoom, pan, hover tooltips) when rendered in a browser.*
+
+Every chart the library draws, each labelled with the single call that produced
+it, is in the **[Chart Gallery](https://jebel-quant.github.io/jquantstats/gallery/)**.
+Regenerate the images with `uv run --with pillow python book/shots/generate.py`.
 
 ## Installation
 

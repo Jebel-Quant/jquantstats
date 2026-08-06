@@ -28,6 +28,24 @@ a **Portfolio route** that works directly from price and position data, and a **
 for arbitrary return streams. All analytics, visualisations, and HTML reports are available
 from either entry point.
 
+## 📊 What it draws
+
+One method call per chart — no axes configured, no colours chosen, no subplot
+grids assembled.
+
+[![Portfolio snapshot: accumulated NAV with tilt and timing components, over the drawdown path](shots/portfolio-snapshot.webp)](gallery.md)
+
+`pf.plots.snapshot()` — accumulated profit decomposed into tilt and timing,
+over the drawdown path. Forty-four years in one call.
+
+[![Sharpe ratio by execution lag, from ten days lead to nineteen days lag](shots/portfolio-lead-lag-ir.webp)](gallery.md)
+
+`pf.plots.lead_lag_ir_plot()` — Sharpe recomputed across execution lags.
+Negative lags peek at the future and score 1.6; the red bar at lag 0, the only
+tradeable one, is 0.44. A look-ahead audit in a single method.
+
+**[→ Browse the full chart gallery](gallery.md)**
+
 ## 🚀 Installation
 
 ```bash
@@ -81,7 +99,7 @@ pip install jquantstats[web]    # FastAPI web server
     data.stats.sortino()
     data.stats.annual_breakdown()
     data.plots.monthly_heatmap()
-    data.reports.to_html()
+    data.reports.full()
     ```
 
 ## 🔬 Portfolio Route — Why It Matters
