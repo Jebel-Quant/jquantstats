@@ -117,7 +117,9 @@ def test_documented_api_names_resolve(path: Path) -> None:
         points at a method the package does not provide.
 
     """
-    unresolved = _unresolved_names(path.read_text())
+    # encoding is explicit: read_text() would otherwise use the locale codec,
+    # which is cp1252 on Windows CI and cannot decode the docs' em dashes.
+    unresolved = _unresolved_names(path.read_text(encoding="utf-8"))
     assert not unresolved, (
         f"{path.relative_to(_ROOT)} references names that do not exist: {unresolved}. "
         f"Rename them, or add them to KNOWN_ABSENT if the text names them precisely "
