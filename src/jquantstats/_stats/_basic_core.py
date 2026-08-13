@@ -324,33 +324,47 @@ class _BasicCoreMixin:
         return _mean(series.filter(mask))
 
     def conditional_value_at_risk(
-        self, sigma: float = 1.0, confidence: float = 0.95, **kwargs: float
+        self,
+        sigma: float = 1.0,
+        confidence: float | None = None,
+        alpha: float | None = None,
     ) -> dict[str, float]:
         """Calculate the conditional value-at-risk (CVaR / Expected Shortfall).
 
         Also known as CVaR or expected shortfall, calculated for each numeric column.
 
+        The tail can be specified either way round: ``confidence`` matches the
+        QuantStats spelling, ``alpha`` matches `value_at_risk` on this same
+        object. They are two names for one quantity (``alpha = 1 - confidence``),
+        so passing both is an error rather than a silent preference.
+
         Args:
             sigma (float, optional): Standard deviation multiplier. Defaults to 1.0.
             confidence (float, optional): Confidence level (e.g. 0.95 for 95 %).
-                Converted internally to ``alpha = 1 - confidence``. Defaults to 0.95.
-            alpha (float, optional): Tail probability (lower tail).  ``alpha`` is the
-                probability mass in the *loss* tail, so ``alpha = 1 - confidence``.
-                For example, a 95 % confidence level corresponds to ``alpha = 0.05``
-                (the default).
-            **kwargs: Legacy keyword arguments.  Passing ``confidence`` (e.g.
-                ``confidence=0.95``) is accepted for backwards compatibility with
-                QuantStats but emits a `DeprecationWarning`.  Use
-                ``alpha = 1 - confidence`` instead.
+                Converted internally to ``alpha = 1 - confidence``. Mutually
+                exclusive with ``alpha``.
+            alpha (float, optional): Tail probability in the *loss* tail (e.g. 0.05
+                for 95 % confidence). Mutually exclusive with ``confidence``.
+                Both defaulting to ``None`` selects ``alpha = 0.05``.
 
         Returns:
             dict[str, float]: The conditional value at risk per asset column.
 
         Raises:
-            TypeError: If unexpected keyword arguments are passed.
+            ValueError: If both ``confidence`` and ``alpha`` are given.
 
         """
-        return self._conditional_value_at_risk_impl(sigma=sigma, alpha=1.0 - confidence)
+        if confidence is not None and alpha is not None:
+            raise ValueError(  # noqa: TRY003
+                f"Pass either confidence or alpha, not both "
+                f"(got confidence={confidence!r}, alpha={alpha!r}); alpha = 1 - confidence"
+            )
+        if confidence is not None:
+            alpha = 1.0 - confidence
+        elif alpha is None:
+            alpha = 0.05
+
+        return self._conditional_value_at_risk_impl(sigma=sigma, alpha=alpha)
 
     @staticmethod
     def _drawdown_with_baseline(series: pl.Series) -> pl.Series:
