@@ -87,12 +87,13 @@ class _BenchmarkStatsMixin:
 
         Args:
             series (pl.Series): The series to calculate information ratio for.
-            periods_per_year (int, optional): Number of periods per year. Defaults to 252.
+            periods_per_year (int, optional): Number of periods per year. Defaults to
+                None, which infers the annualisation factor from the data.
             benchmark (str, optional): The benchmark column name. Defaults to None.
             annualise (bool, optional): Whether to annualise the ratio by multiplying by
-                ``sqrt(periods_per_year)``. Defaults to ``True``.  Set to ``False`` to
-                obtain the raw (non-annualised) information ratio, which matches the value
-                returned by ``qs.stats.information_ratio``.
+                ``sqrt(periods_per_year)``. Defaults to ``False``, returning the raw
+                information ratio, which matches the value returned by
+                ``qs.stats.information_ratio``.  Set to ``True`` to annualise.
 
         Returns:
             float: The information ratio value.

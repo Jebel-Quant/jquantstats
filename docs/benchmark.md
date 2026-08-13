@@ -73,8 +73,8 @@ convention: the downside semi-deviation is the root-mean-square of
 
 ### `information_ratio` annualisation
 
-jquantstats **annualises** the information ratio by default
-(`annualize=True`), whereas QuantStats returns a raw (non-annualised) ratio.
-The jquantstats value can be reproduced without annualisation by reading the
-intermediate active-return statistics; the difference is documented in the
-[Migration guide](MIGRATION.md#statistics).
+Both libraries return a **raw (non-annualised)** information ratio by default,
+so the values agree without adjustment.  jquantstats additionally accepts
+`annualise=True`, which scales the ratio by `sqrt(periods_per_year)`; QuantStats
+has no equivalent option.  See the
+[Migration guide](MIGRATION.md#information_ratio-annualisation).

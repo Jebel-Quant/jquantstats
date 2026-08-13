@@ -14,7 +14,7 @@ def aligned(pandas_frame):
 
 
 def test_information_ratio(stats, aapl, benchmark_pd):
-    """Quantstats does not annualise its information ratio, so we scale by sqrt(252)."""
+    """Neither library annualises by default, so the raw ratios agree directly."""
     x = stats.information_ratio(periods_per_year=252)
     y = qs.stats.information_ratio(aapl, benchmark=benchmark_pd)
     assert x["AAPL"] == pytest.approx(y, abs=TOL_ESTIMATE)
