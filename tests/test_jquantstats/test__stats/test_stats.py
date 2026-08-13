@@ -242,6 +242,54 @@ def test_conditional_value_at_risk(stats):
     assert result["META"] == pytest.approx(-0.06084410598898649)
 
 
+def test_conditional_value_at_risk_alpha_is_honoured(stats):
+    """Tests that a non-default alpha actually changes the CVaR.
+
+    Args:
+        stats: The stats fixture containing a Stats object.
+
+    Verifies:
+        alpha=0.01 selects a deeper tail than the alpha=0.05 default rather than
+        being silently discarded, and agrees with the equivalent confidence level.
+
+    """
+    default = stats.conditional_value_at_risk()["META"]
+    deep = stats.conditional_value_at_risk(alpha=0.01)["META"]
+
+    assert deep < default
+    assert deep == pytest.approx(stats.conditional_value_at_risk(confidence=0.99)["META"])
+
+
+def test_conditional_value_at_risk_rejects_both_tail_arguments(stats):
+    """Tests that supplying confidence and alpha together is an error.
+
+    Args:
+        stats: The stats fixture containing a Stats object.
+
+    Verifies:
+        Passing both spellings of the same quantity raises ValueError instead of
+        silently preferring one.
+
+    """
+    with pytest.raises(ValueError, match="not both"):
+        stats.conditional_value_at_risk(confidence=0.95, alpha=0.05)
+
+
+def test_conditional_value_at_risk_rejects_unknown_keyword(stats):
+    """Tests that an unrecognised keyword argument is rejected.
+
+    Args:
+        stats: The stats fixture containing a Stats object.
+
+    Verifies:
+        A misspelled keyword raises TypeError rather than being absorbed and
+        ignored.
+
+    """
+    with pytest.raises(TypeError):
+        stats.conditional_value_at_risk(confidance=0.99)
+
+
 def test_win_rate(stats):
     """Tests that the win_rate method calculates win rate correctly.
 

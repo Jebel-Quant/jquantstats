@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "jquantstats",
+  "displayName": "jquantstats",
+  "description": "Write correct jquantstats code and migrate off QuantStats",
+  "version": "0.1.0",
+  "author": {
+    "name": "Thomas Schmelzer",
+    "email": "thomas.schmelzer@gmail.com"
+  },
+  "homepage": "https://jebel-quant.github.io/jquantstats/",
+  "repository": "https://github.com/jebel-quant/jquantstats",
+  "license": "MIT",
+  "keywords": ["quant", "portfolio-analytics", "polars", "plotly", "quantstats"]
+}
