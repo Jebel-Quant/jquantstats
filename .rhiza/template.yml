@@ -1,5 +1,5 @@
 repository: "jebel-quant/rhiza"
-ref: "v1.3.2"
+ref: "v1.3.3"
 
 profiles:
   - github-project
@@ -7,7 +7,9 @@ templates:
   - legal
   - github-paper
 
+# Destination paths, as they land in this repo. Source-path entries
+# (bundles/github/...) are inert since the exclude semantics were fixed.
 exclude:
-  - bundles/github/.github/workflows/rhiza_fuzzing.yml
-  - bundles/github/.github/workflows/rhiza_weekly.yml
-  - bundles/github/.github/workflows/rhiza_scorecard.yml
+  - .github/workflows/rhiza_fuzzing.yml
+  - .github/workflows/rhiza_weekly.yml
+  - .github/workflows/rhiza_scorecard.yml
