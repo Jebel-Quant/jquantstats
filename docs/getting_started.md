@@ -140,7 +140,7 @@ flowchart LR
         prices=prices,
         risk_position=risk_df,
         aum=1_000_000,
-        vola=vola_df,
+        vola=32,   # EWMA lookback in periods (int, or dict[str, int] per asset)
     )
     ```
 
@@ -168,7 +168,7 @@ pf.stats.summary()       # full metrics table  →  pl.DataFrame
 
 ```python
 fig = pf.plots.snapshot()              # NAV + drawdown dashboard
-fig = pf.plots.rolling_sharpe(window=60)
+fig = pf.plots.rolling_sharpe_plot(window=60)
 fig.show()                             # opens in browser / notebook
 ```
 
@@ -243,14 +243,14 @@ data.stats.annual_breakdown()   # pl.DataFrame: year | return | sharpe | ...
 ```python
 fig = data.plots.snapshot()
 fig = data.plots.monthly_heatmap()
-fig = data.plots.returns_distribution()
+fig = data.plots.histogram()
 fig.show()
 ```
 
 ### Report
 
 ```python
-html = data.reports.to_html()
+html = data.reports.full()
 ```
 
 ---
