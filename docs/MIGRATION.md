@@ -118,7 +118,7 @@ data = jqs.Data.from_returns(
 
 data.stats.sharpe()
 data.plots.snapshot()
-data.reports.summary()
+data.reports.metrics()
 ```
 
 You can also construct from prices:
@@ -140,14 +140,28 @@ pf = jqs.Portfolio.from_cash_position(
     aum=1_000_000,
 )
 
-# All stats, plots, and reports are available
-pf.stats.sharpe()
-pf.plots.snapshot()
-pf.report.to_html()
+pf.stats.sharpe()            # the full stats API, same as Data
+pf.plots.snapshot()          # a portfolio-specific plot set — see note below
+pf.report.to_html()          # note: .report (singular), unlike Data.reports
 
 # Drop down to the returns-series API at any time
 pf.data.stats.calmar()
+pf.data.plots.drawdown()
 ```
+
+`Portfolio.stats` is the same object you get from `Data`, but `Portfolio.plots`
+is **not** a superset of `Data.plots` — it is a separate, smaller set aimed at
+position-level diagnostics:
+
+```text
+snapshot                  correlation_heatmap        monthly_returns_heatmap
+rolling_sharpe_plot       rolling_volatility_plot    annual_sharpe_plot
+lead_lag_ir_plot          lagged_performance_plot
+smoothed_holdings_performance_plot                   trading_cost_impact_plot
+```
+
+For any other chart — `drawdown()`, `histogram()`, `monthly_heatmap()`, … — go
+through `pf.data.plots`, which is always available.
 
 Other factory methods:
 
@@ -155,16 +169,18 @@ Other factory methods:
 # From share counts
 pf = jqs.Portfolio.from_position(prices, position, aum)
 
-# From risk-scaled positions
-pf = jqs.Portfolio.from_risk_position(prices, risk_position, aum, vola=vola_df)
+# From risk-scaled positions, where vola is an EWMA lookback in periods
+# (an int, or a dict[str, int] per asset) — not a volatility frame
+pf = jqs.Portfolio.from_risk_position(prices, risk_position, aum, vola=32)
 ```
 
 ---
 
 ## API mapping
 
-All jquantstats analytics live on `.stats`, `.plots`, or `.reports` of a
-`Data` (or `Portfolio`) instance.  Methods return a **`dict` keyed by
+All jquantstats analytics live on the `.stats`, `.plots`, and reports accessors
+of a `Data` (or `Portfolio`) instance — note that the reports accessor is
+`Data.reports` but `Portfolio.report`.  Methods return a **`dict` keyed by
 column name** rather than a scalar.
 
 ```python
@@ -190,7 +206,7 @@ data = jqs.Data.from_returns(returns=returns_pl, benchmark=benchmark_pl)
 | `qs.stats.kurtosis(r)` | `data.stats.kurtosis()` | |
 | `qs.stats.max_drawdown(r)` | `data.stats.max_drawdown()` | |
 | `qs.stats.value_at_risk(r)` | `data.stats.value_at_risk(alpha=0.05)` | |
-| `qs.stats.conditional_value_at_risk(r, confidence=0.95)` | `data.stats.conditional_value_at_risk(alpha=0.05)` | `alpha = 1 − confidence`; see note below |
+| `qs.stats.conditional_value_at_risk(r, confidence=0.95)` | `data.stats.conditional_value_at_risk(confidence=0.95)` | `alpha=0.05` is also accepted; see note below |
 | `qs.stats.win_rate(r)` | `data.stats.win_rate()` | |
 | `qs.stats.avg_return(r)` | `data.stats.avg_return()` | |
 | `qs.stats.avg_win(r)` | `data.stats.avg_win()` | |
@@ -219,7 +235,7 @@ data = jqs.Data.from_returns(returns=returns_pl, benchmark=benchmark_pl)
 | `qs.stats.ulcer_index(r)` | `data.stats.ulcer_index()` | |
 | `qs.stats.ulcer_performance_index(r)` | `data.stats.ulcer_performance_index()` | |
 | `qs.stats.serenity_index(r)` | `data.stats.serenity_index()` | |
-| `qs.stats.information_ratio(r, benchmark=b)` | `data.stats.information_ratio()` | jquantstats annualises; see note below |
+| `qs.stats.information_ratio(r, benchmark=b)` | `data.stats.information_ratio()` | raw by default, matching QuantStats; see note below |
 | `qs.stats.r_squared(r, benchmark=b)` | `data.stats.r_squared()` | |
 | `qs.stats.r2(r, benchmark=b)` | `data.stats.r_squared()` | `r2` is a QuantStats alias; use `r_squared()` |
 | `qs.stats.greeks(r, benchmark=b)` | `data.stats.greeks()` | |
@@ -309,6 +325,7 @@ These methods have **no QuantStats equivalent** and are unique to jquantstats.
 | `qs.plots.montecarlo(r)` | `data.plots.montecarlo()` |
 | `qs.plots.montecarlo_distribution(r)` | `data.plots.montecarlo_distribution()` |
 | — | `data.plots.compare()` |
+| — | `data.plots.assets()` |
 
 All `data.plots.*` methods return an interactive **Plotly figure** instead
 of a static matplotlib figure.
@@ -321,10 +338,16 @@ qs.reports.full(returns_pd, benchmark=benchmark_pd)
 qs.reports.metrics(returns_pd)
 
 # jquantstats
-data.reports.summary()
-data.reports.metrics()
-data.reports.to_html()          # full HTML report
+data.reports.metrics()                  # pl.DataFrame; mode="full" for the extended set
+data.reports.full(title="My Strategy")  # str — self-contained HTML document
+
+# The Portfolio route spells it differently: .report (singular), and the
+# HTML entry point is to_html(), which returns a str or writes to `path`.
+pf.report.to_html(title="My Portfolio", path="report.html")
 ```
+
+There is no `data.reports.summary()`.  The composite stats table lives on the
+stats accessor instead, as `data.stats.summary()` → `pl.DataFrame`.
 
 ---
 
@@ -394,30 +417,38 @@ The default (`null_strategy=None`) passes nulls through unchanged.
 
 ### `conditional_value_at_risk` — alpha vs confidence
 
-QuantStats uses a `confidence` parameter (e.g. `confidence=0.95` for the 95%
-CVaR).  jquantstats uses `alpha = 1 − confidence` (e.g. `alpha=0.05`).
-Both refer to the same loss quantile; only the parameter name differs.
+The tail can be named either way round.  `confidence` is the QuantStats
+spelling; `alpha = 1 − confidence` is the tail probability, matching
+`value_at_risk` on the same object.  Passing **both** in one call raises
+`ValueError`, and omitting both gives `alpha=0.05` (95% confidence).
 
 ```python
 # QuantStats — confidence level
 qs.stats.conditional_value_at_risk(r, confidence=0.95)
 
-# jquantstats — alpha (tail probability)
-data.stats.conditional_value_at_risk(alpha=0.05)   # equivalent
+# jquantstats — either spelling, same result
+data.stats.conditional_value_at_risk(confidence=0.95)
+data.stats.conditional_value_at_risk(alpha=0.05)
 ```
+
+Note the asymmetry with `value_at_risk`, which takes `alpha` only and has no
+`confidence` parameter.
 
 ### `information_ratio` — annualisation
 
-QuantStats returns a non-annualised (raw) information ratio.  jquantstats
-**annualises by default** using `periods_per_year` inferred from the data.
-This makes the jquantstats value roughly `√252` times larger for daily data.
+Both libraries return a **raw, non-annualised** information ratio by default,
+so the ported number matches QuantStats as-is.  jquantstats can additionally
+annualise on request, scaling by `√periods_per_year`:
 
 ```python
-# QuantStats — raw (not annualised)
+# QuantStats — raw
 qs.stats.information_ratio(r, benchmark=b)
 
-# jquantstats — annualised (default)
+# jquantstats — raw (default), matching the above
 data.stats.information_ratio()
+
+# jquantstats — annualised
+data.stats.information_ratio(annualise=True)
 ```
 
 ### No top-level functions
@@ -445,7 +476,7 @@ pf = jqs.Portfolio.from_cash_position(prices, positions, aum=1_000_000)
 
 # Execution-delay analysis
 pf_lagged = pf.lag(1)                    # shift positions forward by 1 day
-pf.plots.lead_lag_ir_plot(max_lag=5)     # information ratio across lags
+pf.plots.lead_lag_ir_plot(start=-5, end=5)   # information ratio across a lag range
 
 # Tilt / timing decomposition
 pf.tilt                                  # constant-weight (allocation skill)
@@ -455,7 +486,9 @@ pf.tilt_timing_decomp                    # side-by-side NAV comparison
 # Turnover analytics
 pf.turnover                              # daily one-way turnover (fraction of AUM)
 pf.turnover_weekly()                     # weekly aggregate
-pf.turnover_summary()                    # {"mean_daily": ..., "mean_weekly": ..., "std": ...}
+pf.turnover_summary()                    # pl.DataFrame: metric/value rows for
+                                         # mean_daily_turnover, mean_weekly_turnover,
+                                         # turnover_std
 
 # Cost modelling
 from jquantstats import CostModel
