@@ -67,6 +67,42 @@ _CACHE_SLOTS = (
     "_turnover_cache",
 )
 
+# The canonical name of the date column throughout the Portfolio internals. Every
+# _portfolio_* mixin tests for this exact name to decide whether it has a temporal
+# axis, so inputs are normalised to it once at construction rather than each site
+# having to cope with an arbitrary caller-chosen name.
+_DATE_COLUMN = "date"
+
+
+def _normalise_date_column(frame: pl.DataFrame) -> pl.DataFrame:
+    """Rename *frame*'s temporal column to ``'date'``.
+
+    The Portfolio internals identify the date axis by name, so a frame whose
+    dates live under any other label (``'Date'``, ``'timestamp'``, …) would be
+    treated as having no temporal axis at all — silently falling back to a
+    positional index and a default ``periods_per_year``.  Renaming here makes
+    that impossible.
+
+    A frame that already has a ``'date'`` column is returned untouched, so this is
+    idempotent and cheap on the internal rebuild paths (`lag`, `truncate`,
+    `smoothed_holding`) where the input is already canonical.  When several
+    temporal columns are present the first one wins, matching the
+    leading-date-column convention used throughout.
+
+    Args:
+        frame: A price or cash-position frame, with or without dates.
+
+    Returns:
+        *frame* with its date column named ``'date'``, or *frame* unchanged
+        when it already has one or has no temporal column to rename.
+    """
+    if _DATE_COLUMN in frame.columns:
+        return frame
+    temporal = [name for name, dtype in frame.schema.items() if dtype.is_temporal()]
+    if not temporal:
+        return frame
+    return frame.rename({temporal[0]: _DATE_COLUMN})
+
 
 @dataclasses.dataclass(frozen=True, slots=True)
 class Portfolio(
@@ -106,10 +142,10 @@ class Portfolio(
     - Utility: `correlation`
 
     Attributes:
-        cashposition: Polars DataFrame of positions per asset over time
-            (includes date column if present).
-        prices: Polars DataFrame of prices per asset over time (includes date
-            column if present).
+        cashposition: Polars DataFrame of positions per asset over time.  Any
+            temporal column is present as ``'date'`` — see *Date column* below.
+        prices: Polars DataFrame of prices per asset over time.  Any temporal
+            column is present as ``'date'`` — see *Date column* below.
         aum: Assets under management used as base NAV offset.
 
     Analytics facades
@@ -147,10 +183,21 @@ class Portfolio(
     To sweep a range of cost assumptions use ``trading_cost_impact(max_bps=20)`` (Model B).
     To compute a net-NAV curve set ``cost_per_unit`` at construction and read ``.net_cost_nav`` (Model A).
 
-    Date column requirement
-    -----------------------
-    Most analytics work with or without a ``date`` column. The following features require a
-    temporal ``date`` column (``pl.Date`` or ``pl.Datetime``):
+    Date column
+    -----------
+    The date axis is identified internally by the name ``date``, so a temporal column
+    (``pl.Date`` or ``pl.Datetime``) under any other label — ``'Date'``, ``'timestamp'`` —
+    is **renamed to ``date`` at construction**.  ``prices`` and ``cashposition`` therefore
+    report ``date`` rather than the caller's original name, and every date-dependent
+    feature works regardless of what the input column was called.
+
+    Only genuinely temporal columns are normalised: a date column still held as strings
+    is left as-is and the portfolio is treated as integer-indexed.  Parse it first
+    (``pl.col("Date").str.to_date()``) to get a temporal axis.  When a frame contains
+    several temporal columns and none is named ``date``, the first is renamed.
+
+    Most analytics work with or without a date column. The following features require a
+    temporal ``date`` column:
 
     - ``portfolio.plots.correlation_heatmap()``
     - ``portfolio.plots.lead_lag_ir_plot()``
@@ -208,6 +255,11 @@ class Portfolio(
         the remaining numeric columns as returns.  Used internally to populate
         ``_data_bridge`` at construction time so the ``data`` property is O(1).
 
+        The name is matched literally, which is safe because ``__post_init__``
+        normalises the inputs: the positional-index fallback below is reached
+        only by a portfolio that genuinely has no temporal column, never by one
+        whose dates simply arrived under a different name.
+
         Args:
             ret: Returns DataFrame, optionally with a leading ``'date'`` column.
 
@@ -220,11 +272,16 @@ class Portfolio(
         return Data(returns=returns_only, index=pl.DataFrame({"index": list(range(ret.height))}))
 
     def __post_init__(self) -> None:
-        """Validate input types, shapes, and parameters post-initialization."""
+        """Validate input types, shapes, and parameters, and normalise the date column."""
         if not isinstance(self.prices, pl.DataFrame):
             raise InvalidPricesTypeError(type(self.prices).__name__)
         if not isinstance(self.cashposition, pl.DataFrame):
             raise InvalidCashPositionTypeError(type(self.cashposition).__name__)
+        # Canonicalise the date axis before anything downstream looks for it; the
+        # mixins match ``'date'`` by name, so this must happen on every
+        # construction path, including a direct ``Portfolio(...)`` call.
+        object.__setattr__(self, "prices", _normalise_date_column(self.prices))
+        object.__setattr__(self, "cashposition", _normalise_date_column(self.cashposition))
         if self.cashposition.shape[0] != self.prices.shape[0]:
             raise RowCountMismatchError(self.prices.shape[0], self.cashposition.shape[0])
         if self.aum <= 0.0:
@@ -304,7 +361,8 @@ class Portfolio(
         """Create a Portfolio directly from cash positions aligned with prices.
 
         Args:
-            prices: Price levels per asset over time (may include a date column).
+            prices: Price levels per asset over time.  A temporal column is
+                normalised to ``'date'`` at construction, whatever it was named.
             cash_position: Cash exposure per asset over time, either as a
                 DataFrame or as a Polars expression evaluated against *prices*.
             aum: Assets under management used as the base NAV offset.
