@@ -160,6 +160,61 @@ class IntegerIndexBoundError(JQuantStatsError, TypeError):
         self.actual_type = actual_type
 
 
+class InvalidTruncateBoundError(JQuantStatsError, ValueError):
+    """Raised when a truncation bound is neither a row index nor a usable date.
+
+    Covers a value of an unsupported type (a float, a bool) and a string that
+    is not ISO-8601, both on an object that *has* a temporal index.  An
+    integer-indexed object raises `IntegerIndexBoundError` instead, since there
+    the only legal bound is a row index.
+
+    Args:
+        param: Name of the offending parameter (e.g. ``"start"`` or ``"end"``).
+        value: The value that was supplied.
+
+    Examples:
+        >>> raise InvalidTruncateBoundError("start", "last tuesday")
+        Traceback (most recent call last):
+            ...
+        jquantstats.exceptions.InvalidTruncateBoundError: start must be an int row index, a date/datetime, \
+or an ISO-8601 string; got 'last tuesday'.
+    """
+
+    def __init__(self, param: str, value: Any) -> None:
+        """Initialize with the parameter name and the offending value."""
+        super().__init__(f"{param} must be an int row index, a date/datetime, or an ISO-8601 string; got {value!r}.")
+        self.param = param
+        self.value = value
+
+
+class MixedTruncateBoundsError(JQuantStatsError, TypeError):
+    """Raised when ``start`` and ``end`` mix a row index with a date.
+
+    The two describe different axes, so honouring one and ignoring the other
+    would silently truncate to a range the caller never asked for.
+
+    Args:
+        row_param: Name of the parameter given as a row index.
+        date_param: Name of the parameter given as a date.
+
+    Examples:
+        >>> raise MixedTruncateBoundsError("start", "end")
+        Traceback (most recent call last):
+            ...
+        jquantstats.exceptions.MixedTruncateBoundsError: start and end must both be row indices or both be \
+dates; got start as a row index and end as a date.
+    """
+
+    def __init__(self, row_param: str, date_param: str) -> None:
+        """Initialize with the row-index and date parameter names."""
+        super().__init__(
+            f"start and end must both be row indices or both be dates; "
+            f"got {row_param} as a row index and {date_param} as a date."
+        )
+        self.row_param = row_param
+        self.date_param = date_param
+
+
 class PositionExprColumnError(JQuantStatsError, ValueError):
     """Raised when a position expression creates columns that do not exist in prices.
 
