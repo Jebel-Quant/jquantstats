@@ -47,8 +47,14 @@ of the trade is a look-ahead artefact, not skill.
 ```python
 pf.trading_cost_impact(max_bps=20)          # pl.DataFrame — a cost sweep
 pf.plots.trading_cost_impact_plot(max_bps=20)
-pf.cost_adjusted_returns(cost_bps=5)
+pf.cost_adjusted_returns(cost_bps=5)        # a returns *frame*, not a metric
 pf.turnover_summary()                       # what the sweep is actually charging for
+
+# Metrics on a cost- or fee-adjusted series go through pf.as_data(), which keeps
+# only the 'returns' column. Data.from_returns(frame) would also score the
+# 'profit' and 'NAV_accumulated' columns as if they were assets.
+net = pf.deduct_management_fee(annual_fee=0.0085, base=pf.cost_adjusted_returns(cost_bps=5))
+pf.as_data(net).stats.sharpe()
 ```
 
 Report the bps level at which the edge reaches zero — that number is far more

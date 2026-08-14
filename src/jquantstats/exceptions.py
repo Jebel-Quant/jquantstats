@@ -351,6 +351,38 @@ class UncleanSeriesError(JQuantStatsError, ValueError):
         self.reason = reason
 
 
+class MissingReturnsColumnError(JQuantStatsError, ValueError):
+    """Raised when a frame handed to the returns bridge has no ``'returns'`` column.
+
+    `jquantstats.portfolio.Portfolio.as_data` reads the return series from the
+    ``'returns'`` column and ignores every other column.  A frame without one
+    carries no return series at all, so it is rejected rather than silently
+    analysed on whatever columns happen to be present.
+
+    Args:
+        available: Column names actually present in the frame, included in the
+            error message to help diagnose the mismatch.
+
+    Examples:
+        >>> raise MissingReturnsColumnError(["date", "profit"])  # doctest: +ELLIPSIS
+        Traceback (most recent call last):
+            ...
+        jquantstats.exceptions.MissingReturnsColumnError: ...
+    """
+
+    def __init__(self, available: list[str] | None = None) -> None:
+        """Initialize with the column names present in the offending frame."""
+        available = [] if available is None else list(available)
+        cols = ", ".join(f"'{c}'" for c in available) if available else ""
+        super().__init__(
+            "DataFrame has no 'returns' column to bridge into Data"
+            + (f"; available columns: {cols}" if cols else "")
+            + ". Pass a frame produced by Portfolio.returns, cost_adjusted_returns "
+            "or deduct_management_fee, or rename your return column to 'returns'."
+        )
+        self.available = available
+
+
 class MuSchemaError(JQuantStatsError, ValueError):
     """Raised when a ``mu`` (expected-returns) frame doesn't match the portfolio's assets.
 
