@@ -477,6 +477,106 @@ def _require(obj: Any, attr: str, op: str) -> Any:
     return method
 
 
+def _build_portfolio(
+    ctor: str,
+    inputs: dict[str, Any],
+    args: dict[str, Any],
+    root: Path,
+    frames: dict[str, pl.DataFrame],
+    notes: list[str],
+) -> Any:
+    """Construct a Portfolio, normalising the date axis of both inputs.
+
+    Args:
+        ctor: Constructor name.
+        inputs: The recipe's ``inputs`` block.
+        args: The recipe's ``args`` block.
+        root: Project root.
+        frames: Collects the materialised inputs, keyed by role.
+        notes: Collects normalisation notes.
+
+    Returns:
+        The Portfolio.
+
+    Raises:
+        ContextError: If the constructor or inputs do not line up.
+    """
+    from jquantstats import Portfolio
+
+    if ctor not in PORTFOLIO_CONSTRUCTORS:
+        raise ContextError(f"unknown Portfolio constructor {ctor!r} ({', '.join(PORTFOLIO_CONSTRUCTORS)})")
+    pos_role = PORTFOLIO_CONSTRUCTORS[ctor]
+
+    for role in ("prices", pos_role):
+        if role not in inputs:
+            raise ContextError(f"{ctor} needs an input named {role!r}")
+        frame, renamed = _put_date_first(
+            read_input(inputs[role], root), inputs[role].get("date_col"), PORTFOLIO_DATE_COL
+        )
+        if renamed:
+            notes.append(
+                f"{role}: date column {renamed!r} renamed to 'date' — the Portfolio/Data bridge "
+                f"keeps the date axis only under that name"
+            )
+        frames[role] = frame
+
+    kwargs: dict[str, Any] = {"aum": float(args["aum"])}
+    if ctor == "from_risk_position":
+        if "vola" in args:
+            kwargs["vola"] = args["vola"]
+        if args.get("vol_cap") is not None:
+            kwargs["vol_cap"] = float(args["vol_cap"])
+    kwargs.update(_cost_kwargs(args))
+    return getattr(Portfolio, ctor)(prices=frames["prices"], **{pos_role: frames[pos_role]}, **kwargs)
+
+
+def _build_data(
+    ctor: str,
+    inputs: dict[str, Any],
+    args: dict[str, Any],
+    root: Path,
+    frames: dict[str, pl.DataFrame],
+) -> Any:
+    """Construct a Data, wiring up the benchmark and risk-free inputs.
+
+    Args:
+        ctor: Constructor name.
+        inputs: The recipe's ``inputs`` block.
+        args: The recipe's ``args`` block.
+        root: Project root.
+        frames: Collects the materialised inputs, keyed by role.
+
+    Returns:
+        The Data instance.
+
+    Raises:
+        ContextError: If the constructor or inputs do not line up.
+    """
+    from jquantstats import Data
+
+    if ctor not in DATA_CONSTRUCTORS:
+        raise ContextError(f"unknown Data constructor {ctor!r} ({', '.join(DATA_CONSTRUCTORS)})")
+    role = DATA_CONSTRUCTORS[ctor]
+    if role not in inputs:
+        raise ContextError(f"{ctor} needs an input named {role!r}")
+
+    frames[role] = read_input(inputs[role], root)
+    kwargs: dict[str, Any] = {"date_col": inputs[role].get("date_col") or frames[role].columns[0]}
+    if args.get("null_strategy"):
+        kwargs["null_strategy"] = args["null_strategy"]
+    if "benchmark" in inputs:
+        frames["benchmark"] = read_input(inputs["benchmark"], root)
+        kwargs["benchmark"] = frames["benchmark"]
+
+    rf = args.get("rf")
+    if isinstance(rf, dict):
+        frames["rf"] = read_input(rf, root)
+        kwargs["rf"] = frames["rf"]
+    elif rf is not None:
+        kwargs["rf"] = float(rf)
+    return getattr(Data, ctor)(**{role: frames[role]}, **kwargs)
+
+
 def build_detailed(recipe: dict[str, Any], root: Path) -> tuple[Any, dict[str, pl.DataFrame], list[str]]:
     """Rebuild the object and keep the raw inputs for inspection.
 
@@ -499,57 +599,12 @@ def build_detailed(recipe: dict[str, Any], root: Path) -> tuple[Any, dict[str, p
     notes: list[str] = []
     frames: dict[str, pl.DataFrame] = {}
 
+    if not isinstance(ctor, str):
+        raise ContextError(f"recipe {recipe.get('name')!r} names no 'constructor'")
     if entry == "Portfolio":
-        from jquantstats import Portfolio
-
-        if ctor not in PORTFOLIO_CONSTRUCTORS:
-            raise ContextError(f"unknown Portfolio constructor {ctor!r} ({', '.join(PORTFOLIO_CONSTRUCTORS)})")
-        pos_role = PORTFOLIO_CONSTRUCTORS[ctor]
-        for role in ("prices", pos_role):
-            if role not in inputs:
-                raise ContextError(f"{ctor} needs an input named {role!r}")
-            frame, renamed = _put_date_first(
-                read_input(inputs[role], root), inputs[role].get("date_col"), PORTFOLIO_DATE_COL
-            )
-            if renamed:
-                notes.append(
-                    f"{role}: date column {renamed!r} renamed to 'date' — the Portfolio/Data bridge "
-                    f"keeps the date axis only under that name"
-                )
-            frames[role] = frame
-        kwargs: dict[str, Any] = {"aum": float(args["aum"])}
-        if ctor == "from_risk_position":
-            if "vola" in args:
-                kwargs["vola"] = args["vola"]
-            if args.get("vol_cap") is not None:
-                kwargs["vol_cap"] = float(args["vol_cap"])
-        kwargs.update(_cost_kwargs(args))
-        obj = getattr(Portfolio, ctor)(prices=frames["prices"], **{pos_role: frames[pos_role]}, **kwargs)
-
+        obj = _build_portfolio(ctor, inputs, args, root, frames, notes)
     elif entry == "Data":
-        from jquantstats import Data
-
-        if ctor not in DATA_CONSTRUCTORS:
-            raise ContextError(f"unknown Data constructor {ctor!r} ({', '.join(DATA_CONSTRUCTORS)})")
-        role = DATA_CONSTRUCTORS[ctor]
-        if role not in inputs:
-            raise ContextError(f"{ctor} needs an input named {role!r}")
-        frames[role] = read_input(inputs[role], root)
-        date_col = inputs[role].get("date_col") or frames[role].columns[0]
-        kwargs = {"date_col": date_col}
-        if args.get("null_strategy"):
-            kwargs["null_strategy"] = args["null_strategy"]
-        if "benchmark" in inputs:
-            frames["benchmark"] = read_input(inputs["benchmark"], root)
-            kwargs["benchmark"] = frames["benchmark"]
-        rf = args.get("rf")
-        if isinstance(rf, dict):
-            frames["rf"] = read_input(rf, root)
-            kwargs["rf"] = frames["rf"]
-        elif rf is not None:
-            kwargs["rf"] = float(rf)
-        obj = getattr(Data, ctor)(**{role: frames[role]}, **kwargs)
-
+        obj = _build_data(ctor, inputs, args, root, frames)
     else:
         raise ContextError(f"entry_point must be 'Portfolio' or 'Data', got {entry!r}")
 

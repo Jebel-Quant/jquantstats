@@ -489,6 +489,36 @@ def test_cli_portfolio_writes_context(project, capsys):
     assert jqs_context.digest_path(project).exists()
 
 
+def test_recipe_paths_are_posix(project, prices_frame):
+    r"""Recipe paths use forward slashes on every platform, so a recipe travels.
+
+    A Windows-authored `data\prices.csv` would not resolve on another machine,
+    and the recipe is meant to be committed and shared.
+    """
+    nested = project / "data" / "nested"
+    nested.mkdir()
+    prices_frame.write_csv(nested / "prices.csv")
+    prices_frame.select(pl.col("date"), pl.lit(1e5).alias("A"), pl.lit(1e5).alias("B")).write_csv(nested / "pos.csv")
+
+    jqs_load.main(
+        [
+            "portfolio",
+            "--prices",
+            str(nested / "prices.csv"),
+            "--cash-position",
+            str(nested / "pos.csv"),
+            "--aum",
+            "1e6",
+            "--root",
+            str(project),
+        ]
+    )
+    recipe = jqs_context.read_container(project)["contexts"]["base"]
+    assert recipe["inputs"]["prices"]["path"] == "data/nested/prices.csv"
+    assert "\\" not in json.dumps(recipe)
+    assert jqs_context.load(root=project).assets == ["A", "B"]  # and it still rebuilds
+
+
 def test_cli_data_warns_and_exits_nonzero(project, capsys):
     """Building over nulls without a strategy is reported and flagged in the code."""
     code = jqs_load.main(["data", "--returns", str(project / "data" / "returns.csv"), "--root", str(project)])

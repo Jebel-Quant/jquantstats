@@ -170,20 +170,25 @@ def _input_spec(path: str | None, date_col: str | None, columns: list[str] | Non
 
 
 def _relative(path: str, root: Path) -> str:
-    """Make *path* relative to *root* when it lives inside it.
+    r"""Make *path* relative to *root* when it lives inside it.
+
+    Always POSIX-separated. The recipe is meant to be committed and read on
+    other machines, and a Windows-authored ``data\prices.csv`` would neither
+    resolve elsewhere nor read cleanly in JSON, which escapes the backslash.
+    Forward slashes are accepted by pathlib on every platform.
 
     Args:
         path: A user-supplied path.
         root: Project root.
 
     Returns:
-        A root-relative path where possible, else the resolved absolute path.
+        A root-relative POSIX path where possible, else the resolved absolute one.
     """
     resolved = Path(path).resolve()
     try:
-        return str(resolved.relative_to(root))
+        return resolved.relative_to(root).as_posix()
     except ValueError:
-        return str(resolved)
+        return resolved.as_posix()
 
 
 def _post_ops(args: argparse.Namespace) -> list[dict[str, Any]]:
