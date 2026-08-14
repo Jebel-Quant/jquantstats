@@ -175,8 +175,10 @@ def test_truncate_post_op(project):
 def test_truncate_bounds_are_coerced(project):
     """An ISO string bound reaches the library as a date object.
 
-    JSON has no date type, and `truncate` rejects strings despite advertising
-    `str` in its signature — so the recipe layer converts.
+    JSON has no date type, so a recipe can only ever carry a string. The library
+    parses ISO strings itself since #926, but the recipe layer still converts, to
+    reject an unparseable bound as a `ContextError` naming the recipe rather than
+    as a library error from deep inside a rebuild.
     """
     from_recipe = jqs_context.build(_portfolio_recipe(post=[{"op": "truncate", "start": "2020-01-11"}]), project)
     direct = jqs_context.build(_portfolio_recipe(), project).truncate(start=date(2020, 1, 11))
@@ -186,15 +188,18 @@ def test_truncate_bounds_are_coerced(project):
         jqs_context.build(_portfolio_recipe(post=[{"op": "truncate", "start": "last tuesday"}]), project)
 
 
-def test_integer_truncate_bound_is_a_library_noop(project):
-    """Pins current library behaviour: an int bound on a temporal axis truncates nothing.
+def test_integer_truncate_bound_slices_positionally(project):
+    """An int bound in a recipe is a row index, even on a temporal axis.
 
-    `truncate` accepts `int` as a row index, but routes on the index dtype, so a
-    temporal axis silently ignores it. Kept as a test so a future fix is visible
-    here rather than surprising a recipe that used a row index.
+    This pinned the pre-fix no-op until #927 landed; it now pins the fixed
+    behaviour, so a recipe using a row index truncates as written. Row 10 of the
+    fixture is 2020-01-11, so the two spellings must agree.
     """
-    obj = jqs_context.build(_portfolio_recipe(post=[{"op": "truncate", "start": 10}]), project)
-    assert obj.prices.height == 80
+    by_row = jqs_context.build(_portfolio_recipe(post=[{"op": "truncate", "start": 10}]), project)
+    by_date = jqs_context.build(_portfolio_recipe(post=[{"op": "truncate", "start": "2020-01-11"}]), project)
+
+    assert by_row.prices.height == 70
+    assert by_row.prices.equals(by_date.prices)
 
 
 def test_resample_post_op(project):
