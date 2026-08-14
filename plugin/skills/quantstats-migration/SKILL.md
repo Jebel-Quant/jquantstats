@@ -167,25 +167,46 @@ composite stats table is `data.stats.summary()` → `pl.DataFrame`.
 This mapping is a summary of a moving API. Before finalising code, confirm the
 symbols exist rather than trusting memory:
 
-```python
-from jquantstats._stats._stats import Stats
-sorted(m for m in dir(Stats) if not m.startswith("_"))
+```bash
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/jqs.sh" jqs_api.py --show sharpe
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/jqs.sh" jqs_api.py --grep drawdown
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/jqs.sh" jqs_api.py stats
 ```
 
-Same for `jquantstats._plots.DataPlots` / `PortfolioPlots`. If a name is
-missing, it was either renamed to its canonical form (see the table above) or
-never ported — say so rather than inventing a wrapper.
+`--show` reports signature and docstring from the installed version, and says so
+plainly when a name is absent. A missing name was either renamed to its
+canonical form (see the table above) or never ported — say so rather than
+inventing a wrapper.
+
+## Step 6 — record the context once
+
+Ported code that rebuilds its own portfolio in every script drifts. Record the
+construction once so later analysis shares one object:
+
+```bash
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/jqs.sh" jqs_load.py data \
+    --returns data/returns.csv --benchmark data/spy.csv --null-strategy drop
+```
+
+See `${CLAUDE_PLUGIN_ROOT}/reference/portfolio-context.md`. Subsequent snippets
+then use `load()` instead of repeating the constructor, and the digest it prints
+surfaces the null and periodicity problems that make ported numbers disagree
+with QuantStats.
 
 ## Portfolio-only capabilities
 
 Reach for these when the request goes beyond what a return series can express;
 none have a QuantStats counterpart.
 
+Mind which of these are properties: only `lag`, `turnover_summary`,
+`trading_cost_impact`, `smoothed_holding` and `truncate` take parentheses.
+
 ```python
 pf.lag(1)                       # shift positions — execution-delay study
 pf.plots.lead_lag_ir_plot()     # IR across lags
 pf.tilt, pf.timing, pf.tilt_timing_decomp   # allocation vs timing skill
-pf.turnover, pf.turnover_weekly(), pf.turnover_summary()
+pf.turnover, pf.turnover_weekly             # properties — no parentheses
+pf.turnover_summary()                       # a method
 pf.trading_cost_impact(...)     # cost sensitivity sweep
 
 from jquantstats import CostModel

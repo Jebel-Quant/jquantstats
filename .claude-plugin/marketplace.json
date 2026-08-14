@@ -11,12 +11,17 @@
     {
       "name": "jquantstats",
       "source": "./plugin",
-      "description": "Write correct jquantstats code and migrate off QuantStats",
+      "description": "Analyse portfolios with jquantstats: shared portfolio context, analysis, diagnostics, robustness, QuantStats migration",
       "homepage": "https://jebel-quant.github.io/jquantstats/",
       "repository": "https://github.com/jebel-quant/jquantstats",
       "license": "MIT",
       "category": "finance",
-      "tags": ["quant", "portfolio-analytics", "polars", "quantstats"]
+      "tags": [
+        "quant",
+        "portfolio-analytics",
+        "polars",
+        "quantstats"
+      ]
     }
   ]
 }
