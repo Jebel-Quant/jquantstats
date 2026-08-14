@@ -10,13 +10,13 @@ construction path and return the concrete ``Self`` type.
 from __future__ import annotations
 
 from datetime import date, datetime
-from typing import TYPE_CHECKING, Self
+from typing import TYPE_CHECKING, Self, cast
 
 import polars as pl
 import polars.selectors as cs
 
 from ._portfolio_base import _PortfolioMembers
-from .exceptions import IntegerIndexBoundError
+from ._truncate import resolve_bounds
 
 
 class PortfolioTransformMixin(_PortfolioMembers):
@@ -97,15 +97,11 @@ class PortfolioTransformMixin(_PortfolioMembers):
         return cond
 
     @staticmethod
-    def _row_slice_bounds(
-        start: date | datetime | str | int | None,
-        end: date | datetime | str | int | None,
-        height: int,
-    ) -> tuple[int, int]:
-        """Resolve integer row bounds into a ``(offset, length)`` slice.
+    def _row_slice_bounds(start: int | None, end: int | None, height: int) -> tuple[int, int]:
+        """Resolve integer row bounds into an ``(offset, length)`` slice.
 
-        Used when the portfolio has no ``'date'`` column and truncation falls
-        back to 0-based row indexing.
+        Bounds arrive already validated by `resolve_bounds`, so this only
+        substitutes the open-ended defaults.
 
         Args:
             start: Optional inclusive lower row index; 0 when None.
@@ -116,16 +112,9 @@ class PortfolioTransformMixin(_PortfolioMembers):
             The ``(offset, length)`` pair to pass to ``DataFrame.slice``.
             ``length`` is clamped at 0 so an inverted range yields an empty
             frame rather than a negative slice.
-
-        Raises:
-            IntegerIndexBoundError: When a supplied bound is not an integer.
         """
-        if start is not None and not isinstance(start, int):
-            raise IntegerIndexBoundError("start", type(start).__name__)
-        if end is not None and not isinstance(end, int):
-            raise IntegerIndexBoundError("end", type(end).__name__)
-        row_start = int(start) if start is not None else 0
-        row_end = int(end) + 1 if end is not None else height
+        row_start = start if start is not None else 0
+        row_end = end + 1 if end is not None else height
         return row_start, max(0, row_end - row_start)
 
     # ── Transforms ─────────────────────────────────────────────────────────────
@@ -137,40 +126,48 @@ class PortfolioTransformMixin(_PortfolioMembers):
     ) -> Self:
         """Return a new Portfolio truncated to the inclusive [start, end] range.
 
-        When a ``'date'`` column is present in both prices and cash positions,
-        truncation is performed by comparing the ``'date'`` column against
-        ``start`` and ``end`` (which should be date/datetime values or strings
-        parseable by Polars).
+        **The bound type picks the axis.**  A ``date``, ``datetime`` or ISO-8601
+        string is compared against the ``'date'`` column; an ``int`` is a 0-based
+        row index and slices positionally.  Row indices work on a dated portfolio
+        too — ``truncate(start=10)`` drops the first ten rows — but the two kinds
+        cannot be combined in one call.
 
-        When the ``'date'`` column is absent, integer-based row slicing is
-        used instead.  In this case ``start`` and ``end`` must be non-negative
-        integers representing 0-based row indices.  Passing non-integer bounds
-        to an integer-indexed portfolio raises `TypeError`.
+        A portfolio with no ``'date'`` column accepts row indices only.
 
         In all cases the ``aum`` value is preserved.
 
         Args:
-            start: Optional lower bound (inclusive). A date/datetime or
-                Polars-parseable string when a ``'date'`` column exists; a
-                non-negative int row index when the data has no ``'date'``
-                column.
-            end: Optional upper bound (inclusive). Same type rules as
-                ``start``.
+            start: Optional inclusive lower bound.  A ``date``/``datetime``, an
+                ISO-8601 string, or an ``int`` row index; ``int`` only when there
+                is no ``'date'`` column.
+            end: Optional inclusive upper bound.  Same type rules as ``start``,
+                and must address the same axis.
 
         Returns:
             A new Portfolio instance with prices and cash positions filtered
             to the specified range.
 
         Raises:
-            TypeError: When the portfolio has no ``'date'`` column and a
-                non-integer bound is supplied.
+            IntegerIndexBoundError: When the portfolio has no ``'date'`` column
+                and a bound is not an ``int``.
+            InvalidTruncateBoundError: When a bound is of an unsupported type,
+                or is a string that is not ISO-8601.
+            MixedTruncateBoundsError: When one bound is a row index and the
+                other a date.
         """
-        if "date" in self.prices.columns:
-            cond = self._date_range_mask(start, end)
+        mode, lower, upper = resolve_bounds(start, end, temporal="date" in self.prices.columns)
+
+        if mode == "dates":
+            cond = self._date_range_mask(lower, upper)
             pr = self.prices.filter(cond)
             cp = self.cashposition.filter(cond)
         else:
-            offset, length = self._row_slice_bounds(start, end, self.prices.height)
+            # "none" resolves to a full-width slice, so it needs no separate branch.
+            # The casts record what resolve_bounds guarantees for these modes but
+            # cannot express in its return type.
+            offset, length = self._row_slice_bounds(
+                cast("int | None", lower), cast("int | None", upper), self.prices.height
+            )
             pr = self.prices.slice(offset, length)
             cp = self.cashposition.slice(offset, length)
         return self._rebuild(prices=pr, cash_position=cp)

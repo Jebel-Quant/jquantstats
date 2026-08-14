@@ -91,6 +91,109 @@ def test_portfolio_post_init_requires_positive_aum(prices, positions):
         Portfolio(prices=prices, cashposition=positions, aum=-1.0)
 
 
+# ─── Date-column normalisation (issue #925) ───────────────────────────────────
+# The Portfolio internals identify the date axis by the literal name 'date'.
+# Before normalisation, a frame using any other label silently lost its temporal
+# axis: periods_per_year fell back to 252 and every annualised metric shifted by
+# sqrt(actual / 252) with nothing raised.
+
+
+@pytest.mark.parametrize("name", ["Date", "DATE", "timestamp", "Datum"])
+def test_date_column_is_normalised(prices, positions, name):
+    """A temporal column under any name is renamed to 'date' on construction."""
+    pf = Portfolio.from_cash_position(
+        prices=prices.rename({"date": name}),
+        cash_position=positions.rename({"date": name}),
+        aum=1e5,
+    )
+
+    assert pf.prices.columns == ["date", "A", "B"]
+    assert pf.cashposition.columns == ["date", "A", "B"]
+    # The temporal axis reaches the Data bridge rather than a positional index.
+    assert pf.data.index.columns == ["date"]
+
+
+@pytest.mark.parametrize("name", ["Date", "timestamp"])
+def test_renaming_the_date_column_does_not_change_any_metric(prices, positions, portfolio, name):
+    """The whole point: an arbitrary date-column name is now metric-neutral."""
+    renamed = Portfolio.from_cash_position(
+        prices=prices.rename({"date": name}),
+        cash_position=positions.rename({"date": name}),
+        aum=1e5,
+    )
+
+    assert renamed.stats.periods_per_year == portfolio.stats.periods_per_year
+    assert renamed.stats.sharpe()["returns"] == portfolio.stats.sharpe()["returns"]
+    assert renamed.returns.equals(portfolio.returns)
+    assert renamed.describe().equals(portfolio.describe())
+
+
+def test_normalisation_applies_to_direct_construction(prices, positions):
+    """Normalisation lives in __post_init__, so it covers Portfolio(...) too."""
+    pf = Portfolio(
+        prices=prices.rename({"date": "Date"}),
+        cashposition=positions.rename({"date": "Date"}),
+        aum=1e5,
+    )
+    assert pf.prices.columns[0] == "date"
+    assert pf.cashposition.columns[0] == "date"
+
+
+def test_normalisation_survives_transforms(prices, positions):
+    """Transforms rebuild through the same path, so the canonical name persists."""
+    pf = Portfolio.from_cash_position(
+        prices=prices.rename({"date": "Date"}),
+        cash_position=positions.rename({"date": "Date"}),
+        aum=1e5,
+    )
+    assert pf.lag(1).prices.columns[0] == "date"
+    assert pf.truncate(start=date(2020, 1, 2)).prices.columns[0] == "date"
+    assert pf.smoothed_holding(2).cashposition.columns[0] == "date"
+    assert pf.tilt.prices.columns[0] == "date"
+
+
+def test_an_existing_date_column_wins(prices, positions):
+    """A frame already carrying 'date' is left alone — no collision, no reorder."""
+    extra = prices.with_columns(pl.col("date").alias("Date"))
+    pf = Portfolio.from_cash_position(prices=extra, cash_position=positions, aum=1e5)
+    assert pf.prices.columns == ["date", "A", "B", "Date"]
+
+
+def test_first_temporal_column_wins(positions):
+    """With several temporal columns and no 'date', the leading one is renamed."""
+    dates = pl.date_range(start=date(2020, 1, 1), end=date(2020, 1, 3), interval="1d", eager=True).cast(pl.Date)
+    prices = pl.DataFrame(
+        {
+            "Date": dates,
+            "settled": dates,
+            "A": pl.Series([100.0, 110.0, 121.0], dtype=pl.Float64),
+            "B": pl.Series([200.0, 180.0, 198.0], dtype=pl.Float64),
+        }
+    )
+    pf = Portfolio.from_cash_position(prices=prices, cash_position=positions, aum=1e5)
+    assert pf.prices.columns == ["date", "settled", "A", "B"]
+
+
+def test_a_string_date_column_is_not_renamed(positions):
+    """Only genuinely temporal columns are normalised; unparsed strings are not."""
+    prices = pl.DataFrame(
+        {
+            "Date": ["2020-01-01", "2020-01-02", "2020-01-03"],
+            "A": pl.Series([100.0, 110.0, 121.0], dtype=pl.Float64),
+            "B": pl.Series([200.0, 180.0, 198.0], dtype=pl.Float64),
+        }
+    )
+    pf = Portfolio.from_cash_position(prices=prices, cash_position=positions.drop("date"), aum=1e5)
+    assert pf.prices.columns == ["Date", "A", "B"]
+    assert pf.data.index.columns == ["index"]
+
+
+def test_undated_portfolio_still_uses_a_positional_index(int_portfolio):
+    """A frame with no temporal column keeps the documented integer-index behaviour."""
+    assert "date" not in int_portfolio.prices.columns
+    assert int_portfolio.data.index.columns == ["index"]
+
+
 # ─── from_riskposition edge cases ─────────────────────────────────────────────
 
 

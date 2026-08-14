@@ -118,7 +118,8 @@ class PortfolioConstructorMixin(_PortfolioMembers):
         derived from the corresponding price series.
 
         Args:
-            prices: Price levels per asset over time (may include a date column).
+            prices: Price levels per asset over time.  A temporal column is
+                normalised to ``'date'`` at construction, whatever it was named.
             risk_position: Risk units per asset aligned with prices.
             vola: EWMA lookback (span-equivalent) used to estimate volatility.
                 Pass an ``int`` to apply the same span to every asset, or a
@@ -208,7 +209,8 @@ class PortfolioConstructorMixin(_PortfolioMembers):
         :py`from_cash_position`.
 
         Args:
-            prices: Price levels per asset over time (may include a date column).
+            prices: Price levels per asset over time.  A temporal column is
+                normalised to ``'date'`` at construction, whatever it was named.
             position: Number of units held per asset over time, aligned with
                 *prices*.  Non-numeric columns (e.g. ``'date'``) are passed
                 through unchanged.
