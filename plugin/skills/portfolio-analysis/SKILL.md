@@ -42,13 +42,26 @@ A `Portfolio`'s series is always named `returns`. Multi-asset lives on `Data`.
 |---|---|
 | No parens (properties) | `turnover`, `turnover_weekly`, `tilt`, `timing`, `tilt_timing_decomp`, `drawdown`, `highwater`, `monthly`, `profit`, `profits`, `nav_accumulated`, `nav_compounded`, `net_cost_nav`, `position_delta_costs`, `all`, `assets`, `cost_model`, `returns` |
 | No parens (dataclass fields) | `prices`, `cashposition`, `aum`, `cost_per_unit`, `cost_bps`, `annual_fee` |
-| Call them | `lag(n)`, `truncate(start, end)`, `smoothed_holding(n)`, `turnover_summary()`, `trading_cost_impact(max_bps)`, `cost_adjusted_returns(cost_bps)`, `deduct_management_fee(annual_fee)`, `correlation(frame)`, `describe()` |
+| Call them | `lag(n)`, `truncate(start, end)`, `smoothed_holding(n)`, `turnover_summary()`, `trading_cost_impact(max_bps)`, `cost_adjusted_returns(cost_bps)`, `deduct_management_fee(annual_fee)`, `correlation(frame)`, `as_data(returns)`, `describe()` |
+
+**3. To get stats on a *derived* returns frame, use `pf.as_data(frame)` — never
+`Data.from_returns(frame)`.** The frames returned by `pf.returns`,
+`cost_adjusted_returns()` and `deduct_management_fee()` also carry `profit` and
+`NAV_accumulated`, which `Data.from_returns` would silently treat as two more
+assets (reporting a Sharpe for a cash P&L series and a NAV level). `as_data`
+keeps only the `returns` column and raises `MissingReturnsColumnError` if there
+isn't one.
+
+```python
+net = pf.deduct_management_fee(annual_fee=0.0085, base=pf.cost_adjusted_returns(cost_bps=5))
+pf.as_data(net).stats.sharpe()      # {'returns': ...}
+```
 
 On `Data`: `assets`, `date_col`, `all` are properties; `returns`, `index`,
 `benchmark` are fields; `head`, `tail`, `items`, `copy`, `resample`,
 `truncate`, `describe` are methods.
 
-**3. Periodicity kwargs are not uniformly named.** `sharpe`, `sortino`,
+**4. Periodicity kwargs are not uniformly named.** `sharpe`, `sortino`,
 `volatility`, `omega`, `treynor_ratio` take `periods`; `information_ratio`,
 `greeks`, `rolling_greeks`, `montecarlo_sharpe`, `montecarlo_cagr` take
 `periods_per_year`. Both default to `None` → inferred. Check the digest's
