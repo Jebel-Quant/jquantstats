@@ -23,16 +23,16 @@ def stats(data):
 
 @pytest.fixture
 def pandas_frame(data):
-    """Fixture that returns the data as a pandas DataFrame with Date as index.
+    """Fixture that returns the data as a pandas DataFrame with the date as index.
 
     Args:
         data: The data fixture containing a Data object.
 
     Returns:
-        pd.DataFrame: A pandas DataFrame with Date as index and all data columns.
+        pd.DataFrame: A pandas DataFrame with the date as index and all data columns.
 
     """
-    return data.all.to_pandas().set_index("Date")
+    return data.all.to_pandas().set_index("date")
 
 
 @pytest.fixture

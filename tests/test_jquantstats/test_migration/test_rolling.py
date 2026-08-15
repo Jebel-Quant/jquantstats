@@ -21,11 +21,11 @@ from ..tolerances import TOL_FLOAT64
 )
 def test_rolling(stats, method, kwargs, atol):
     """Verify each rolling method produces the same time-series as quantstats."""
-    aapl = stats.all.to_pandas().set_index("Date")["AAPL"]
+    aapl = stats.all.to_pandas().set_index("date")["AAPL"]
     jqs_df = getattr(stats, method)(**kwargs)
     qs_series = getattr(qs.stats, method)(aapl, **kwargs)
 
-    jqs_pd = jqs_df.to_pandas().set_index("Date")["AAPL"].dropna()
+    jqs_pd = jqs_df.to_pandas().set_index("date")["AAPL"].dropna()
     qs_clean = qs_series.dropna()
     common = jqs_pd.index.intersection(qs_clean.index)
 
@@ -38,12 +38,12 @@ def test_pct_rank(stats):
     aapl_returns = stats.returns["AAPL"]
     aapl_prices = _DrawdownMixin.prices(aapl_returns)
     aapl_prices_pd = aapl_prices.to_pandas()
-    aapl_prices_pd.index = stats.index["Date"].to_pandas()
+    aapl_prices_pd.index = stats.index["date"].to_pandas()
 
     jqs_df = stats.pct_rank(window=60)
     qs_series = qs.stats.pct_rank(aapl_prices_pd, window=60)
 
-    jqs_pd = jqs_df.to_pandas().set_index("Date")["AAPL"].dropna()
+    jqs_pd = jqs_df.to_pandas().set_index("date")["AAPL"].dropna()
     qs_clean = qs_series.dropna()
     common = jqs_pd.index.intersection(qs_clean.index)
 

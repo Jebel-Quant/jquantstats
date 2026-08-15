@@ -89,11 +89,12 @@ def test_date_col(data):
         data (_Data): The data fixture containing a Data object.
 
     Verifies:
-        The date_col property returns the expected date column name.
+        The date_col property reports the canonical ``'date'``, even though the
+        source frame labelled the column ``'Date'`` (#929).
 
     """
     x = data.date_col
-    assert x == ["Date"]
+    assert x == ["date"]
 
 
 def test_periods(data):
@@ -324,15 +325,15 @@ def test_copy_no_benchmark(data_no_benchmark):
 
 def test_truncate_by_start_and_end(data):
     """Tests truncate(start, end) filters rows inclusively by date."""
-    first_date = data.index["Date"][0]
-    last_date = data.index["Date"][-1]
-    mid_start = data.index["Date"][10]
-    mid_end = data.index["Date"][20]
+    first_date = data.index["date"][0]
+    last_date = data.index["date"][-1]
+    mid_start = data.index["date"][10]
+    mid_end = data.index["date"][20]
 
     result = data.truncate(start=mid_start, end=mid_end)
 
-    assert result.index["Date"][0] == mid_start
-    assert result.index["Date"][-1] == mid_end
+    assert result.index["date"][0] == mid_start
+    assert result.index["date"][-1] == mid_end
     assert result.returns.shape[0] == 11
     assert result.index.shape[0] == result.returns.shape[0]
     if result.benchmark is not None:
@@ -345,17 +346,17 @@ def test_truncate_by_start_and_end(data):
 
 def test_truncate_start_only(data):
     """Tests truncate(start=...) returns rows from start to the end of the data."""
-    mid_start = data.index["Date"][10]
+    mid_start = data.index["date"][10]
     result = data.truncate(start=mid_start)
-    assert result.index["Date"][0] == mid_start
+    assert result.index["date"][0] == mid_start
     assert result.returns.shape[0] == data.returns.shape[0] - 10
 
 
 def test_truncate_end_only(data):
     """Tests truncate(end=...) returns rows from the beginning up to end inclusive."""
-    mid_end = data.index["Date"][9]
+    mid_end = data.index["date"][9]
     result = data.truncate(end=mid_end)
-    assert result.index["Date"][-1] == mid_end
+    assert result.index["date"][-1] == mid_end
     assert result.returns.shape[0] == 10
 
 
@@ -369,8 +370,8 @@ def test_truncate_no_bounds_returns_all(data):
 
 def test_truncate_no_benchmark(data_no_benchmark):
     """Tests truncate() works when there is no benchmark."""
-    mid_start = data_no_benchmark.index["Date"][5]
-    mid_end = data_no_benchmark.index["Date"][15]
+    mid_start = data_no_benchmark.index["date"][5]
+    mid_end = data_no_benchmark.index["date"][15]
     result = data_no_benchmark.truncate(start=mid_start, end=mid_end)
     assert result.benchmark is None
     assert result.returns.shape[0] == 11

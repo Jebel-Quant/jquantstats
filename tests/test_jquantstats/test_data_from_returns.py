@@ -42,7 +42,7 @@ def test_with_constant_rf(returns):
     result = Data.from_returns(returns=returns, rf=rf, date_col="Date")
 
     assert_series_equal(result.returns["Meta"], returns["Meta"] - rf)
-    assert_series_equal(result.index.to_series(), returns["Date"])
+    assert_series_equal(result.index.to_series(), returns["Date"].rename("date"))
     # Verify there's no benchmark
     assert result.benchmark is None
 

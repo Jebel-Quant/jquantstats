@@ -82,6 +82,12 @@ returns_pl = pl.DataFrame({
 })
 ```
 
+The date column is found by type, not by name: whatever you call it — `Date`,
+`timestamp`, `dt` — the first temporal column is used, and the resulting object
+exposes it as `date` (`data.index["date"]`, `data.date_col == ["date"]`). Pass
+`date_col=` only to nominate a specific column, which is required for a
+non-temporal (e.g. integer) index since there is no temporal column to find.
+
 ### Benchmarks
 
 ```python
@@ -94,7 +100,6 @@ import jquantstats as jqs
 data = jqs.Data.from_returns(
     returns=returns_pl,
     benchmark=benchmark_pl,
-    date_col="Date",
 )
 data.stats.information_ratio()   # benchmark used automatically
 ```
@@ -113,7 +118,6 @@ import jquantstats as jqs
 data = jqs.Data.from_returns(
     returns=returns_pl,     # pl.DataFrame with date + return columns
     benchmark=benchmark_pl, # optional
-    date_col="Date",
 )
 
 data.stats.sharpe()
@@ -124,7 +128,7 @@ data.reports.metrics()
 You can also construct from prices:
 
 ```python
-data = jqs.Data.from_prices(prices=prices_pl, date_col="Date")
+data = jqs.Data.from_prices(prices=prices_pl)
 ```
 
 ### `Portfolio` — prices + positions (no QuantStats equivalent)

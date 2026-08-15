@@ -28,10 +28,12 @@ class MissingDateColumnError(JQuantStatsError, ValueError):
     Args:
         frame_name: Descriptive name of the frame missing the column (e.g. ``"prices"``).
         column: Name of the date column that was looked up (e.g. the
-            ``date_col`` argument). When omitted, the default ``'date'``
-            column is assumed.
+            ``date_col`` argument). When omitted, the column was being
+            auto-detected rather than looked up by name.
         available: Column names actually present in the frame, included in
-            the error message to help diagnose the mismatch.
+            the error message to help diagnose the mismatch. Supplying them
+            without a *column* selects the auto-detection wording — no
+            temporal column was found to use as the date axis.
 
     Examples:
         >>> raise MissingDateColumnError("prices")  # doctest: +ELLIPSIS
@@ -43,12 +45,17 @@ class MissingDateColumnError(JQuantStatsError, ValueError):
     def __init__(self, frame_name: str, column: str | None = None, available: list[str] | None = None) -> None:
         """Initialize with the frame name and, optionally, the missing column and available columns."""
         available = [] if available is None else list(available)
-        if column is None:
+        cols = ", ".join(f"'{c}'" for c in available) if available else ""
+        if column is None and not cols:
             msg = f"DataFrame '{frame_name}' is missing the required 'date' column."
         else:
-            cols = ", ".join(f"'{c}'" for c in available) if available else ""
+            lookup = (
+                f"has no column '{column}' to use as the date column"
+                if column is not None
+                else "has no temporal column to use as the date column"
+            )
             msg = (
-                f"DataFrame '{frame_name}' has no column '{column}' to use as the date column"
+                f"DataFrame '{frame_name}' {lookup}"
                 + (f"; available columns: {cols}" if cols else "")
                 + ". Pass date_col=<name of an existing column>."
             )

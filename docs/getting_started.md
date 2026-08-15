@@ -243,6 +243,27 @@ positions). This is the lighter-weight path and accepts pandas DataFrames too.
     data = Data.from_returns(returns=returns_pl)
     ```
 
+### The date column
+
+The date column is identified by **type, not by name**: the first temporal
+column of each input frame is used, whether it is called `Date`, `timestamp`,
+or anything else. Returns, benchmark and risk-free frames are resolved
+independently, so they need not agree on a label.
+
+Whatever it was called on the way in, the object exposes it as `date` — the
+same name the `Portfolio` internals use, so one reader works against both
+routes:
+
+```python
+data.index["date"]      # the date series
+data.date_col           # ['date'] — the supported way to read the name
+pf.data.date_col        # ['date'] — a Portfolio's Data agrees
+```
+
+Pass `date_col="…"` to nominate a column explicitly. That is required for a
+date-free (integer-indexed) frame, since there is no temporal column to find;
+such an index keeps its own name rather than being relabelled `date`.
+
 ### Stats
 
 ```python

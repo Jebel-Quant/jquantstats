@@ -148,7 +148,7 @@ def edge(data):
         Data: A Data object with returns and benchmark data that are all zeros.
 
     """
-    index = data.index["Date"]
+    index = data.index["date"]
     returns = pl.DataFrame({"index": index, "returns": [0.0] * len(index)})
     benchmark = pl.DataFrame({"index": index, "benchmark": [0.0] * len(index)})
 

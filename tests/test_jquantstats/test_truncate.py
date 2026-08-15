@@ -61,8 +61,15 @@ def dated_data() -> Data:
 
 @pytest.fixture
 def int_data() -> Data:
-    """An 80-row Data with an integer index."""
-    return Data.from_returns(pl.DataFrame({"Date": list(range(N)), "R": pl.Series([0.001] * N, dtype=pl.Float64)}))
+    """An 80-row Data with an integer index.
+
+    The index column has to be nominated explicitly: auto-detection looks for a
+    temporal column and there is none here.
+    """
+    return Data.from_returns(
+        pl.DataFrame({"Date": list(range(N)), "R": pl.Series([0.001] * N, dtype=pl.Float64)}),
+        date_col="Date",
+    )
 
 
 # ─── #926: string bounds are parsed ───────────────────────────────────────────
