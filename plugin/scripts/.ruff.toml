@@ -1,0 +1,15 @@
+# Scoped lint override for the plugin's CLI scripts.
+#
+# The repo-root `ruff.toml` is Rhiza-managed (see CLAUDE.md: gaps in synced files
+# are fixed upstream, never patched locally), so a per-file-ignore cannot live
+# there. Ruff resolves configuration hierarchically, so this file applies to
+# plugin/scripts/ only and leaves src/ and tests/ under the repo-wide rules.
+extend = "../../ruff.toml"
+
+[lint]
+# TRY003 — `src/` follows the typed-exception pattern in `exceptions.py`, where
+# each error class builds its own message. These are argv-driven CLI scripts
+# whose entire job is to fail legibly: "input file not found: data/prices.csv"
+# belongs at the raise site, and ~20 subclasses of one ContextError would make
+# the failures harder to read, not easier.
+extend-ignore = ["TRY003"]
