@@ -616,7 +616,7 @@ def test_metrics_full_mode_correlation_raises(data):
             """Return all DataFrame without benchmark column to break pl.corr."""
             real_all: pl.DataFrame = self._real.all  # type: ignore[union-attr]
             # Drop the benchmark column so selecting it later raises
-            return real_all.select(["Date", "AAPL", "META"])
+            return real_all.select(["date", "AAPL", "META"])
 
         @property
         def benchmark(self) -> pl.DataFrame:

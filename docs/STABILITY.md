@@ -103,6 +103,13 @@ renamed or removed before 1.0.  The constructors (`Portfolio.from_position`,
 points.  Changes here would be disruptive enough that they are held for the
 1.0 boundary.
 
+**The date column.**  A temporal index is exposed as `date` on every object,
+whichever entry point built it, and `Data.date_col` reports that name.  This
+was settled in 0.11: before then `Data.from_returns` defaulted to `Date` while
+`Portfolio` canonicalised on `date`, so `index.columns[0]` was not a reliable
+thing to write against.  An index nominated with `date_col=` that is *not*
+temporal — an integer row index, say — keeps its own name.
+
 **What may still move.**  Individual metric methods on `Stats` may gain
 keyword arguments, change default values, or be renamed for consistency as
 the QuantStats-parity work settles; chart signatures on `Plots` may change

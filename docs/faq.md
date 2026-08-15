@@ -81,6 +81,25 @@ else.
 
 ## Questions
 
+### What must my date column be called?
+
+Anything — it is found by type, not by name. Each input frame's first temporal
+column becomes the date axis, so `Date`, `timestamp` and `dt` all work, and
+returns, benchmark and risk-free frames need not agree on a label.
+
+On the resulting object the column is always `date`, whichever route built it:
+
+```python
+data.index["date"]      # Data.from_returns / from_prices
+pf.data.index["date"]   # a Portfolio's Data bridge
+data.date_col           # ['date'] — the supported way to read the name
+```
+
+Pass `date_col="…"` to nominate a column explicitly. A date-free
+(integer-indexed) frame *requires* it — there is no temporal column to detect —
+and that index keeps its own name, since calling an integer axis `date` would
+be a lie.
+
 ### What is the difference between NaN and null?
 
 - **`null`** (Polars missing value) — "no observation". Rejected at

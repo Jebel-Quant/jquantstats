@@ -16,10 +16,11 @@ from ._stats import Stats
 from ._types import NativeFrame, NativeFrameOrScalar
 from ._utils import DataUtils
 from ._utils._construction import (
+    DATE_COLUMN,
     _align_returns_benchmark,
     _apply_null_strategy,
+    _canonicalise_date_column,
     _prices_to_returns,
-    _require_date_col,
     _subtract_risk_free,
     _to_polars,
 )
@@ -42,7 +43,15 @@ class Data(_ReshapeMixin):
         benchmark (pl.DataFrame | None): Optional benchmark returns DataFrame.
             Defaults to None.
         index (pl.DataFrame): DataFrame containing the date index for the
-            returns data.
+            returns data. A temporal index column is always named ``'date'``
+            — see *Date column* below.
+
+    Date column:
+        Whatever the input frames called it, a temporal index column ends up
+        as ``'date'``, the same name the `Portfolio` internals use. So
+        ``data.index['date']`` works on every `Data` object, however it was
+        built, and ``Data.date_col`` stays the safest way to read the name —
+        a date-free (integer-indexed) object keeps its own index column name.
 
     """
 
@@ -51,7 +60,13 @@ class Data(_ReshapeMixin):
     benchmark: pl.DataFrame | None = None
 
     def __post_init__(self) -> None:
-        """Validate the Data object after initialization."""
+        """Normalise the index column name and validate the Data object."""
+        # Canonicalise here rather than in the constructors alone, so a Data built
+        # by hand (or rebuilt by a reshape) carries the same index column name.
+        temporal = [name for name, dtype in self.index.schema.items() if dtype.is_temporal()]
+        if temporal and temporal[0] != DATE_COLUMN:
+            object.__setattr__(self, "index", self.index.rename({temporal[0]: DATE_COLUMN}))
+
         # You need at least two points
         if self.index.shape[0] < 2:
             raise ValueError("Index must contain at least two timestamps.")  # noqa: TRY003
@@ -75,7 +90,7 @@ class Data(_ReshapeMixin):
         returns: NativeFrame,
         rf: NativeFrameOrScalar = 0.0,
         benchmark: NativeFrame | None = None,
-        date_col: str = "Date",
+        date_col: str | None = None,
         null_strategy: Literal["raise", "drop", "forward_fill"] | None = None,
     ) -> Data:
         """Create a Data object from returns and optional benchmark.
@@ -96,8 +111,12 @@ class Data(_ReshapeMixin):
                 benchmark are aligned on their common dates; if either frame
                 contains dates the other lacks, those rows are dropped and a
                 `BenchmarkAlignmentWarning` is emitted.
-            date_col (str): Name of the date column in the DataFrames.
-                Defaults to ``"Date"``.
+            date_col (str | None): Name of the date column in the DataFrames.
+                Defaults to ``None``, which auto-detects the first temporal
+                column of each frame. Pass a name to nominate a column
+                explicitly — required for a non-temporal (e.g. integer) index,
+                which auto-detection will not find. Whichever column is used,
+                it is renamed to ``'date'`` on the resulting object.
             null_strategy ({"raise", "drop", "forward_fill"} | None): How to
                 handle ``null`` (missing) values in *returns* and *benchmark*.
                 Defaults to ``None`` (nulls propagate through calculations).
@@ -122,8 +141,10 @@ class Data(_ReshapeMixin):
 
         Raises:
             MissingDateColumnError: If *date_col* is not a column of
-                *returns*, *benchmark*, or a DataFrame-valued *rf*. Raised
-                before any joins so the offending frame is named explicitly.
+                *returns*, *benchmark*, or a DataFrame-valued *rf* — or, when
+                *date_col* is ``None``, if one of those frames has no temporal
+                column to auto-detect. Raised before any joins so the
+                offending frame is named explicitly.
             NullsInReturnsError: If *null_strategy* is ``"raise"`` and the
                 data contains null values.
             ValueError: If there are no overlapping dates between returns and
@@ -175,25 +196,30 @@ class Data(_ReshapeMixin):
             ```
 
         """
-        returns_pl = _to_polars(returns)
-        benchmark_pl = _to_polars(benchmark) if benchmark is not None else None
+        # Resolve the date column once, up front: a temporal axis is renamed to the
+        # canonical 'date' on every frame, so the joins below — and the resulting
+        # object — speak one column name whatever the caller's frames were labelled.
+        # A frame-valued rf carries the same date_col, so it resolves the same way.
+        returns_pl, resolved_col = _canonicalise_date_column(_to_polars(returns), "returns", date_col)
+        benchmark_pl = (
+            _canonicalise_date_column(_to_polars(benchmark), "benchmark", date_col)[0]
+            if benchmark is not None
+            else None
+        )
         # accept ints (e.g. rf=0) by coercing to float
-        rf_converted: float | pl.DataFrame = float(rf) if isinstance(rf, int | float) else _to_polars(rf)
+        rf_converted: float | pl.DataFrame = (
+            float(rf) if isinstance(rf, int | float) else _canonicalise_date_column(_to_polars(rf), "rf", date_col)[0]
+        )
 
-        frames: list[tuple[str, pl.DataFrame | None]] = [("returns", returns_pl), ("benchmark", benchmark_pl)]
-        if isinstance(rf_converted, pl.DataFrame):
-            frames.append(("rf", rf_converted))
-        _require_date_col(frames, date_col)
-
-        returns_pl = _apply_null_strategy(returns_pl, date_col, "returns", null_strategy)
+        returns_pl = _apply_null_strategy(returns_pl, resolved_col, "returns", null_strategy)
         if benchmark_pl is not None:
-            benchmark_pl = _apply_null_strategy(benchmark_pl, date_col, "benchmark", null_strategy)
-            returns_pl, benchmark_pl = _align_returns_benchmark(returns_pl, benchmark_pl, date_col)
+            benchmark_pl = _apply_null_strategy(benchmark_pl, resolved_col, "benchmark", null_strategy)
+            returns_pl, benchmark_pl = _align_returns_benchmark(returns_pl, benchmark_pl, resolved_col)
 
-        index = returns_pl.select(date_col)
-        excess_returns = _subtract_risk_free(returns_pl, rf_converted, date_col).drop(date_col)
+        index = returns_pl.select(resolved_col)
+        excess_returns = _subtract_risk_free(returns_pl, rf_converted, resolved_col).drop(resolved_col)
         excess_benchmark = (
-            _subtract_risk_free(benchmark_pl, rf_converted, date_col).drop(date_col)
+            _subtract_risk_free(benchmark_pl, rf_converted, resolved_col).drop(resolved_col)
             if benchmark_pl is not None
             else None
         )
@@ -206,7 +232,7 @@ class Data(_ReshapeMixin):
         prices: NativeFrame,
         rf: NativeFrameOrScalar = 0.0,
         benchmark: NativeFrame | None = None,
-        date_col: str = "Date",
+        date_col: str | None = None,
         null_strategy: Literal["raise", "drop", "forward_fill"] | None = None,
     ) -> Data:
         """Create a Data object from prices and optional benchmark.
@@ -218,14 +244,18 @@ class Data(_ReshapeMixin):
         Args:
             prices (NativeFrame): Price-level data. First column should be
                 the date column; remaining columns are asset prices.
-            rf (float | NativeFrame): Risk-free rate. Forwarded unchanged to
-                `from_returns`. Defaults to 0.0 (no risk-free rate
-                adjustment).
+            rf (float | NativeFrame): Risk-free rate. Forwarded to
+                `from_returns`; a frame-valued *rf* has its date column
+                canonicalised on the way, exactly as *prices* does. Defaults
+                to 0.0 (no risk-free rate adjustment).
             benchmark (NativeFrame | None): Benchmark prices. Converted to
                 returns in the same way as ``prices`` before being forwarded
                 to `from_returns`. Defaults to None (no benchmark).
-            date_col (str): Name of the date column in the DataFrames.
-                Defaults to ``"Date"``.
+            date_col (str | None): Name of the date column in the DataFrames.
+                Defaults to ``None``, which auto-detects the first temporal
+                column of each frame. Forwarded unchanged to `from_returns`;
+                whichever column is used is renamed to ``'date'`` on the
+                resulting object.
             null_strategy ({"raise", "drop", "forward_fill"} | None): How to
                 handle ``null`` (missing) values after converting prices to
                 returns. Forwarded unchanged to `from_returns`. Defaults to
@@ -250,8 +280,9 @@ class Data(_ReshapeMixin):
 
         Raises:
             MissingDateColumnError: If *date_col* is not a column of *prices*
-                or *benchmark*. Raised before returns are derived so the
-                offending frame is named explicitly.
+                or *benchmark* — or, when *date_col* is ``None``, if either
+                frame has no temporal column to auto-detect. Raised before
+                returns are derived so the offending frame is named explicitly.
 
         Examples:
             ```python
@@ -267,17 +298,27 @@ class Data(_ReshapeMixin):
             ```
 
         """
-        returns_pl = _prices_to_returns(_to_polars(prices), date_col, "prices")
+        prices_pl, resolved_col = _canonicalise_date_column(_to_polars(prices), "prices", date_col)
+        returns_pl = _prices_to_returns(prices_pl, resolved_col)
 
         benchmark_returns: NativeFrame | None = None
         if benchmark is not None:
-            benchmark_returns = _prices_to_returns(_to_polars(benchmark), date_col, "benchmark")
+            benchmark_pl, _ = _canonicalise_date_column(_to_polars(benchmark), "benchmark", date_col)
+            benchmark_returns = _prices_to_returns(benchmark_pl, resolved_col)
 
+        # A frame-valued rf is canonicalised here too, since the frames handed on
+        # below are resolved already and date_col no longer describes them.
+        rf_forwarded: NativeFrameOrScalar = (
+            rf if isinstance(rf, int | float) else _canonicalise_date_column(_to_polars(rf), "rf", date_col)[0]
+        )
+
+        # Naming the resolved column keeps auto-detection from picking a different
+        # one downstream — it would not find a non-temporal (e.g. integer) index.
         return cls.from_returns(
             returns=returns_pl,
-            rf=rf,
+            rf=rf_forwarded,
             benchmark=benchmark_returns,
-            date_col=date_col,
+            date_col=resolved_col,
             null_strategy=null_strategy,
         )
 

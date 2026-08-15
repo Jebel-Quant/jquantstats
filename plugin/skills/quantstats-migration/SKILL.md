@@ -44,9 +44,12 @@ returns_pl = pl.from_pandas(returns_pd.rename("MyStrategy").reset_index())
 # → columns ["Date", "MyStrategy"]
 ```
 
-The first column is the date column (`date_col="Date"` by default). Every other
-column is an asset — multi-asset is native, so port a loop over series into a
-single wide frame and one call.
+The date column is auto-detected as the first temporal column, whatever it is
+called, and is exposed as `date` on the resulting object (`data.date_col ==
+["date"]`). Pass `date_col=` only to nominate a column explicitly — required
+for a date-free, integer-indexed frame. Every other column is an asset —
+multi-asset is native, so port a loop over series into a single wide frame and
+one call.
 
 **Nulls matter.** pandas drops `NaN` silently; Polars propagates `null`, so one
 missing value turns a whole metric into `null`. To reproduce QuantStats numbers,
@@ -68,7 +71,7 @@ series.
 ```python
 import jquantstats as jqs
 
-data = jqs.Data.from_returns(returns=returns_pl, rf=0.0, benchmark=benchmark_pl, date_col="Date")
+data = jqs.Data.from_returns(returns=returns_pl, rf=0.0, benchmark=benchmark_pl)
 data = jqs.Data.from_prices(prices=prices_pl)          # same kwargs
 ```
 

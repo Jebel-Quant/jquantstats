@@ -125,7 +125,7 @@ def test_rolling_greeks_beta(stats, aapl, benchmark_pd):
     jqs_df = stats.rolling_greeks(rolling_period=126, periods_per_year=252)
     qs_df = qs.stats.rolling_greeks(aapl, benchmark_pd, periods=126)
 
-    jqs_pd = jqs_df.to_pandas().set_index("Date")["AAPL_beta"].dropna()
+    jqs_pd = jqs_df.to_pandas().set_index("date")["AAPL_beta"].dropna()
     qs_beta = qs_df["beta"].dropna()
     common = jqs_pd.index.intersection(qs_beta.index)
 

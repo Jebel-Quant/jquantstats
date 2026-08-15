@@ -26,6 +26,12 @@ __all__ = [
     "interpolate",
 ]
 
+#: The canonical name of the date column on every `Data` object, matching the
+#: name the `Portfolio` internals already enforce. Inputs are renamed to it once
+#: at construction so that ``data.index.columns[0]`` is the same string however
+#: the object was built.
+DATE_COLUMN = "date"
+
 
 def _to_polars(df: NativeFrame) -> pl.DataFrame:
     """Convert any narwhals-compatible DataFrame to a polars DataFrame."""
@@ -195,19 +201,42 @@ def _subtract_risk_free(dframe: pl.DataFrame, rf: float | pl.DataFrame, date_col
     )
 
 
-def _require_date_col(frames: list[tuple[str, pl.DataFrame | None]], date_col: str) -> None:
-    """Verify *date_col* is present in every supplied (non-None) frame.
+def _canonicalise_date_column(frame: pl.DataFrame, frame_name: str, date_col: str | None) -> tuple[pl.DataFrame, str]:
+    """Resolve *frame*'s date column and rename a temporal one to `DATE_COLUMN`.
+
+    When *date_col* is ``None`` the date column is auto-detected as the first
+    temporal column of *frame*, matching what `Portfolio` does at construction.
+    An explicit *date_col* is used verbatim and need not be temporal, so an
+    integer or string index column can still be nominated by name — such a
+    column keeps its own name, since calling an integer axis ``'date'`` would
+    be a lie.
 
     Args:
-        frames: ``(name, frame)`` pairs; ``None`` frames are skipped.
-        date_col: The required date column name.
+        frame: A returns, prices, benchmark or risk-free frame.
+        frame_name: Descriptive name used in the error message (e.g. ``"returns"``).
+        date_col: Name of the date column, or ``None`` to auto-detect it.
+
+    Returns:
+        tuple[pl.DataFrame, str]: The frame and the name its date column now
+        carries — ``'date'`` for a temporal axis, the nominated name otherwise.
 
     Raises:
-        MissingDateColumnError: If any frame lacks *date_col*, naming that frame.
+        MissingDateColumnError: If *date_col* is not a column of *frame*, or —
+            when auto-detecting — if *frame* has no temporal column at all.
     """
-    for frame_name, frame in frames:
-        if frame is not None and date_col not in frame.columns:
-            raise MissingDateColumnError(frame_name, column=date_col, available=list(frame.columns))
+    if date_col is None:
+        temporal = [name for name, dtype in frame.schema.items() if dtype.is_temporal()]
+        if not temporal:
+            raise MissingDateColumnError(frame_name, available=list(frame.columns))
+        source = temporal[0]
+    elif date_col not in frame.columns:
+        raise MissingDateColumnError(frame_name, column=date_col, available=list(frame.columns))
+    else:
+        source = date_col
+
+    if source == DATE_COLUMN or not frame.schema[source].is_temporal():
+        return frame, source
+    return frame.rename({source: DATE_COLUMN}), DATE_COLUMN
 
 
 def _align_returns_benchmark(
@@ -249,7 +278,7 @@ def _align_returns_benchmark(
     return returns_pl, benchmark_pl
 
 
-def _prices_to_returns(frame: pl.DataFrame, date_col: str, frame_name: str) -> pl.DataFrame:
+def _prices_to_returns(frame: pl.DataFrame, date_col: str) -> pl.DataFrame:
     """Convert a price-level frame to a returns frame via percentage change.
 
     The first row is dropped because no prior price is available to compute a
@@ -257,18 +286,13 @@ def _prices_to_returns(frame: pl.DataFrame, date_col: str, frame_name: str) -> p
 
     Args:
         frame: Price-level frame with a *date_col* column and asset columns.
+            Callers canonicalise the date column first, so its presence is a
+            precondition here rather than something re-checked.
         date_col: Name of the date column (passed through unchanged).
-        frame_name: Descriptive name used in the error message when *date_col*
-            is missing (e.g. ``"prices"`` or ``"benchmark"``).
 
     Returns:
         pl.DataFrame: Returns frame with the same columns as *frame*, one row
         shorter.
-
-    Raises:
-        MissingDateColumnError: If *date_col* is not a column of *frame*.
     """
-    if date_col not in frame.columns:
-        raise MissingDateColumnError(frame_name, column=date_col, available=list(frame.columns))
     asset_cols = _value_columns(frame, date_col)
     return frame.with_columns([pl.col(c).pct_change().alias(c) for c in asset_cols]).slice(1)

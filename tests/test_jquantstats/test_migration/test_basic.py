@@ -61,7 +61,7 @@ from ..tolerances import TOL_FLOAT64
 )
 def test_migration(stats, method, kwargs, tol):
     """Verify each stat method produces the same result as quantstats."""
-    aapl = stats.all.to_pandas().set_index("Date")["AAPL"]
+    aapl = stats.all.to_pandas().set_index("date")["AAPL"]
     x = getattr(stats, method)(**kwargs)["AAPL"]
     y = getattr(qs.stats, method)(aapl, **kwargs)
     assert x == pytest.approx(y, abs=tol)
@@ -69,7 +69,7 @@ def test_migration(stats, method, kwargs, tol):
 
 def test_conditional_value_at_risk(stats):
     """Test conditional_value_at_risk matches QuantStats output."""
-    returns = stats.all.to_pandas().set_index("Date")["AAPL"]
+    returns = stats.all.to_pandas().set_index("date")["AAPL"]
     x = qs.stats.conditional_value_at_risk(returns, confidence=0.99)
     y = stats.conditional_value_at_risk(confidence=0.99)["AAPL"]
     assert x == pytest.approx(y, abs=TOL_FLOAT64)
