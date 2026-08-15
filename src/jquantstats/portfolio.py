@@ -41,6 +41,7 @@ from ._portfolio_cost import PortfolioCostMixin
 from ._portfolio_nav import PortfolioNavMixin
 from ._portfolio_transform import PortfolioTransformMixin
 from ._portfolio_turnover import PortfolioTurnoverMixin
+from ._portfolio_units import PortfolioUnitsMixin
 from ._reports import Report
 from ._stats import Stats as Stats
 from ._utils import PortfolioUtils as PortfolioUtils
@@ -111,6 +112,7 @@ class Portfolio(
     PortfolioTurnoverMixin,
     PortfolioCostMixin,
     PortfolioTransformMixin,
+    PortfolioUnitsMixin,
     PortfolioConstructorMixin,
 ):
     """Portfolio analytics class for quant finance.
@@ -137,6 +139,9 @@ class Portfolio(
     - Attribution: `tilt`, `timing`, `tilt_timing_decomp`
     - Turnover: `turnover`, `turnover_weekly`,
       `turnover_summary`
+    - Share-count view: `units`, `equity`, `trades_units`,
+      `trades_currency`, `weights` — all derived from cash positions and
+      prices, so they are available however the portfolio was constructed
     - Cost analysis: `cost_adjusted_returns`,
       `trading_cost_impact`, `deduct_management_fee`
     - Utility: `correlation`
