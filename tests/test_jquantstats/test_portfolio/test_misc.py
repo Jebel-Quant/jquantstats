@@ -9,6 +9,7 @@ import pytest
 
 from jquantstats import Portfolio
 from jquantstats.data import Data
+from jquantstats.exceptions import MissingReturnsColumnError
 
 # ─── Fixtures ────────────────────────────────────────────────────────────────
 
@@ -71,6 +72,78 @@ def test_integer_indexed_stats_uses_252_periods_per_year(int_portfolio):
     sharpe = int_portfolio.stats.sharpe()
     assert "returns" in sharpe
     assert abs(sharpe["returns"]) < 1000  # sanity: not ~5600x inflated
+
+
+# ─── Portfolio.as_data over derived returns frames ───────────────────────────
+
+
+def test_as_data_defaults_to_the_portfolio_returns(portfolio):
+    """as_data() with no argument must match the data property's series."""
+    assert portfolio.as_data().returns["returns"].to_list() == portfolio.data.returns["returns"].to_list()
+
+
+def test_as_data_narrows_a_derived_frame_to_the_return_series(portfolio):
+    """A cost-adjusted frame carries profit and NAV columns; only 'returns' may survive."""
+    adjusted = portfolio.cost_adjusted_returns(cost_bps=5.0)
+    assert {"profit", "NAV_accumulated"}.issubset(adjusted.columns)
+
+    d = portfolio.as_data(adjusted)
+    assert d.returns.columns == ["returns"]
+    assert d.index.columns == ["date"]
+    assert d.returns["returns"].to_list() == adjusted["returns"].to_list()
+    # The narrowing is the point: profit and NAV must not show up as assets.
+    assert set(d.stats.sharpe()) == {"returns"}
+
+
+def test_as_data_accepts_a_bare_two_column_frame(portfolio):
+    """A hand-built date+returns frame needs no portfolio-specific columns."""
+    bare = portfolio.returns.select(["date", "returns"])
+    assert portfolio.as_data(bare).returns["returns"].to_list() == bare["returns"].to_list()
+
+
+def test_as_data_normalises_a_differently_named_date_column(portfolio):
+    """A caller's 'Date' column must become the index, not be dropped for a row counter."""
+    renamed = portfolio.returns.select(["date", "returns"]).rename({"date": "Date"})
+    d = portfolio.as_data(renamed)
+    assert d.index.columns == ["date"]
+    assert d.index["date"].to_list() == portfolio.returns["date"].to_list()
+
+
+def test_as_data_falls_back_to_a_row_index_without_dates(portfolio):
+    """A frame with no temporal column gets the synthetic integer index."""
+    d = portfolio.as_data(portfolio.returns.select("returns"))
+    assert d.index.columns == ["index"]
+    assert d.index["index"].to_list() == list(range(portfolio.returns.height))
+
+
+def test_as_data_rejects_a_frame_without_a_returns_column(portfolio):
+    """A frame carrying no return series must raise rather than be analysed anyway."""
+    with pytest.raises(MissingReturnsColumnError, match="no 'returns' column"):
+        portfolio.as_data(portfolio.nav_accumulated)
+
+
+def test_as_data_error_lists_the_available_columns(portfolio):
+    """The error names the columns present, so the caller can see what they passed."""
+    with pytest.raises(MissingReturnsColumnError) as excinfo:
+        portfolio.as_data(portfolio.prices)
+    assert excinfo.value.available == portfolio.prices.columns
+    assert "'A'" in str(excinfo.value)
+
+
+def test_as_data_is_not_cached(portfolio):
+    """as_data must build a fresh Data per call; only the no-arg property is cached."""
+    frame = portfolio.cost_adjusted_returns(cost_bps=5.0)
+    assert portfolio.as_data(frame) is not portfolio.as_data(frame)
+
+
+def test_cost_and_fee_ladder_through_as_data(portfolio):
+    """The documented ladder — costs then fee — must reduce the Sharpe monotonically."""
+    gross = portfolio.as_data().stats.sharpe()["returns"]
+    net_costs = portfolio.cost_adjusted_returns(cost_bps=25.0)
+    net_all = portfolio.deduct_management_fee(annual_fee=0.02, base=net_costs)
+
+    assert portfolio.as_data(net_costs).stats.sharpe()["returns"] < gross
+    assert portfolio.as_data(net_all).stats.sharpe()["returns"] < portfolio.as_data(net_costs).stats.sharpe()["returns"]
 
 
 # ─── _data_bridge caching ─────────────────────────────────────────────────────

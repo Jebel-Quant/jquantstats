@@ -18,7 +18,7 @@ Public API is unchanged:
 - Derived data series — `profits`, `profit`, `nav_accumulated`,
   `returns`, `monthly`, `nav_compounded`, `highwater`,
   `drawdown`, `all`
-- Lazy composition accessors — `stats`, `plots`, `report`
+- Lazy composition accessors — `stats`, `plots`, `report`, `data`, `as_data`
 - Portfolio transforms — `truncate`, `lag`, `smoothed_holding`
 - Attribution — `tilt`, `timing`, `tilt_timing_decomp`
 - Turnover analysis — `turnover`, `turnover_weekly`, `turnover_summary`
@@ -48,6 +48,7 @@ from .data import Data as Data
 from .exceptions import (
     InvalidCashPositionTypeError,
     InvalidPricesTypeError,
+    MissingReturnsColumnError,
     NonPositiveAumError,
     RowCountMismatchError,
     UncleanSeriesError,
@@ -131,7 +132,8 @@ class Portfolio(
     - `drawdown` — drawdown from high-water mark
     - `all` — merged view of all derived series
 
-    - Lazy composition accessors: `stats`, `plots`, `report`
+    - Lazy composition accessors: `stats`, `plots`, `report`, `data`,
+      `as_data` (the same bridge over a derived returns frame)
     - Portfolio transforms: `truncate`, `lag`,
       `smoothed_holding`
     - Attribution: `tilt`, `timing`, `tilt_timing_decomp`
@@ -154,6 +156,9 @@ class Portfolio(
     - ``.plots``   : portfolio-specific ``Plots``; NAV overlays, lead-lag IR, rolling Sharpe/vol, heatmaps.
     - ``.report``  : HTML ``Report``; self-contained portfolio performance report.
     - ``.data``    : bridge to the legacy ``Data`` / ``Stats`` / ``DataPlots`` pipeline.
+    - ``.as_data(frame)`` : the same bridge over a *derived* returns frame — cost-adjusted,
+      fee-deducted, or hand-built. Prefer it over ``Data.from_returns(frame)``, which would
+      also treat the ``'profit'`` and ``'NAV_accumulated'`` columns as assets.
 
     ``.plots`` and ``.report`` are intentionally *not* delegated to the legacy path: the legacy
     path operates on a bare returns series, while the analytics path has access to raw prices,
@@ -251,24 +256,33 @@ class Portfolio(
     def _build_data_bridge(ret: pl.DataFrame) -> "Data":
         """Build a `Data` bridge from a returns frame.
 
-        Splits out the ``'date'`` column (if present) into an index and passes
-        the remaining numeric columns as returns.  Used internally to populate
-        ``_data_bridge`` at construction time so the ``data`` property is O(1).
+        Narrows *ret* to its ``'returns'`` column and splits out ``'date'`` (if
+        present) into the index.  The narrowing is the whole point: the
+        portfolio's returns-shaped frames also carry ``'profit'`` and
+        ``'NAV_accumulated'``, and passing those to `Data` would have it treat a
+        cash P&L series and a NAV level as two further "assets".
 
-        The name is matched literally, which is safe because ``__post_init__``
-        normalises the inputs: the positional-index fallback below is reached
-        only by a portfolio that genuinely has no temporal column, never by one
-        whose dates simply arrived under a different name.
+        The date column is matched literally after a
+        `_normalise_date_column` pass, so a caller-supplied frame whose dates
+        arrived as ``'Date'`` is handled too; the positional-index fallback is
+        reached only by a frame that genuinely has no temporal column.
 
         Args:
-            ret: Returns DataFrame, optionally with a leading ``'date'`` column.
+            ret: Returns DataFrame with a ``'returns'`` column, optionally with
+                a date column and any number of columns to ignore.
 
         Returns:
-            A `Data` instance backed by *ret*.
+            A `Data` instance backed by the ``'returns'`` column of *ret*.
+
+        Raises:
+            MissingReturnsColumnError: If *ret* has no ``'returns'`` column.
         """
+        if "returns" not in ret.columns:
+            raise MissingReturnsColumnError(ret.columns)
+        ret = _normalise_date_column(ret)
         returns_only = ret.select("returns")
-        if "date" in ret.columns:
-            return Data(returns=returns_only, index=ret.select("date"))
+        if _DATE_COLUMN in ret.columns:
+            return Data(returns=returns_only, index=ret.select(_DATE_COLUMN))
         return Data(returns=returns_only, index=pl.DataFrame({"index": list(range(ret.height))}))
 
     def __post_init__(self) -> None:
@@ -458,7 +472,48 @@ class Portfolio(
             >>> "returns" in d.returns.columns
             True
         """
-        return Portfolio._build_data_bridge(self.returns)
+        return self.as_data()
+
+    def as_data(self, returns: pl.DataFrame | None = None) -> "Data":
+        """Bridge a returns-shaped frame into a `Data` object.
+
+        `data` is the same bridge hardwired to `returns`.  Use this
+        method when the series you want analysed is a *derived* one — the output
+        of `cost_adjusted_returns`, `deduct_management_fee`, or any frame you
+        built yourself — so it reaches `Stats` through the same narrowing the
+        `data` property uses.
+
+        Building the `Data` by hand is the trap this exists to close:
+        the portfolio's returns-shaped frames carry ``'profit'`` and
+        ``'NAV_accumulated'`` alongside ``'returns'``, and
+        ``Data.from_returns(pf.returns)`` therefore reports a Sharpe ratio for
+        the cash P&L series and the NAV level as if they were two more assets.
+        This method keeps only ``'returns'``.
+
+        Args:
+            returns: Frame with a ``'returns'`` column, optionally a date
+                column, and any number of other columns (which are ignored).
+                Defaults to `returns`.
+
+        Returns:
+            `Data`: A Data object over the single return series, indexed by the
+            frame's date column when it has one and by row position otherwise.
+
+        Raises:
+            MissingReturnsColumnError: If *returns* has no ``'returns'`` column.
+
+        Examples:
+            >>> import polars as pl
+            >>> from datetime import date
+            >>> _d = [date(2020, 1, 1), date(2020, 1, 2), date(2020, 1, 3)]
+            >>> prices = pl.DataFrame({"date": _d, "A": [100.0, 110.0, 121.0]})
+            >>> pos = pl.DataFrame({"date": _d, "A": [1000.0, 1000.0, 1000.0]})
+            >>> pf = Portfolio(prices=prices, cashposition=pos, aum=1e6, cost_bps=5.0)
+            >>> net = pf.as_data(pf.cost_adjusted_returns())
+            >>> net.returns.columns
+            ['returns']
+        """
+        return Portfolio._build_data_bridge(self.returns if returns is None else returns)
 
     @property
     @cached_in_slot("_stats_cache")

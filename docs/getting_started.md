@@ -90,7 +90,21 @@ flowchart LR
     AUM --> RET
     RET --> OUT["stats · plots · report"]
     CP --> TO[turnover] --> COST["cost_adjusted_returns ·<br/>trading_cost_impact"]
+    COST --> AD["as_data(frame)"] --> OUT
 ```
+
+`stats`, `plots` and `report` read the gross `returns` series. To run the same
+metrics over a *derived* one — cost-adjusted, fee-deducted, or hand-built — pass
+the frame through `pf.as_data(frame)`:
+
+```python
+net = pf.deduct_management_fee(annual_fee=0.0085, base=pf.cost_adjusted_returns(cost_bps=5))
+pf.as_data(net).stats.sharpe()
+```
+
+Prefer it to building the `Data` yourself: `pf.returns` and the cost frames also
+carry `profit` and `NAV_accumulated` columns, and `Data.from_returns` would score
+those as two additional assets. `as_data` keeps only `returns`.
 
 ### Build a Portfolio
 
