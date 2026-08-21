@@ -30,6 +30,36 @@ repos:
         language: system
         pass_filenames: false
 
+      # The architectural import contracts in [tool.importlinter]: the analytics
+      # subpackages (_stats, _plots, _reports, _utils) annotate against the structural
+      # Protocols in _protocol.py and must never import the concrete Data / Portfolio at
+      # runtime.
+      #
+      # This used to be a `make arch` target hooked into `test` with a double-colon rule,
+      # which made it a CI gate only because rhiza v1.3.x ran `make test` in CI. v1.4.0
+      # retired the make layer and rhiza_ci.yml now runs `uvx rhiza-task test` directly,
+      # so a Makefile hook no longer reaches CI at all — the contracts would have gone
+      # unchecked while every job stayed green. As a hook it runs under `rhiza-task fmt`,
+      # which is what the `ci / Pre-commit hooks` job executes.
+      #
+      # `uv run --with import-linter` is the exact command the old `arch` target used, and
+      # it is not interchangeable with an isolated `language: python` hook: import-linter
+      # resolves `root_package = "jquantstats"` by importing it, so it needs the project
+      # ITSELF on the path. In a pre-commit venv holding only import-linter that fails with
+      # "Could not find package 'jquantstats' in your Python path". `uv run` uses the
+      # project environment, where jquantstats is installed, and `--with` keeps
+      # import-linter out of [dependency-groups] — matching the policy there of declaring
+      # only what something resolves from the venv.
+      #
+      # pass_filenames is off because lint-imports reads its whole contract set from
+      # pyproject.toml rather than taking paths; `files` only decides *whether* to run.
+      - id: import-linter
+        name: Architectural import contracts (import-linter)
+        entry: uv run --with import-linter lint-imports
+        language: system
+        pass_filenames: false
+        files: '^(src/.*\.py|pyproject\.toml)$'
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: 'v0.16.2'
     hooks:
