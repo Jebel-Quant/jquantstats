@@ -106,6 +106,71 @@ include = [
 [tool.bandit]
 exclude_dirs = ["src/tests"]  # Exclude test directories from security scanning
 
+# Settings for the rhiza-task CLI, which replaced the synced make layer in rhiza
+# v1.4.0. Every value below was carried over from a file that release deleted
+# (`.rhiza/make.d/*.mk`, `.rhiza/.env`, the old Makefile); each one differs from the
+# CLI default, so dropping it would quietly weaken a gate rather than fail loudly.
+[tool.rhiza-task]
+# Was COVERAGE_FAIL_UNDER in .rhiza/make.d/custom-env.mk. The CLI default is 90.
+# `[tool.coverage.report] fail_under = 100` above does NOT cover this: the `test`
+# task passes `--cov-fail-under` on the command line, which outranks the config
+# file. Without this line the suite may drop to 90% coverage and still go green.
+coverage_fail_under = 100
+
+# Was TYPECHECKER in .rhiza/make.d/python.mk. The CLI default is `ty` alone, so
+# omitting this would stop running mypy --strict entirely. Note this is also
+# stricter than the make layer was: the old shell `case` let mypy's exit status
+# win, so a `ty` failure could pass. Both must now succeed.
+typechecker = "both"
+
+# Was MARIMO_FOLDER in .rhiza/.env. The CLI default is `docs/notebooks`, which does
+# not exist here — the notebooks live under book/. Without this, `marimo-validate`
+# finds nothing to check and the notebooks stop being verified, and the folder also
+# drops out of the deptry scan (taking the `marimo` dev dependency with it).
+marimo_folder = "book/marimo/notebooks"
+
+# Was RHIZA_CHECKS_VERSION in .rhiza/make.d/quality.mk, consumed as
+# `pytest-rhiza==$(RHIZA_CHECKS_VERSION)`. The CLI default resolves
+# `pytest-rhiza @ git+…@v0.2.0`; this repo ran 0.2.1, so the pin is preserved
+# rather than silently rolled back. (Latest on PyPI is 0.4.0 — upgrading is a
+# deliberate decision, not part of this migration.)
+pytest_rhiza = "pytest-rhiza==0.2.1"
+
+# Replaces `DEPTRY_FOLDERS += api` from the old Makefile. v1.4.0 removed that
+# accumulator and now *derives* the deptry folder set — source_folder plus
+# marimo_folder — with no setting to extend it. The `deps` task appends
+# `deptry_ignore` to deptry's argv after those folders, and deptry takes multiple
+# roots positionally, so a bare path here restores the previous scope exactly.
+#
+# This is load-bearing, not cosmetic: without it deptry never sees api/, and
+# `ci / deps` fails with `DEP002 'fastapi' defined as a dependency but not used`.
+# Suppressing that with a per_rule_ignores entry would have been the weaker fix —
+# it would also stop flagging fastapi if api/ ever really stopped importing it.
+deptry_ignore = ["api"]
+
+# Deliberately NOT set, each because it already matches the CLI default — listing
+# them anyway is how a redundant line becomes the one someone edits:
+#   source_folder ("src"), tests_folder ("tests"), uv_sync_args
+#   ("--all-extras --all-groups"), license_fail_on ("GPL LGPL AGPL"),
+#   book_output ("_book"), zensical_version (">=0.0.36"), paper_folder
+#   ("docs/paper").
+# Also deliberately unset:
+#   mkdocs_extra_packages  the old Makefile set `--with 'mkdocstrings[python]'`,
+#                          which is now the default. Naming the setting REPLACES
+#                          the default list, so restating it invites someone to
+#                          append a package and silently drop mkdocstrings.
+#   license_ignore_packages  marimo.mk appended `docutils`; rhiza-task adds it
+#                            itself whenever the marimo tasks are registered.
+#   ci_os_matrix  .rhiza/.env documented leaving this unset on purpose so
+#                 rhiza_ci.yml can pick the matrix per caller. Pinning it here
+#                 would defeat that for every consumer.
+#   layers / rhiza_checks  both derived — layers from the manifests present
+#                          (pyproject.toml -> "python"), and the check set from
+#                          layers, which still yields all five checks the make
+#                          accumulators built up.
+# Not settings at all: PROJECT_NAME_EXTRA and LOG_LEVEL from custom-env.mk were
+# cosmetic and have no CLI equivalent.
+
 # Ignore specific dependency issues.
 #
 # DEP002 flags a declared dependency with no import site. The three below have
@@ -116,8 +181,10 @@ exclude_dirs = ["src/tests"]  # Exclude test directories from security scanning
 #                       (`uvicorn api.app:app`), not imported.
 #   python-multipart  - parses multipart/form-data for FastAPI's Form/UploadFile.
 #                       Imported by Starlette, never by us.
-# fastapi is deliberately absent: api/ is now part of the deptry scan (see the
-# DEPTRY_FOLDERS line in the Makefile), so its import there is observed directly.
+# fastapi is deliberately absent: api/ is part of the deptry scan (see
+# `deptry_ignore` under [tool.rhiza-task] above — it was the Makefile's
+# DEPTRY_FOLDERS line before rhiza v1.4.0), so its import there is observed
+# directly.
 [tool.deptry.per_rule_ignores]
 DEP002 = ["kaleido", "uvicorn", "python-multipart"]
 
