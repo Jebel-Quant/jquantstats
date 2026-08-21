@@ -1,34 +1,50 @@
 """Guard the repo's 100% coverage gate against rhiza template-sync regressions.
 
-The gate lives in ``.rhiza/make.d/custom-env.mk`` (``COVERAGE_FAIL_UNDER ?= 100``)
-because that is the only committed channel that passes the template's own
-validation tests. A rhiza sync could reset that file to its example content,
-silently dropping the gate back to the template default of 90 while CI stays
-green — this test makes such a regression fail CI loudly instead.
+The gate used to live in ``.rhiza/make.d/custom-env.mk`` (``COVERAGE_FAIL_UNDER ?= 100``),
+and this test read it back with ``make -s print-COVERAGE_FAIL_UNDER``. Rhiza v1.4.0 retired
+the make layer entirely — that file, the ``print-%`` target and the whole
+``.rhiza/make.d/`` folder are gone — so the value now lives in ``[tool.rhiza-task]`` in
+``pyproject.toml``, which is where the ``rhiza-task`` CLI reads it from.
+
+The regression this guards against is unchanged in substance: drop the setting and
+``rhiza-task`` falls back to its own default of 90, so the suite could shed ten points of
+coverage while CI stayed green. It is read straight out of the committed TOML rather than
+through the CLI, so the test needs no network, no ``uvx`` and no subprocess.
+
+``[tool.coverage.report] fail_under`` is asserted alongside it because the two are
+genuinely independent: the ``test`` task passes ``--cov-fail-under`` on the command line,
+which outranks the config file, so a bare-``pytest`` run and a ``rhiza-task test`` run
+enforce different numbers if these ever drift apart.
 """
 
-import re
-import shutil
-import subprocess  # nosec B404 — invokes the repo's own Makefile with a fixed argv, no untrusted input
+import tomllib
 from pathlib import Path
 
-import pytest
-
 _REPO_ROOT = Path(__file__).parents[2]
-_MAKE = shutil.which("make")  # absolute path, avoids partial-path process start (B607)
+_EXPECTED = 100
+_CLI_DEFAULT = 90  # rhiza-task's own fallback, i.e. what a dropped setting silently buys
 
 
-@pytest.mark.skipif(_MAKE is None, reason="make not available")
+def _pyproject() -> dict:
+    """Parse the repo's ``pyproject.toml``.
+
+    Returns:
+        The parsed TOML document.
+    """
+    with (_REPO_ROOT / "pyproject.toml").open("rb") as handle:
+        return tomllib.load(handle)
+
+
 def test_coverage_gate_is_100():
-    """`make print-COVERAGE_FAIL_UNDER` must resolve to 100, not the template default of 90."""
-    proc = subprocess.run(  # nosec B603 — fixed argv, absolute executable, repo-controlled Makefile
-        [_MAKE, "-s", "print-COVERAGE_FAIL_UNDER"],
-        cwd=_REPO_ROOT,
-        capture_output=True,
-        text=True,
-        timeout=30,
-        check=True,
+    """``[tool.rhiza-task] coverage_fail_under`` must be 100, not rhiza-task's default of 90."""
+    rhiza_task = _pyproject()["tool"]["rhiza-task"]
+    assert "coverage_fail_under" in rhiza_task, (
+        "[tool.rhiza-task] has no coverage_fail_under — the gate silently falls back to "
+        f"rhiza-task's default of {_CLI_DEFAULT}%"
     )
-    plain = re.sub(r"\x1b\[[0-9;]*m", "", proc.stdout)
-    values = re.findall(r"^\s*(\d+)\s*$", plain, flags=re.MULTILINE)
-    assert values == ["100"], f"coverage gate is not 100 — custom-env.mk override lost? output:\n{plain}"
+    assert rhiza_task["coverage_fail_under"] == _EXPECTED
+
+
+def test_coverage_report_fail_under_agrees():
+    """``[tool.coverage.report] fail_under`` must match, so a bare pytest run enforces the same gate."""
+    assert _pyproject()["tool"]["coverage"]["report"]["fail_under"] == _EXPECTED
