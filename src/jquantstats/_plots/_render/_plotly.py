@@ -14,10 +14,12 @@ property the full-fidelity snapshot tests exist to pin.
 
 from __future__ import annotations
 
+from typing import Any
+
 import plotly.graph_objects as go
+import plotly.io as pio
 from plotly.subplots import make_subplots
 
-from .._data._styling import _apply_base_layout, _apply_figsize
 from .._spec import (
     Axis,
     Band,
@@ -36,6 +38,13 @@ from .._spec import (
 
 __all__ = ["render_plotly"]
 
+# Marimo renders a figure through its mimetype rather than by writing HTML, and
+# will not display one otherwise. Set here rather than at package import so that
+# `import jquantstats` has no side effect on Plotly's global configuration; the
+# first Plotly render is the earliest point it can possibly matter.
+pio.renderers.default = "plotly_mimetype"
+
+
 # Semantic tick format -> d3 format string, the vocabulary Plotly speaks.
 _D3_FORMATS: dict[TickFormat, str] = {
     "float2": ".2f",
@@ -51,8 +60,12 @@ _D3_FORMATS: dict[TickFormat, str] = {
 _DASHES = {"solid": "solid", "dash": "dash"}
 
 # Named colour ramp -> Plotly's colorscale stops.
-_COLORSCALES: dict[ColorScale, list[list[float | str]]] = {
+# Named colour ramp -> what Plotly expects: explicit stops for the custom one,
+# a built-in scale name for the rest.
+_COLORSCALES: dict[ColorScale, list[list[float | str]] | str] = {
     "red_white_green": [[0, "#d62728"], [0.5, "#ffffff"], [1, "#2ca02c"]],
+    "rdylgn": "RdYlGn",
+    "rdbu_r": "RdBu_r",
 }
 
 # Bars are drawn without an outline throughout.
@@ -104,7 +117,11 @@ def _scatter(line: LineSeries) -> go.Scatter:
     if line.show_legend is not None:
         grouping["showlegend"] = line.show_legend
 
-    trace = go.Scatter(x=line.x, y=line.y, mode="lines", name=line.name, line=style, **fill, **grouping)
+    mode = "lines+markers" if line.markers else "lines"
+    if line.marker_size is not None:
+        grouping["marker"] = {"size": line.marker_size}
+
+    trace = go.Scatter(x=line.x, y=line.y, mode=mode, name=line.name, line=style, **fill, **grouping)
     if line.hover is not None:
         trace.update(hovertemplate=_hovertemplate(line.hover))
     return trace
@@ -199,6 +216,8 @@ def _heatmap(grid: HeatmapGrid) -> go.Heatmap:
         texttemplate="%{text}",
         colorscale=_COLORSCALES[grid.colorscale],
         zmid=grid.zmid,
+        zmin=grid.zmin,
+        zmax=grid.zmax,
         showscale=True,
         colorbar={"title": grid.colorbar_title},
     )
@@ -279,6 +298,10 @@ def _axis_kwargs(axis: Axis, *, vertical: bool = False) -> dict[str, object]:
         kwargs["tickformat"] = _D3_FORMATS[axis.tick_format]
     if axis.log:
         kwargs["type"] = "log"
+    if axis.kind is not None:
+        kwargs["type"] = axis.kind
+    if axis.dtick is not None:
+        kwargs["dtick"] = axis.dtick
     if axis.opposite_side:
         kwargs["side"] = "right" if vertical else "top"
     return kwargs
@@ -401,12 +424,25 @@ def _apply_layout(fig: go.Figure, spec: FigureSpec) -> None:
         # ones would only clutter what is a categorical axis.
         fig.update_yaxes(showgrid=True, gridwidth=0.5, gridcolor="lightgrey")
         fig.update_xaxes(showgrid=False)
+    elif spec.chrome == "plain":
+        # One series that names itself in the title, so no legend; the grid
+        # still helps read a value off the axes.
+        fig.update_layout(
+            title=spec.title,
+            height=spec.height,
+            plot_bgcolor="white",
+            hovermode=spec.hover_mode,
+        )
+        fig.update_xaxes(showgrid=True, gridwidth=0.5, gridcolor="lightgrey")
+        fig.update_yaxes(showgrid=True, gridwidth=0.5, gridcolor="lightgrey")
     else:
         # A matrix chart: colour encodes the value, so a legend would name
         # nothing and a shared-x hover has nothing to align. Only the title,
         # height and background are set.
         fig.update_layout(title=spec.title, height=spec.height, plot_bgcolor="white")
 
+    if spec.width is not None:
+        fig.update_layout(width=spec.width)
     _apply_figsize(fig, spec.figsize)
     if spec.bar_mode is not None:
         fig.update_layout(barmode=spec.bar_mode)
@@ -427,3 +463,70 @@ def _apply_panel_axes(fig: go.Figure, panel: Panel, at: dict[str, int]) -> None:
     y_kwargs = _axis_kwargs(panel.yaxis, vertical=True)
     if y_kwargs:
         fig.update_yaxes(**y_kwargs, **at)
+
+
+def _date_range_selector() -> dict[str, Any]:
+    """Return a standard Plotly date range-selector configuration.
+
+    Returns:
+        A dict suitable for ``xaxis.rangeselector``.
+
+    """
+    return {
+        "buttons": [
+            {"count": 6, "label": "6m", "step": "month", "stepmode": "backward"},
+            {"count": 1, "label": "1y", "step": "year", "stepmode": "backward"},
+            {"count": 3, "label": "3y", "step": "year", "stepmode": "backward"},
+            {"step": "year", "stepmode": "todate", "label": "YTD"},
+            {"step": "all", "label": "All"},
+        ]
+    }
+
+
+def _apply_base_layout(
+    fig: go.Figure,
+    title: str,
+    height: int | None = 600,
+    with_range_selector: bool = True,
+) -> go.Figure:
+    """Apply the standard jquantstats Plotly layout to a figure.
+
+    Sets white background, light-grey grid, horizontal legend, and an
+    optional date range-selector on the primary x-axis.
+
+    Args:
+        fig: The Plotly figure to style in-place.
+        title: Chart title.
+        height: Figure height in pixels. Defaults to 600. None leaves the
+            height unset, which Plotly treats as "size to the container".
+        with_range_selector: Attach a date range-selector to ``xaxis``.
+            Defaults to True.
+
+    Returns:
+        The same figure, mutated in-place and returned for chaining.
+
+    """
+    layout_kw: dict[str, Any] = {
+        "title": title,
+        "height": height,
+        "hovermode": "x unified",
+        "plot_bgcolor": "white",
+        "legend": {"orientation": "h", "yanchor": "bottom", "y": 1.02, "xanchor": "right", "x": 1},
+    }
+    if with_range_selector:
+        layout_kw["xaxis"] = {
+            "rangeselector": _date_range_selector(),
+            "rangeslider": {"visible": False},
+            "type": "date",
+        }
+    fig.update_layout(**layout_kw)
+    fig.update_xaxes(showgrid=True, gridwidth=0.5, gridcolor="lightgrey")
+    fig.update_yaxes(showgrid=True, gridwidth=0.5, gridcolor="lightgrey")
+    return fig
+
+
+def _apply_figsize(fig: go.Figure, figsize: tuple[int, int] | None) -> go.Figure:
+    """Apply optional ``(width, height)`` figure size to Plotly layout."""
+    if figsize is not None:
+        fig.update_layout(width=figsize[0], height=figsize[1])
+    return fig

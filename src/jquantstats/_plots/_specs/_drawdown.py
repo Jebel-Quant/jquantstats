@@ -9,11 +9,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-import plotly.express as px
 import polars as pl
 
 from .._spec import Axis, Band, FigureSpec, HoverSpec, LineSeries, Panel, RefLine
-from .._style import hex_to_rgba, ticker_colors
+from .._style import PALETTE, hex_to_rgba, ticker_colors
 
 if TYPE_CHECKING:
     from jquantstats._protocol import DataLike
@@ -147,7 +146,6 @@ def drawdowns_periods_spec(data: DataLike, n: int, title: str, asset: str | None
 
     price_list = (1.0 + df[col].cast(pl.Float64)).cum_prod().to_list()
     dates = df[date_col].to_list()
-    palette = px.colors.qualitative.Plotly
 
     bands = []
     for i, period in enumerate(compute_drawdown_periods(price_list, n)):
@@ -157,7 +155,7 @@ def drawdowns_periods_spec(data: DataLike, n: int, title: str, asset: str | None
                 # Extend to the next point so the span covers the final day of
                 # the episode rather than stopping at its left edge.
                 x1=dates[min(period["end_idx"] + 1, len(dates) - 1)],
-                color=hex_to_rgba(palette[i % len(palette)], alpha=_BAND_ALPHA),
+                color=hex_to_rgba(PALETTE[i % len(PALETTE)], alpha=_BAND_ALPHA),
                 label=f"#{i + 1} {period['max_drawdown']:.1%}",
             )
         )

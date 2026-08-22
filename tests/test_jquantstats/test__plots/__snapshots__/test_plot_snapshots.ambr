@@ -47,7 +47,7 @@
   dict({
     'layout': dict({
       'hovermode': None,
-      'plot_bgcolor': None,
+      'plot_bgcolor': 'white',
       'subplot_titles': list([
       ]),
       'title': 'Correlation heatmap',
@@ -55,7 +55,7 @@
     'num_traces': 1,
     'traces': list([
       dict({
-        'name': '0',
+        'name': None,
         'type': 'Heatmap',
       }),
     ]),
