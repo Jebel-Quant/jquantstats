@@ -79,6 +79,57 @@ def _classify(param: str, value: Any) -> tuple[Mode, Any]:
     raise InvalidTruncateBoundError(param, value)
 
 
+def _resolve_row_bounds(start: Any, end: Any) -> tuple[Mode, Any, Any]:
+    """Resolve bounds against an integer index, where only row numbers are legal.
+
+    Split out of `resolve_bounds` so the non-temporal rule reads as one thing:
+    a row number is the only meaning a bound can carry here, so anything else is
+    reported against that expectation rather than being classified further.
+
+    ``bool`` is rejected for the reason `_classify` rejects it — ``start=True``
+    is far more likely to be a mistake than a request for row 1 — but the error
+    differs: on an integer index the complaint is the index type, not the bound
+    type, so `IntegerIndexBoundError` names what was expected.
+
+    Args:
+        start: Inclusive lower bound, or ``None``.
+        end: Inclusive upper bound, or ``None``.
+
+    Returns:
+        ``(mode, start, end)`` with the bounds unchanged — a row index needs no
+        coercion. ``mode`` is ``"none"`` when both bounds are ``None``, else
+        ``"rows"``.
+
+    Raises:
+        IntegerIndexBoundError: If either bound is not an ``int``.
+    """
+    for param, value in (("start", start), ("end", end)):
+        if value is not None and (isinstance(value, bool) or not isinstance(value, int)):
+            raise IntegerIndexBoundError(param, type(value).__name__)
+    return ("none" if start is None and end is None else "rows"), start, end
+
+
+def _reject_mixed_modes(start_mode: Mode, end_mode: Mode) -> None:
+    """Reject a row index paired with a date, in either order.
+
+    The two checks are mirror images, and the argument order to
+    `MixedTruncateBoundsError` is not symmetric: the first name is the bound
+    that disagrees with the axis already established by the other, so the
+    message reads as a complaint about the newcomer rather than about the pair.
+
+    Args:
+        start_mode: The mode `_classify` assigned to *start*.
+        end_mode: The mode `_classify` assigned to *end*.
+
+    Raises:
+        MixedTruncateBoundsError: If one bound is a row index and the other a date.
+    """
+    if start_mode == "rows" and end_mode == "dates":
+        raise MixedTruncateBoundsError("start", "end")
+    if start_mode == "dates" and end_mode == "rows":
+        raise MixedTruncateBoundsError("end", "start")
+
+
 def resolve_bounds(start: Any, end: Any, *, temporal: bool) -> tuple[Mode, Any, Any]:
     """Decide which axis *start* and *end* address, and coerce them for it.
 
@@ -103,20 +154,13 @@ def resolve_bounds(start: Any, end: Any, *, temporal: bool) -> tuple[Mode, Any, 
         MixedTruncateBoundsError: If one bound is a row index and the other a date.
     """
     if not temporal:
-        # Integer index: a row number is the only thing a bound can mean, so any
-        # other type is reported against that expectation.
-        for param, value in (("start", start), ("end", end)):
-            if value is not None and (isinstance(value, bool) or not isinstance(value, int)):
-                raise IntegerIndexBoundError(param, type(value).__name__)
-        return ("none" if start is None and end is None else "rows"), start, end
+        return _resolve_row_bounds(start, end)
 
     start_mode, start_value = _classify("start", start)
     end_mode, end_value = _classify("end", end)
+    _reject_mixed_modes(start_mode, end_mode)
 
-    if start_mode == "rows" and end_mode == "dates":
-        raise MixedTruncateBoundsError("start", "end")
-    if start_mode == "dates" and end_mode == "rows":
-        raise MixedTruncateBoundsError("end", "start")
-
+    # With the modes agreed, whichever bound is set names the axis; when only one
+    # is given the other stays "none" and contributes nothing.
     mode: Mode = start_mode if start_mode != "none" else end_mode
     return mode, start_value, end_value
