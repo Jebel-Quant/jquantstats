@@ -8,10 +8,20 @@ from ._cumulative import compare_spec as compare_spec
 from ._cumulative import cumulative_returns_spec as cumulative_returns_spec
 from ._cumulative import earnings_spec as earnings_spec
 from ._cumulative import log_returns_spec as log_returns_spec
+from ._periodic import daily_returns_spec as daily_returns_spec
+from ._periodic import monthly_heatmap_spec as monthly_heatmap_spec
+from ._periodic import monthly_returns_spec as monthly_returns_spec
+from ._periodic import period_agg_exprs as period_agg_exprs
+from ._periodic import yearly_returns_spec as yearly_returns_spec
 
 __all__ = [
     "compare_spec",
     "cumulative_returns_spec",
+    "daily_returns_spec",
     "earnings_spec",
     "log_returns_spec",
+    "monthly_heatmap_spec",
+    "monthly_returns_spec",
+    "period_agg_exprs",
+    "yearly_returns_spec",
 ]

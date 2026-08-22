@@ -12,19 +12,43 @@ Three concerns, in order:
 from __future__ import annotations
 
 import matplotlib.figure as mfigure
+import numpy as np
 import plotly.graph_objects as go
 import polars as pl
 import pytest
+from matplotlib.colors import TwoSlopeNorm, to_hex, to_rgba
 from matplotlib.ticker import StrMethodFormatter
 
 import jquantstats
 from jquantstats._plots import _backend
 from jquantstats._plots._render import render, render_plotly
-from jquantstats._plots._render._mpl import _DEFAULT_WIDTH_PX, _DPI, render_mpl
-from jquantstats._plots._spec import Axis, FigureSpec, LineSeries, Panel
+from jquantstats._plots._render._mpl import _DEFAULT_WIDTH_PX, _DPI, mpl_color, render_mpl
+from jquantstats._plots._spec import Axis, FigureSpec, HeatmapGrid, LineSeries, Panel
 from jquantstats.exceptions import MissingBackendError
 
-# Every cumulative chart, with arguments exercising the interesting branches.
+
+def _normalise_colour(colour: str) -> tuple[float, ...]:
+    """Reduce a colour to comparable RGBA floats.
+
+    The two backends spell the same colour differently — a spec carries
+    Plotly's CSS ``rgba(99, 110, 250, 0.4)``, while matplotlib reports a hex
+    string — so comparison goes through a common representation. It routes
+    through the renderer's own `mpl_color`, so this checks the real translation
+    rather than a second copy of it. Values are rounded because ``rgba()``
+    carries 8-bit channels while matplotlib keeps floats.
+    """
+    return tuple(round(channel, 2) for channel in to_rgba(mpl_color(colour)))
+
+
+def _scaled_colour(colour: str, opacity: float) -> tuple[float, ...]:
+    """Reduce a colour to comparable RGBA floats with its alpha scaled."""
+    r, g, b, a = to_rgba(mpl_color(colour))
+    return tuple(round(channel, 2) for channel in (r, g, b, a * opacity))
+
+
+# Every line chart migrated so far, with arguments exercising the interesting
+# branches. Parity is asserted per line series, so bar and matrix charts are
+# checked separately below.
 CUMULATIVE_CHARTS = [
     ("returns", {}),
     ("returns", {"log_scale": True}),
@@ -37,6 +61,16 @@ CUMULATIVE_CHARTS = [
     ("earnings", {"start_balance": 250_000}),
 ]
 _IDS = [f"{name}-{sorted(kwargs)}" for name, kwargs in CUMULATIVE_CHARTS]
+
+# The periodic bar charts.
+BAR_CHARTS = [
+    ("daily_returns", {}),
+    ("yearly_returns", {}),
+    ("yearly_returns", {"compounded": False}),
+    ("monthly_returns", {}),
+    ("monthly_returns", {"compounded": False}),
+]
+_BAR_IDS = [f"{name}-{sorted(kwargs)}" for name, kwargs in BAR_CHARTS]
 
 
 def _line(**overrides) -> LineSeries:
@@ -132,6 +166,156 @@ def test_backends_agree_on_colours(data, method: str, kwargs: dict) -> None:
     plotly_colors = [trace.line.color.lower() for trace in plotly_fig.data]
     mpl_colors = [line.get_color().lower() for line in mpl_fig.axes[0].get_lines()]
     assert plotly_colors == mpl_colors
+
+
+@pytest.mark.parametrize(("method", "kwargs"), BAR_CHARTS, ids=_BAR_IDS)
+def test_bar_backends_plot_the_same_numbers(data, method: str, kwargs: dict) -> None:
+    """Both backends draw identical bars for every periodic chart."""
+    plotly_fig = getattr(data.plots, method)(**kwargs, backend="plotly")
+    mpl_fig = getattr(data.plots, method)(**kwargs, backend="matplotlib")
+
+    containers = mpl_fig.axes[0].containers
+    assert len(containers) == len(plotly_fig.data)
+
+    for trace, container in zip(plotly_fig.data, containers, strict=True):
+        assert trace.name == container.get_label()
+        heights = [patch.get_height() for patch in container]
+        assert list(trace.y) == pytest.approx(heights, nan_ok=True)
+
+
+@pytest.mark.parametrize(("method", "kwargs"), BAR_CHARTS, ids=_BAR_IDS)
+def test_bar_backends_agree_on_per_bar_colours(data, method: str, kwargs: dict) -> None:
+    """Sign colouring is decided in the spec, so both backends match.
+
+    These charts colour each bar by the sign of its value rather than by
+    series, which is the reason `BarSeries` carries a colour per bar.
+
+    The two backends apply opacity differently: Plotly keeps it on the trace
+    and multiplies, while matplotlib has no equivalent, so the renderer folds
+    it into each colour's alpha. Comparison therefore scales Plotly's colours
+    by its trace opacity before matching.
+    """
+    plotly_fig = getattr(data.plots, method)(**kwargs, backend="plotly")
+    mpl_fig = getattr(data.plots, method)(**kwargs, backend="matplotlib")
+
+    for trace, container in zip(plotly_fig.data, mpl_fig.axes[0].containers, strict=True):
+        expected = [_scaled_colour(c, trace.opacity) for c in trace.marker.color]
+        actual = [_normalise_colour(to_hex(p.get_facecolor(), keep_alpha=True)) for p in container]
+        assert expected == actual
+
+
+def test_heatmap_backends_plot_the_same_matrix(data) -> None:
+    """The calendar grid holds the same values on both backends."""
+    plotly_fig = data.plots.monthly_heatmap(backend="plotly")
+    mpl_fig = data.plots.monthly_heatmap(backend="matplotlib")
+
+    expected = [list(row) for row in plotly_fig.data[0].z]
+    actual = mpl_fig.axes[0].images[0].get_array()
+
+    assert actual.shape == (len(expected), 12)
+    for row_index, row in enumerate(expected):
+        for col_index, value in enumerate(row):
+            cell = actual[row_index, col_index]
+            if value is None:
+                assert cell is np.ma.masked, "an uncovered month must stay unpainted"
+            else:
+                assert float(cell) == pytest.approx(value)
+
+
+def test_heatmap_titles_name_the_asset(data) -> None:
+    """One asset per calendar, so the title says which."""
+    asset = data.assets[0]
+    plotly_fig = data.plots.monthly_heatmap(asset=asset, backend="plotly")
+    mpl_fig = data.plots.monthly_heatmap(asset=asset, backend="matplotlib")
+
+    assert plotly_fig.layout.title.text.endswith(f"— {asset}")
+    assert mpl_fig.get_suptitle().endswith(f"— {asset}")
+
+
+def test_heatmap_puts_months_along_the_top(data) -> None:
+    """Months read as column headings on both backends."""
+    assert data.plots.monthly_heatmap(backend="plotly").layout.xaxis.side == "top"
+
+    mpl_fig = data.plots.monthly_heatmap(backend="matplotlib")
+    labels = [t.get_text() for t in mpl_fig.axes[0].get_xticklabels()]
+    assert labels[:3] == ["Jan", "Feb", "Mar"]
+    assert mpl_fig.axes[0].xaxis.get_ticks_position() == "top"
+
+
+def test_matrix_charts_carry_no_legend(data) -> None:
+    """Colour encodes the value, so a legend would name nothing."""
+    assert data.plots.monthly_heatmap(backend="matplotlib").axes[0].get_legend() is None
+
+
+def _grid_is_on(ax) -> bool:
+    """Whether *ax* draws grid lines.
+
+    Read from the ticks rather than ``xaxis.get_gridlines()``: those Line2D
+    artists exist and report themselves visible whether or not the grid is
+    actually enabled.
+    """
+    ticks = ax.xaxis.get_major_ticks()
+    return bool(ticks) and ticks[0].gridline.get_visible()
+
+
+def test_matrix_charts_carry_no_grid(data) -> None:
+    """A grid behind an opaque matrix would be hidden anyway."""
+    assert not _grid_is_on(data.plots.monthly_heatmap(backend="matplotlib").axes[0])
+
+
+def test_series_charts_keep_their_grid(data) -> None:
+    """The counterpart: a line or bar chart still gets its grid."""
+    assert _grid_is_on(data.plots.daily_returns(backend="matplotlib").axes[0])
+
+
+def test_heatmap_without_a_midpoint_spans_the_data_range() -> None:
+    """A grid may decline to anchor its colour ramp.
+
+    No calendar does — they all centre on zero so red and green read
+    symmetrically — but the spec can express it, so it must work.
+    """
+    grid = HeatmapGrid(
+        x_labels=("Jan", "Feb"),
+        y_labels=("2024",),
+        z=((1.0, 3.0),),
+        text=(("", ""),),
+        colorscale="red_white_green",
+        zmid=None,
+    )
+    fig = render_mpl(FigureSpec(title="T", panels=(Panel(heatmap=grid),), chrome="bare"))
+    assert not isinstance(fig.axes[0].images[0].norm, TwoSlopeNorm)
+
+
+def test_heatmap_with_a_midpoint_centres_the_ramp(data) -> None:
+    """Anchoring at zero is what makes red and green read symmetrically."""
+    norm = data.plots.monthly_heatmap(backend="matplotlib").axes[0].images[0].norm
+    assert isinstance(norm, TwoSlopeNorm)
+    assert norm.vcenter == 0
+
+
+def test_opposite_side_resolves_per_axis() -> None:
+    """The far edge is the top for an x-axis and the right for a y-axis.
+
+    Only the calendar's x-axis uses this in practice, so the vertical case is
+    covered here rather than left as an untested path.
+    """
+    panel = Panel(lines=(_line(),), xaxis=Axis(opposite_side=True), yaxis=Axis(opposite_side=True))
+    ax = render_mpl(_spec(panel)).axes[0]
+    assert ax.xaxis.get_ticks_position() == "top"
+    assert ax.yaxis.get_ticks_position() == "right"
+
+
+def test_heatmap_with_no_values_still_renders() -> None:
+    """An entirely empty calendar must not divide by an empty range."""
+    grid = HeatmapGrid(
+        x_labels=("Jan",),
+        y_labels=("2024",),
+        z=((None,),),
+        text=(("",),),
+        colorscale="red_white_green",
+    )
+    fig = render_mpl(FigureSpec(title="T", panels=(Panel(heatmap=grid),), chrome="bare"))
+    assert fig.axes[0].images[0].get_array().count() == 0
 
 
 def test_validation_is_backend_independent(data_no_benchmark) -> None:

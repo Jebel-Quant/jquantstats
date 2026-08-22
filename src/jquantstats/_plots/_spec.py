@@ -31,8 +31,12 @@ import polars as pl
 
 __all__ = [
     "Axis",
+    "BarSeries",
+    "Chrome",
+    "ColorScale",
     "Dash",
     "FigureSpec",
+    "HeatmapGrid",
     "HoverSpec",
     "LineSeries",
     "Panel",
@@ -41,14 +45,27 @@ __all__ = [
 
 #: How to render a number, named by intent rather than by any backend's syntax.
 #:
-#: ``float2``/``float4`` are fixed-point to that many decimals; ``currency0`` is
+#: ``float2``/``float4`` are fixed-point to that many decimals; ``percent1``/
+#: ``percent2`` scale to a percentage with that many decimals; ``currency0`` is
 #: a thousands-separated integer. Each renderer owns the mapping — Plotly wants
 #: ``".2f"``, matplotlib wants a ``Formatter`` — so neither vocabulary leaks in
 #: here.
-TickFormat = Literal["float2", "float4", "currency0"]
+TickFormat = Literal["float2", "float4", "percent1", "percent2", "currency0"]
 
 #: Line styles, kept to the set the charts actually use.
 Dash = Literal["solid", "dash"]
+
+#: Named colour ramps for matrix charts, resolved per backend.
+ColorScale = Literal["red_white_green"]
+
+#: How much furniture a chart carries.
+#:
+#: ``timeseries`` is the standard treatment shared by most charts: a legend,
+#: unified hover, a light grid and optionally the date range-selector.
+#: ``bare`` is for matrix charts, where colour encodes the value rather than
+#: the series — a legend would name nothing and a shared-x hover has no
+#: meaning, so only the title, height and background are set.
+Chrome = Literal["timeseries", "bare"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -104,6 +121,59 @@ class LineSeries:
 
 
 @dataclass(frozen=True, slots=True)
+class BarSeries:
+    """One set of bars drawn across a panel.
+
+    Attributes:
+        name: Legend entry for the series.
+        x: Bar positions — dates, or the category each bar sits at.
+        y: Bar heights.
+        colors: One colour per bar. Per-bar rather than per-series because
+            these charts colour a bar by the sign of its value.
+        opacity: Fill opacity.
+        hover: Tooltip description, or None to leave the backend's default.
+
+    """
+
+    name: str
+    x: pl.Series
+    y: pl.Series
+    colors: tuple[str, ...]
+    opacity: float = 0.85
+    hover: HoverSpec | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class HeatmapGrid:
+    """A matrix of values drawn as a coloured grid.
+
+    Attributes:
+        x_labels: Column headings, left to right.
+        y_labels: Row headings, top to bottom.
+        z: The values, as ``z[row][column]``. None marks a missing cell.
+        text: Per-cell labels drawn over the grid, parallel to *z*.
+        colorscale: The colour ramp to map values through.
+        zmid: Value anchored to the middle of a diverging ramp, or None to
+            span the data range.
+        colorbar_title: Heading for the colour scale legend.
+        hover_label: Word naming the quantity in the tooltip, or None for no
+            tooltip. Interactive-only, so matplotlib ignores it.
+
+    """
+
+    x_labels: tuple[str, ...]
+    y_labels: tuple[str, ...]
+    z: tuple[tuple[float | None, ...], ...]
+    text: tuple[tuple[str, ...], ...]
+    colorscale: ColorScale
+    # An int, so a whole-number anchor serialises as `0` rather than `0.0`;
+    # Plotly preserves the distinction and the fidelity snapshots compare it.
+    zmid: float | None = 0
+    colorbar_title: str = ""
+    hover_label: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class Axis:
     """Configuration for one axis of a panel.
 
@@ -116,6 +186,10 @@ class Axis:
         tick_format: How to render tick values, or None for the default.
         tick_prefix: Written before each tick value, e.g. a currency sign.
         log: Use a logarithmic scale.
+        opposite_side: Draw the axis on the far edge — the top for a
+            horizontal axis, the right for a vertical one. The monthly
+            calendar puts its months along the top, where they read as column
+            headings.
 
     """
 
@@ -123,6 +197,10 @@ class Axis:
     tick_format: TickFormat | None = None
     tick_prefix: str = ""
     log: bool = False
+    # Deliberately a flag rather than a compass point. Which edge counts as
+    # "opposite" depends on the axis, and naming it absolutely would admit
+    # nonsense a renderer would then have to police — an x-axis on the "left".
+    opposite_side: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -134,6 +212,8 @@ class Panel:
 
     Attributes:
         lines: Line series to draw.
+        bars: Bar series to draw.
+        heatmap: A value matrix to draw, or None.
         xaxis: Horizontal axis configuration.
         yaxis: Vertical axis configuration.
         title: Heading for this panel, used when a chart has several.
@@ -141,6 +221,8 @@ class Panel:
     """
 
     lines: tuple[LineSeries, ...] = ()
+    bars: tuple[BarSeries, ...] = ()
+    heatmap: HeatmapGrid | None = None
     xaxis: Axis = field(default_factory=Axis)
     yaxis: Axis = field(default_factory=Axis)
     title: str | None = None
@@ -159,6 +241,9 @@ class FigureSpec:
             inches so one public signature means the same thing either way.
         date_range_selector: Offer the Plotly range-selector buttons. Ignored
             by matplotlib, which has no interactive widgets.
+        chrome: How much surrounding furniture the chart carries.
+        bar_mode: How bars from different series share an x position, or None
+            for the backend's default.
 
     """
 
@@ -167,3 +252,5 @@ class FigureSpec:
     height: int = 600
     figsize: tuple[int, int] | None = None
     date_range_selector: bool = True
+    chrome: Chrome = "timeseries"
+    bar_mode: Literal["group", "overlay", "relative"] | None = None

@@ -2,57 +2,24 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal, overload
 
-import plotly.graph_objects as go
-import polars as pl
-
-from ._styling import _apply_base_layout, _bar_colors, _ticker_colors, _yearly_bar_colors
+from .._render import render
+from .._specs import (
+    daily_returns_spec,
+    monthly_heatmap_spec,
+    monthly_returns_spec,
+    yearly_returns_spec,
+)
 
 if TYPE_CHECKING:
+    from matplotlib.figure import Figure as MplFigure
+    from plotly.graph_objects import Figure as PlotlyFigure
+
     from jquantstats._protocol import DataLike
 
-
-def _period_agg_exprs(tickers: list[str], compounded: bool) -> list[pl.Expr]:
-    """Per-ticker aggregation expressions for a period bucket.
-
-    Args:
-        tickers: Asset column names to aggregate.
-        compounded: Compound returns within the bucket when True, sum them
-            when False.
-
-    Returns:
-        One aliased expression per ticker.
-    """
-    if compounded:
-        return [((1.0 + pl.col(t)).product() - 1.0).alias(t) for t in tickers]
-    return [pl.col(t).sum().alias(t) for t in tickers]
-
-
-def _monthly_heatmap_matrix(
-    monthly: pl.DataFrame, years: list[int]
-) -> tuple[list[list[float | None]], list[list[str]]]:
-    """Build the year-by-month value and label grids for the monthly heatmap.
-
-    Args:
-        monthly: Aggregated frame with ``_year``, ``_month`` and ``ret`` columns.
-        years: Sorted unique years, defining the row order of the output grids.
-
-    Returns:
-        A ``(z, text)`` tuple: ``z`` holds returns scaled to percent (``None``
-        for missing cells) and ``text`` the formatted per-cell labels.
-
-    """
-    year_idx = {y: i for i, y in enumerate(years)}
-    z: list[list[float | None]] = [[None] * 12 for _ in years]
-    text: list[list[str]] = [[""] * 12 for _ in years]
-    for row in monthly.iter_rows(named=True):
-        yi = year_idx[row["_year"]]
-        mi = row["_month"] - 1
-        val = row["ret"]
-        z[yi][mi] = val * 100 if val is not None else None
-        text[yi][mi] = f"{val:.1%}" if val is not None else ""
-    return z, text
+    from .._backend import Backend
+    from .._render import Figure
 
 
 class _PeriodicPlotsMixin:
@@ -62,7 +29,13 @@ class _PeriodicPlotsMixin:
 
     _data: DataLike
 
-    def daily_returns(self, title: str = "Daily Returns") -> go.Figure:
+    @overload
+    def daily_returns(self, title: str = ..., *, backend: Literal["plotly"] | None = ...) -> PlotlyFigure: ...
+
+    @overload
+    def daily_returns(self, title: str = ..., *, backend: Literal["matplotlib"]) -> MplFigure: ...
+
+    def daily_returns(self, title: str = "Daily Returns", *, backend: Backend | None = None) -> Figure:
         """Daily returns as a bar chart.
 
         Each bar is coloured green for positive returns and red for negative
@@ -72,124 +45,102 @@ class _PeriodicPlotsMixin:
 
         Args:
             title: Chart title. Defaults to ``"Daily Returns"``.
+            backend: Renderer to use. Defaults to the ambient selection.
 
         Returns:
-            go.Figure: Interactive Plotly bar chart.
+            Figure: A bar chart.
 
         """
-        df = self._data.all
-        date_col = df.columns[0]
-        tickers = [c for c in df.columns if c != date_col]
-        colors = _ticker_colors(tickers)
-        single = len(tickers) == 1
+        return render(daily_returns_spec(self._data, title=title), backend)
 
-        fig = go.Figure()
-        for ticker in tickers:
-            values = df[ticker].to_list()
-            bar_colors = _bar_colors(values, colors[ticker], single_asset=single)
+    @overload
+    def yearly_returns(
+        self, title: str = ..., compounded: bool = ..., *, backend: Literal["plotly"] | None = ...
+    ) -> PlotlyFigure: ...
 
-            fig.add_trace(
-                go.Bar(
-                    x=df[date_col],
-                    y=df[ticker],
-                    name=ticker,
-                    marker={"color": bar_colors, "line": {"width": 0}},
-                    opacity=0.85,
-                    hovertemplate=f"{ticker}: %{{y:.2%}}",
-                )
-            )
+    @overload
+    def yearly_returns(
+        self, title: str = ..., compounded: bool = ..., *, backend: Literal["matplotlib"]
+    ) -> MplFigure: ...
 
-        _apply_base_layout(fig, title)
-        fig.update_yaxes(title_text="Return", tickformat=".1%")
-        return fig
-
-    def yearly_returns(self, title: str = "Yearly Returns", compounded: bool = True) -> go.Figure:
+    def yearly_returns(
+        self,
+        title: str = "Yearly Returns",
+        compounded: bool = True,
+        *,
+        backend: Backend | None = None,
+    ) -> Figure:
         """Annual compounded (or summed) returns as a grouped bar chart.
 
         Args:
             title: Chart title. Defaults to ``"Yearly Returns"``.
             compounded: Compound returns within each year. Defaults to True.
+            backend: Renderer to use. Defaults to the ambient selection.
 
         Returns:
-            go.Figure: Interactive Plotly grouped bar chart.
+            Figure: A grouped bar chart.
 
         """
-        df = self._data.all
-        date_col = df.columns[0]
-        tickers = [c for c in df.columns if c != date_col]
-        colors = _ticker_colors(tickers)
+        return render(yearly_returns_spec(self._data, title=title, compounded=compounded), backend)
 
-        agg_exprs = _period_agg_exprs(tickers, compounded)
-        yearly = (
-            df.with_columns(pl.col(date_col).dt.year().alias("_year")).group_by("_year").agg(agg_exprs).sort("_year")
-        )
+    @overload
+    def monthly_returns(
+        self, title: str = ..., compounded: bool = ..., *, backend: Literal["plotly"] | None = ...
+    ) -> PlotlyFigure: ...
 
-        fig = go.Figure()
-        for ticker in tickers:
-            bar_colors = _yearly_bar_colors(yearly[ticker].to_list(), colors[ticker])
-            fig.add_trace(
-                go.Bar(
-                    x=yearly["_year"],
-                    y=yearly[ticker],
-                    name=ticker,
-                    marker={"color": bar_colors, "line": {"width": 0}},
-                    opacity=0.85,
-                    hovertemplate=f"{ticker}: %{{y:.2%}}",
-                )
-            )
+    @overload
+    def monthly_returns(
+        self, title: str = ..., compounded: bool = ..., *, backend: Literal["matplotlib"]
+    ) -> MplFigure: ...
 
-        _apply_base_layout(fig, title, with_range_selector=False)
-        fig.update_layout(barmode="group", xaxis_title="Year")
-        fig.update_yaxes(title_text="Annual Return", tickformat=".1%")
-        return fig
-
-    def monthly_returns(self, title: str = "Monthly Returns", compounded: bool = True) -> go.Figure:
+    def monthly_returns(
+        self,
+        title: str = "Monthly Returns",
+        compounded: bool = True,
+        *,
+        backend: Backend | None = None,
+    ) -> Figure:
         """Monthly compounded (or summed) returns as a bar chart.
 
         Args:
             title: Chart title. Defaults to ``"Monthly Returns"``.
             compounded: Compound returns within each month. Defaults to True.
+            backend: Renderer to use. Defaults to the ambient selection.
 
         Returns:
-            go.Figure: Interactive Plotly bar chart.
+            Figure: A bar chart.
 
         """
-        df = self._data.all
-        date_col = df.columns[0]
-        tickers = [c for c in df.columns if c != date_col]
-        colors = _ticker_colors(tickers)
-        single = len(tickers) == 1
+        return render(monthly_returns_spec(self._data, title=title, compounded=compounded), backend)
 
-        monthly = df.group_by_dynamic(
-            index_column=date_col, every="1mo", period="1mo", closed="right", label="right"
-        ).agg(_period_agg_exprs(tickers, compounded))
+    @overload
+    def monthly_heatmap(
+        self,
+        title: str = ...,
+        compounded: bool = ...,
+        asset: str | None = ...,
+        *,
+        backend: Literal["plotly"] | None = ...,
+    ) -> PlotlyFigure: ...
 
-        fig = go.Figure()
-        for ticker in tickers:
-            values = monthly[ticker].to_list()
-            bar_colors = _bar_colors(values, colors[ticker], single_asset=single)
-
-            fig.add_trace(
-                go.Bar(
-                    x=monthly[date_col],
-                    y=monthly[ticker],
-                    name=ticker,
-                    marker={"color": bar_colors, "line": {"width": 0}},
-                    opacity=0.85,
-                    hovertemplate=f"{ticker}: %{{y:.2%}}",
-                )
-            )
-
-        _apply_base_layout(fig, title)
-        fig.update_yaxes(title_text="Monthly Return", tickformat=".1%")
-        return fig
+    @overload
+    def monthly_heatmap(
+        self,
+        title: str = ...,
+        compounded: bool = ...,
+        asset: str | None = ...,
+        *,
+        backend: Literal["matplotlib"],
+    ) -> MplFigure: ...
 
     def monthly_heatmap(
         self,
         title: str = "Monthly Returns Heatmap",
         compounded: bool = True,
         asset: str | None = None,
-    ) -> go.Figure:
+        *,
+        backend: Backend | None = None,
+    ) -> Figure:
         """Monthly returns calendar heatmap (year x month).
 
         One heatmap is produced per call for a single asset.  Green cells
@@ -200,53 +151,11 @@ class _PeriodicPlotsMixin:
             compounded: Compound intra-month returns. Defaults to True.
             asset: Asset column name to display.  Defaults to the first
                 non-date column in the dataset.
+            backend: Renderer to use. Defaults to the ambient selection.
 
         Returns:
-            go.Figure: Interactive Plotly heatmap.
+            Figure: A calendar heatmap.
 
         """
-        df = self._data.all
-        date_col = df.columns[0]
-        tickers = [c for c in df.columns if c != date_col]
-        col = asset if asset in tickers else tickers[0]
-
-        month_names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-
-        agg_expr = ((1.0 + pl.col(col)).product() - 1.0).alias("ret") if compounded else pl.col(col).sum().alias("ret")
-        monthly = (
-            df.with_columns(
-                [
-                    pl.col(date_col).dt.year().alias("_year"),
-                    pl.col(date_col).dt.month().alias("_month"),
-                ]
-            )
-            .group_by(["_year", "_month"])
-            .agg(agg_expr.alias("ret"))
-            .sort(["_year", "_month"])
-        )
-
-        years = sorted(monthly["_year"].unique().to_list())
-        z, text = _monthly_heatmap_matrix(monthly, years)
-
-        fig = go.Figure(
-            go.Heatmap(
-                x=month_names,
-                y=[str(y) for y in years],
-                z=z,
-                text=text,
-                texttemplate="%{text}",
-                colorscale=[[0, "#d62728"], [0.5, "#ffffff"], [1, "#2ca02c"]],
-                zmid=0,
-                showscale=True,
-                colorbar={"title": "Return (%)"},
-                hovertemplate="<b>%{y} %{x}</b><br>Return: %{text}<extra></extra>",
-            )
-        )
-
-        fig.update_layout(
-            title=f"{title} — {col}",
-            height=max(300, 40 * len(years) + 100),
-            plot_bgcolor="white",
-            xaxis={"side": "top"},
-        )
-        return fig
+        spec = monthly_heatmap_spec(self._data, title=title, compounded=compounded, asset=asset)
+        return render(spec, backend)
