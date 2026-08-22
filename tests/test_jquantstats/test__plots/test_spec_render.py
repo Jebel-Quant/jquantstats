@@ -17,7 +17,17 @@ import pytest
 
 from jquantstats._plots._render import render_plotly
 from jquantstats._plots._render._plotly import _axis_kwargs, _hovertemplate
-from jquantstats._plots._spec import Axis, BarSeries, FigureSpec, HeatmapGrid, HoverSpec, LineSeries, Panel
+from jquantstats._plots._spec import (
+    Axis,
+    Band,
+    BarSeries,
+    FigureSpec,
+    HeatmapGrid,
+    HoverSpec,
+    LineSeries,
+    Panel,
+    RefLine,
+)
 from jquantstats._plots._specs import (
     compare_spec,
     cumulative_returns_spec,
@@ -205,6 +215,55 @@ def test_bare_chrome_omits_the_timeseries_furniture() -> None:
     assert "legend" not in layout
     assert "rangeselector" not in layout.get("xaxis", {})
     assert layout["plot_bgcolor"] == "white"
+
+
+def test_horizontal_reference_line_sits_at_its_value() -> None:
+    """A break-even marker is a horizontal line at the given value."""
+    fig = render_plotly(_spec(Panel(lines=(_line(),), ref_lines=(RefLine(value=0),))))
+    (shape,) = fig.layout.shapes
+    assert (shape.y0, shape.y1) == (0, 0)
+    assert shape.line.dash is None, "solid is the default and is left unstated"
+
+
+def test_vertical_reference_line_sits_at_its_value() -> None:
+    """The same marker can run the other way."""
+    fig = render_plotly(_spec(Panel(lines=(_line(),), ref_lines=(RefLine(value=2, orientation="v"),))))
+    (shape,) = fig.layout.shapes
+    assert (shape.x0, shape.x1) == (2, 2)
+
+
+def test_dashed_reference_line_states_its_dash() -> None:
+    """A non-default stroke pattern is emitted."""
+    fig = render_plotly(_spec(Panel(lines=(_line(),), ref_lines=(RefLine(value=1, dash="dash"),))))
+    assert fig.layout.shapes[0].line.dash == "dash"
+
+
+def test_band_without_a_label_draws_no_annotation() -> None:
+    """A span may shade without naming itself."""
+    fig = render_plotly(_spec(Panel(lines=(_line(),), bands=(Band(x0=1, x1=2, color="rgba(0,0,0,0.2)"),))))
+    assert not fig.layout.annotations
+    assert len(fig.layout.shapes) == 1
+
+
+def test_band_with_a_label_annotates_it() -> None:
+    """A labelled span carries its text."""
+    band = Band(x0=1, x1=2, color="rgba(0,0,0,0.2)", label="#1 -12.3%")
+    fig = render_plotly(_spec(Panel(lines=(_line(),), bands=(band,))))
+    assert [a.text for a in fig.layout.annotations] == ["#1 -12.3%"]
+
+
+def test_unfilled_lines_omit_the_fill_properties() -> None:
+    """Only the underwater curve is filled; the rest stay outlines."""
+    payload = json.loads(render_plotly(_spec(Panel(lines=(_line(),)))).to_json())["data"][0]
+    assert "fill" not in payload
+    assert "fillcolor" not in payload
+
+
+def test_filled_lines_shade_to_zero() -> None:
+    """A fill colour shades the area between the line and zero."""
+    fig = render_plotly(_spec(Panel(lines=(_line(fill_color="rgba(0,0,0,0.3)"),))))
+    assert fig.data[0].fill == "tozeroy"
+    assert fig.data[0].fillcolor == "rgba(0,0,0,0.3)"
 
 
 def test_bar_mode_is_only_emitted_when_asked_for() -> None:

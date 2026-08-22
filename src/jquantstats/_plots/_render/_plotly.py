@@ -17,7 +17,18 @@ from __future__ import annotations
 import plotly.graph_objects as go
 
 from .._data._styling import _apply_base_layout, _apply_figsize
-from .._spec import Axis, BarSeries, ColorScale, FigureSpec, HeatmapGrid, HoverSpec, LineSeries, TickFormat
+from .._spec import (
+    Axis,
+    Band,
+    BarSeries,
+    ColorScale,
+    FigureSpec,
+    HeatmapGrid,
+    HoverSpec,
+    LineSeries,
+    RefLine,
+    TickFormat,
+)
 
 __all__ = ["render_plotly"]
 
@@ -25,6 +36,7 @@ __all__ = ["render_plotly"]
 _D3_FORMATS: dict[TickFormat, str] = {
     "float2": ".2f",
     "float4": ".4f",
+    "percent0": ".0%",
     "percent1": ".1%",
     "percent2": ".2%",
     "currency0": ",.0f",
@@ -71,7 +83,11 @@ def _scatter(line: LineSeries) -> go.Scatter:
     if line.dash != "solid":
         style["dash"] = _DASHES[line.dash]
 
-    trace = go.Scatter(x=line.x, y=line.y, mode="lines", name=line.name, line=style)
+    fill: dict[str, object] = {}
+    if line.fill_color is not None:
+        fill = {"fill": "tozeroy", "fillcolor": line.fill_color}
+
+    trace = go.Scatter(x=line.x, y=line.y, mode="lines", name=line.name, line=style, **fill)
     if line.hover is not None:
         trace.update(hovertemplate=_hovertemplate(line.hover))
     return trace
@@ -123,6 +139,44 @@ def _heatmap(grid: HeatmapGrid) -> go.Heatmap:
     if grid.hover_label is not None:
         trace.update(hovertemplate=f"<b>%{{y}} %{{x}}</b><br>{grid.hover_label}: %{{text}}<extra></extra>")
     return trace
+
+
+def _add_ref_line(fig: go.Figure, ref: RefLine) -> None:
+    """Draw a fixed-value marker line onto *fig*.
+
+    Args:
+        fig: The figure to draw on.
+        ref: The line to draw.
+
+    """
+    # `dash` is left unstated when solid: that is Plotly's default, and naming
+    # it anyway would add a property to the serialised shape.
+    style: dict[str, object] = {"line_width": ref.width, "line_color": ref.color}
+    if ref.dash != "solid":
+        style["line_dash"] = _DASHES[ref.dash]
+
+    if ref.orientation == "h":
+        fig.add_hline(y=ref.value, **style)
+    else:
+        fig.add_vline(x=ref.value, **style)
+
+
+def _add_band(fig: go.Figure, band: Band) -> None:
+    """Draw a shaded vertical span onto *fig*.
+
+    Args:
+        fig: The figure to draw on.
+        band: The span to draw.
+
+    """
+    kwargs: dict[str, object] = {}
+    if band.label is not None:
+        kwargs = {
+            "annotation_text": band.label,
+            "annotation_position": "top left",
+            "annotation_font_size": band.label_size,
+        }
+    fig.add_vrect(x0=band.x0, x1=band.x1, fillcolor=band.color, line_width=0, **kwargs)
 
 
 def _axis_kwargs(axis: Axis, *, vertical: bool = False) -> dict[str, object]:
@@ -179,6 +233,10 @@ def render_plotly(spec: FigureSpec) -> go.Figure:
         fig.add_trace(_bar(bar))
     if panel.heatmap is not None:
         fig.add_trace(_heatmap(panel.heatmap))
+    for ref in panel.ref_lines:
+        _add_ref_line(fig, ref)
+    for band in panel.bands:
+        _add_band(fig, band)
 
     if spec.chrome == "timeseries":
         _apply_base_layout(fig, spec.title, height=spec.height, with_range_selector=spec.date_range_selector)
