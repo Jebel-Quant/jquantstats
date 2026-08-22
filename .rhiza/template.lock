@@ -4,8 +4,8 @@ host: github
 ref: v1.5.1
 include: []
 exclude:
-- .github/ISSUE_TEMPLATE
-- .github/DISCUSSION_TEMPLATE
+- SECURITY.md
+- .github/CONFIG.md
 - .github/workflows/rhiza_fuzzing.yml
 - .github/workflows/rhiza_weekly.yml
 - .github/workflows/rhiza_scorecard.yml
@@ -17,7 +17,6 @@ profiles:
 files:
 - .bandit
 - .editorconfig
-- .github/CONFIG.md
 - .github/dependabot.yml
 - .github/release.yml
 - .github/rulesets/main-branch-protection.json
@@ -38,7 +37,6 @@ files:
 - .rhiza/semgrep.yml
 - LICENSE
 - Makefile
-- SECURITY.md
 - cliff.toml
 - docs/assets/rhiza-logo.svg
 - docs/development/MARIMO.md
@@ -49,5 +47,5 @@ files:
 - pytest.ini
 - ruff.toml
 - tests/test_rhiza_packaging.py
-synced_at: '2026-08-22T14:38:47Z'
+synced_at: '2026-08-22T17:36:36Z'
 strategy: merge
