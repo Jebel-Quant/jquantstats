@@ -119,15 +119,20 @@ def interpolate(df: pl.DataFrame) -> pl.DataFrame:
         filled; schema and dtypes of the original columns are preserved.
 
     Examples:
-        ```python
-        import polars as pl
-        from jquantstats import interpolate
+        >>> import polars as pl
+        >>> from jquantstats import interpolate
+        >>> df = pl.DataFrame({"a": [None, 1.0, None, 3.0, None], "b": ["x", "y", "z", "w", "v"]})
+        >>> result = interpolate(df)
 
-        df = pl.DataFrame({"a": [None, 1.0, None, 3.0, None], "b": ["x", "y", "z", "w", "v"]})
-        result = interpolate(df)
-        # a: [None, 1.0, 1.0, 3.0, None]  (leading/trailing nulls untouched)
-        # b: ["x", "y", "z", "w", "v"]    (non-numeric unchanged)
-        ```
+        The interior null is filled; the leading and trailing ones are left alone:
+
+        >>> result["a"].to_list()
+        [None, 1.0, 1.0, 3.0, None]
+
+        Non-numeric columns pass through untouched:
+
+        >>> result["b"].to_list()
+        ['x', 'y', 'z', 'w', 'v']
 
     """
     # Choose a temp column name guaranteed not to collide with any user column.

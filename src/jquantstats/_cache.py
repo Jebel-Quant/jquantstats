@@ -26,11 +26,24 @@ def cached_in_slot(slot: str) -> Callable[[Callable[[Any], T]], Callable[[Any], 
 
     Apply below ``@property`` so the property getter is the wrapped function:
 
-    ```python
-    @property
-    @cached_in_slot("_profits_cache")
-    def profits(self) -> pl.DataFrame: ...
-    ```
+    >>> class Prices:
+    ...     __slots__ = ("_calls", "_profits_cache")
+    ...     def __init__(self):
+    ...         self._calls = 0
+    ...         self._profits_cache = None  # the slot must start as None
+    ...     @property
+    ...     @cached_in_slot("_profits_cache")
+    ...     def profits(self):
+    ...         self._calls += 1
+    ...         return [1, 2, 3]
+
+    The second access is served from the slot rather than recomputed:
+
+    >>> prices = Prices()
+    >>> prices.profits, prices.profits
+    ([1, 2, 3], [1, 2, 3])
+    >>> prices._calls
+    1
 
     Args:
         slot: Name of the declared slot field used as the cache. The field
