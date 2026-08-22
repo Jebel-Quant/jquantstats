@@ -1,41 +1,30 @@
-"""Shared styling and figure-layout helpers for the data plots."""
+"""Shared styling and figure-layout helpers for the data plots.
+
+The colour helpers here are re-exported from `jquantstats._plots._style`, which
+is where they now live: choosing a colour is backend-neutral, whereas applying a
+Plotly layout is not. The aliases keep the plot families that have not yet moved
+to the spec/renderer split working against a single definition.
+"""
 
 from __future__ import annotations
 
 from typing import Any
 
-import plotly.express as px
 import plotly.graph_objects as go
 
+from .._style import hex_to_rgba as _hex_to_rgba
+from .._style import ticker_colors as _ticker_colors
 
-def _hex_to_rgba(hex_color: str, alpha: float = 0.5) -> str:
-    """Convert a hex colour string to an RGBA CSS string.
-
-    Args:
-        hex_color: A hex colour string (with or without a leading ``#``).
-        alpha: Opacity in the range [0, 1]. Defaults to 0.5.
-
-    Returns:
-        An RGBA CSS string suitable for use in Plotly colour arguments.
-
-    """
-    hex_color = hex_color.lstrip("#")
-    r, g, b = tuple(int(hex_color[i : i + 2], 16) for i in (0, 2, 4))
-    return f"rgba({r}, {g}, {b}, {alpha})"
-
-
-def _ticker_colors(tickers: list[str]) -> dict[str, str]:
-    """Map ticker names to Plotly qualitative palette colours.
-
-    Args:
-        tickers: Ordered list of ticker / column names.
-
-    Returns:
-        dict mapping each ticker to a hex colour string.
-
-    """
-    palette = px.colors.qualitative.Plotly
-    return {ticker: palette[i % len(palette)] for i, ticker in enumerate(tickers)}
+__all__ = [
+    "_apply_base_layout",
+    "_apply_figsize",
+    "_bar_colors",
+    "_compute_drawdown_periods",
+    "_date_range_selector",
+    "_hex_to_rgba",
+    "_ticker_colors",
+    "_yearly_bar_colors",
+]
 
 
 def _date_range_selector() -> dict[str, Any]:
