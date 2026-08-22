@@ -25,12 +25,13 @@ convert at the point of use.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Literal
+from typing import Any, Literal, TypeAlias
 
 import polars as pl
 
 __all__ = [
     "Axis",
+    "Band",
     "BarSeries",
     "Chrome",
     "ColorScale",
@@ -40,8 +41,20 @@ __all__ = [
     "HoverSpec",
     "LineSeries",
     "Panel",
+    "RefLine",
     "TickFormat",
+    "Values",
 ]
+
+#: Plotted values: a polars Series, or a plain Python list.
+#:
+#: Both are accepted deliberately. Plotly serialises them differently — a Series
+#: becomes a compact binary buffer, a list a plain JSON array — and each chart's
+#: existing wire format is pinned by the fidelity snapshots. Builders therefore
+#: pass through whichever container the chart already used rather than
+#: normalising, so moving a chart onto this seam changes nothing. Renderers must
+#: accept either.
+Values: TypeAlias = "pl.Series | list[Any]"
 
 #: How to render a number, named by intent rather than by any backend's syntax.
 #:
@@ -50,7 +63,7 @@ __all__ = [
 #: a thousands-separated integer. Each renderer owns the mapping — Plotly wants
 #: ``".2f"``, matplotlib wants a ``Formatter`` — so neither vocabulary leaks in
 #: here.
-TickFormat = Literal["float2", "float4", "percent1", "percent2", "currency0"]
+TickFormat = Literal["float2", "float4", "percent0", "percent1", "percent2", "currency0"]
 
 #: Line styles, kept to the set the charts actually use.
 Dash = Literal["solid", "dash"]
@@ -104,19 +117,22 @@ class LineSeries:
         color: Line colour as ``#RRGGBB``; both backends accept that spelling.
         width: Stroke width.
         dash: Stroke pattern.
+        fill_color: Shade the area between the line and zero in this colour,
+            or None to leave the line unfilled. Used by the underwater curve.
         hover: Tooltip description, or None to leave the backend's default.
 
     """
 
     name: str
-    x: pl.Series
-    y: pl.Series
+    x: Values
+    y: Values
     color: str
     # Left as an int so a whole-number width serialises as `2` rather than
     # `2.0`. Plotly preserves the distinction in its JSON, and the fidelity
     # snapshots compare that JSON exactly.
     width: float = 2
     dash: Dash = "solid"
+    fill_color: str | None = None
     hover: HoverSpec | None = None
 
 
@@ -136,11 +152,54 @@ class BarSeries:
     """
 
     name: str
-    x: pl.Series
-    y: pl.Series
+    x: Values
+    y: Values
     colors: tuple[str, ...]
     opacity: float = 0.85
     hover: HoverSpec | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class RefLine:
+    """A straight line marking a fixed value, such as break-even at zero.
+
+    Attributes:
+        value: Where to draw it, in data coordinates.
+        orientation: ``"h"`` for a horizontal line at *value*, ``"v"`` for a
+            vertical one.
+        color: Line colour.
+        width: Stroke width.
+        dash: Stroke pattern.
+
+    """
+
+    value: float
+    orientation: Literal["h", "v"] = "h"
+    color: str = "gray"
+    width: float = 1
+    dash: Dash = "solid"
+
+
+@dataclass(frozen=True, slots=True)
+class Band:
+    """A shaded vertical span marking a stretch of the x-axis.
+
+    Used to pick out the worst drawdown episodes on an equity curve.
+
+    Attributes:
+        x0: Where the span starts.
+        x1: Where it ends.
+        color: Fill colour, usually translucent so the line stays readable.
+        label: Text drawn at the top of the span, or None for no label.
+        label_size: Point size for that text.
+
+    """
+
+    x0: Any
+    x1: Any
+    color: str
+    label: str | None = None
+    label_size: int = 10
 
 
 @dataclass(frozen=True, slots=True)
@@ -214,6 +273,8 @@ class Panel:
         lines: Line series to draw.
         bars: Bar series to draw.
         heatmap: A value matrix to draw, or None.
+        ref_lines: Fixed-value marker lines.
+        bands: Shaded vertical spans, drawn behind the series.
         xaxis: Horizontal axis configuration.
         yaxis: Vertical axis configuration.
         title: Heading for this panel, used when a chart has several.
@@ -223,6 +284,8 @@ class Panel:
     lines: tuple[LineSeries, ...] = ()
     bars: tuple[BarSeries, ...] = ()
     heatmap: HeatmapGrid | None = None
+    ref_lines: tuple[RefLine, ...] = ()
+    bands: tuple[Band, ...] = ()
     xaxis: Axis = field(default_factory=Axis)
     yaxis: Axis = field(default_factory=Axis)
     title: str | None = None

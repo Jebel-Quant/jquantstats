@@ -21,7 +21,6 @@ __all__ = [
     "_apply_base_layout",
     "_apply_figsize",
     "_bar_colors",
-    "_compute_drawdown_periods",
     "_date_range_selector",
     "_hex_to_rgba",
     "_ticker_colors",
@@ -93,40 +92,3 @@ def _apply_figsize(fig: go.Figure, figsize: tuple[int, int] | None) -> go.Figure
     if figsize is not None:
         fig.update_layout(width=figsize[0], height=figsize[1])
     return fig
-
-
-def _compute_drawdown_periods(prices: list[float], n: int) -> list[dict[str, Any]]:
-    """Identify the top *n* drawdown periods from a cumulative price series.
-
-    Args:
-        prices: Cumulative price (NAV) values as a plain Python list.
-        n: Maximum number of drawdown periods to return.
-
-    Returns:
-        List of dicts with keys ``start_idx``, ``end_idx``, ``valley_idx``,
-        ``max_drawdown`` (fraction ≤ 0), sorted by severity (worst first).
-
-    """
-    length = len(prices)
-    hwm: list[float] = [0.0] * length
-    hwm[0] = prices[0]
-    for i in range(1, length):
-        hwm[i] = max(hwm[i - 1], prices[i])
-
-    in_dd = [prices[i] < hwm[i] for i in range(length)]
-    periods: list[dict[str, Any]] = []
-    i = 0
-    while i < length:
-        if not in_dd[i]:
-            i += 1
-            continue
-        start = i
-        while i < length and in_dd[i]:
-            i += 1
-        end = i - 1
-        valley = start + min(range(end - start + 1), key=lambda k: prices[start + k])
-        max_dd = (prices[valley] - hwm[valley]) / hwm[valley]
-        periods.append({"start_idx": start, "end_idx": end, "valley_idx": valley, "max_drawdown": max_dd})
-
-    periods.sort(key=lambda p: p["max_drawdown"])
-    return periods[:n]

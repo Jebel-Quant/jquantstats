@@ -23,7 +23,7 @@ import jquantstats
 from jquantstats._plots import _backend
 from jquantstats._plots._render import render, render_plotly
 from jquantstats._plots._render._mpl import _DEFAULT_WIDTH_PX, _DPI, mpl_color, render_mpl
-from jquantstats._plots._spec import Axis, FigureSpec, HeatmapGrid, LineSeries, Panel
+from jquantstats._plots._spec import Axis, Band, FigureSpec, HeatmapGrid, LineSeries, Panel, RefLine
 from jquantstats.exceptions import MissingBackendError
 
 
@@ -44,6 +44,16 @@ def _scaled_colour(colour: str, opacity: float) -> tuple[float, ...]:
     """Reduce a colour to comparable RGBA floats with its alpha scaled."""
     r, g, b, a = to_rgba(mpl_color(colour))
     return tuple(round(channel, 2) for channel in (r, g, b, a * opacity))
+
+
+def _floats(values) -> list[float]:
+    """Normalise plotted values for comparison, missing points becoming NaN.
+
+    Plotly reports a missing point as ``None`` when the spec carried a plain
+    list and as NaN when it carried a Series, while matplotlib always reports
+    NaN. That is a difference in representation, not in what is drawn.
+    """
+    return [float("nan") if value is None else float(value) for value in values]
 
 
 # Every line chart migrated so far, with arguments exercising the interesting
@@ -154,7 +164,7 @@ def test_backends_plot_the_same_numbers(data, method: str, kwargs: dict) -> None
 
     for trace, line in zip(plotly_fig.data, mpl_lines, strict=True):
         assert trace.name == line.get_label()
-        assert list(trace.y) == pytest.approx(list(line.get_ydata()), nan_ok=True)
+        assert _floats(trace.y) == pytest.approx(_floats(line.get_ydata()), nan_ok=True)
 
 
 @pytest.mark.parametrize(("method", "kwargs"), CUMULATIVE_CHARTS, ids=_IDS)
@@ -180,7 +190,7 @@ def test_bar_backends_plot_the_same_numbers(data, method: str, kwargs: dict) -> 
     for trace, container in zip(plotly_fig.data, containers, strict=True):
         assert trace.name == container.get_label()
         heights = [patch.get_height() for patch in container]
-        assert list(trace.y) == pytest.approx(heights, nan_ok=True)
+        assert _floats(trace.y) == pytest.approx(_floats(heights), nan_ok=True)
 
 
 @pytest.mark.parametrize(("method", "kwargs"), BAR_CHARTS, ids=_BAR_IDS)
@@ -293,6 +303,30 @@ def test_heatmap_with_a_midpoint_centres_the_ramp(data) -> None:
     assert norm.vcenter == 0
 
 
+def test_band_without_a_label_draws_no_text() -> None:
+    """A span may shade without naming itself."""
+    panel = Panel(lines=(_line(),), bands=(Band(x0=1, x1=2, color="rgba(0, 0, 0, 0.2)"),))
+    ax = render_mpl(_spec(panel)).axes[0]
+    assert len(ax.patches) == 1
+    assert not ax.texts
+
+
+def test_vertical_and_dashed_reference_lines_render() -> None:
+    """Both marker orientations and stroke patterns reach the axes.
+
+    The drawdown charts only use a solid horizontal line, so the other
+    variants are covered here rather than left untested.
+    """
+    refs = (RefLine(value=0), RefLine(value=2, orientation="v", dash="dash"))
+    ax = render_mpl(_spec(Panel(lines=(_line(),), ref_lines=refs))).axes[0]
+
+    horizontals = [ln for ln in ax.get_lines() if list(ln.get_ydata()) == [0, 0]]
+    verticals = [ln for ln in ax.get_lines() if list(ln.get_xdata()) == [2, 2]]
+    assert horizontals
+    assert verticals
+    assert verticals[0].get_linestyle() == "--"
+
+
 def test_opposite_side_resolves_per_axis() -> None:
     """The far edge is the top for an x-axis and the right for a y-axis.
 
@@ -316,6 +350,65 @@ def test_heatmap_with_no_values_still_renders() -> None:
     )
     fig = render_mpl(FigureSpec(title="T", panels=(Panel(heatmap=grid),), chrome="bare"))
     assert fig.axes[0].images[0].get_array().count() == 0
+
+
+def test_drawdown_backends_plot_the_same_curves(data) -> None:
+    """The underwater curve matches, reference line excluded.
+
+    matplotlib's ``axhline`` is itself a Line2D, so it has to be filtered out
+    before the series line up with Plotly's traces.
+    """
+    plotly_fig = data.plots.drawdown(backend="plotly")
+    mpl_fig = data.plots.drawdown(backend="matplotlib")
+
+    series = [line for line in mpl_fig.axes[0].get_lines() if line.get_label() in {t.name for t in plotly_fig.data}]
+    assert len(series) == len(plotly_fig.data)
+
+    for trace, line in zip(plotly_fig.data, series, strict=True):
+        assert _floats(trace.y) == pytest.approx(_floats(line.get_ydata()), nan_ok=True)
+
+
+def test_drawdown_is_filled_on_both_backends(data) -> None:
+    """The area between the curve and zero is shaded, not just outlined."""
+    plotly_fig = data.plots.drawdown(backend="plotly")
+    assert all(trace.fill == "tozeroy" for trace in plotly_fig.data)
+
+    mpl_fig = data.plots.drawdown(backend="matplotlib")
+    assert len(mpl_fig.axes[0].collections) == len(plotly_fig.data)
+
+
+def test_drawdown_marks_break_even_on_both_backends(data) -> None:
+    """A line at zero separates the underwater region from the surface."""
+    plotly_fig = data.plots.drawdown(backend="plotly")
+    assert any(shape.y0 == 0 for shape in plotly_fig.layout.shapes)
+
+    mpl_fig = data.plots.drawdown(backend="matplotlib")
+    flat = [ln for ln in mpl_fig.axes[0].get_lines() if list(ln.get_ydata()) == [0, 0]]
+    assert flat, "expected a horizontal reference line at zero"
+
+
+@pytest.mark.parametrize("n", [1, 3, 5])
+def test_drawdown_periods_shade_the_same_episodes(data, n: int) -> None:
+    """Both backends shade the same number of episodes, and label them."""
+    plotly_fig = data.plots.drawdowns_periods(n=n, backend="plotly")
+    mpl_fig = data.plots.drawdowns_periods(n=n, backend="matplotlib")
+
+    plotly_bands = [s for s in plotly_fig.layout.shapes if s.type == "rect"]
+    mpl_bands = mpl_fig.axes[0].patches
+
+    assert len(plotly_bands) == len(mpl_bands) <= n
+    assert len(mpl_fig.axes[0].texts) == len(mpl_bands)
+
+
+def test_drawdown_period_labels_match(data) -> None:
+    """The rank-and-depth labels read the same on both backends."""
+    plotly_fig = data.plots.drawdowns_periods(n=3, backend="plotly")
+    mpl_fig = data.plots.drawdowns_periods(n=3, backend="matplotlib")
+
+    plotly_labels = [a.text for a in plotly_fig.layout.annotations]
+    mpl_labels = [t.get_text() for t in mpl_fig.axes[0].texts]
+    assert plotly_labels == mpl_labels
+    assert mpl_labels[0].startswith("#1 ")
 
 
 def test_validation_is_backend_independent(data_no_benchmark) -> None:

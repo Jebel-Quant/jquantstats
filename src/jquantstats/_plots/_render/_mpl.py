@@ -17,15 +17,27 @@ formats — is reproduced.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
+import polars as pl
 from matplotlib.axes import Axes
 from matplotlib.colors import LinearSegmentedColormap, TwoSlopeNorm, to_rgba
 from matplotlib.figure import Figure
 from matplotlib.ticker import StrMethodFormatter
 
-from .._spec import Axis, BarSeries, ColorScale, FigureSpec, HeatmapGrid, LineSeries, TickFormat
+from .._spec import (
+    Axis,
+    Band,
+    BarSeries,
+    ColorScale,
+    FigureSpec,
+    HeatmapGrid,
+    LineSeries,
+    RefLine,
+    TickFormat,
+    Values,
+)
 
 if TYPE_CHECKING:
     from matplotlib.ticker import Formatter
@@ -47,6 +59,7 @@ _DEFAULT_WIDTH_PX = 1000
 _FORMATS = {
     "float2": "{x:.2f}",
     "float4": "{x:.4f}",
+    "percent0": "{x:.0%}",
     "percent1": "{x:.1%}",
     "percent2": "{x:.2%}",
     "currency0": "{x:,.0f}",
@@ -80,6 +93,32 @@ def _tick_formatter(tick_format: TickFormat, prefix: str) -> Formatter:
     return StrMethodFormatter(f"{prefix}{_FORMATS[tick_format]}")
 
 
+def _as_array(values: Values) -> Any:
+    """Convert plotted values to a numpy array.
+
+    Specs carry either a polars Series or a plain list, whichever the chart
+    already used (see `~jquantstats._plots._spec.Values`). Going via numpy
+    rather than a list also turns a polars null into NaN, which matplotlib
+    draws as a gap; a list of ``None`` would instead force a slow object-dtype
+    array it cannot interpolate across.
+
+    Args:
+        values: A polars Series or a Python list.
+
+    Returns:
+        The values as a numpy array — floats where they convert, so ``None``
+        becomes NaN, and otherwise left as-is for x-axes holding dates.
+
+    """
+    if isinstance(values, pl.Series):
+        return values.to_numpy()
+    try:
+        return np.asarray(values, dtype=float)
+    except TypeError:
+        # A date axis: leave the objects alone, matplotlib understands them.
+        return np.asarray(values)
+
+
 def _draw_line(ax: Axes, line: LineSeries) -> None:
     """Draw one series onto *ax*.
 
@@ -91,17 +130,19 @@ def _draw_line(ax: Axes, line: LineSeries) -> None:
         line: The series to draw.
 
     """
-    # `to_numpy`, not `to_list`: a polars null becomes NaN in a float array but
-    # `None` in a list, and matplotlib draws a gap for the former while the
-    # latter forces a slow object-dtype array it cannot interpolate across.
+    x, y = _as_array(line.x), _as_array(line.y)
     ax.plot(
-        line.x.to_numpy(),
-        line.y.to_numpy(),
+        x,
+        y,
         color=mpl_color(line.color),
         linewidth=line.width,
         linestyle=_LINESTYLES[line.dash],
         label=line.name,
     )
+    if line.fill_color is not None:
+        # `where` keeps the fill out of the gaps a NaN leaves in the line,
+        # which otherwise get shaded as though the value were zero.
+        ax.fill_between(x, y, 0, color=mpl_color(line.fill_color), where=~np.isnan(y), linewidth=0)
 
 
 def mpl_color(color: str) -> str | tuple[float, float, float, float]:
@@ -166,12 +207,48 @@ def _draw_bars(ax: Axes, bar: BarSeries) -> None:
     # whereas Plotly multiplies its trace opacity by it — so passing it
     # separately would render the faded negative bars at the wrong strength.
     ax.bar(
-        bar.x.to_numpy(),
-        bar.y.to_numpy(),
+        _as_array(bar.x),
+        _as_array(bar.y),
         color=[_faded(c, bar.opacity) for c in bar.colors],
         linewidth=0,
         label=bar.name,
     )
+
+
+def _draw_ref_line(ax: Axes, ref: RefLine) -> None:
+    """Draw a fixed-value marker line onto *ax*.
+
+    Args:
+        ax: The axes to draw on.
+        ref: The line to draw.
+
+    """
+    draw = ax.axhline if ref.orientation == "h" else ax.axvline
+    draw(ref.value, color=mpl_color(ref.color), linewidth=ref.width, linestyle=_LINESTYLES[ref.dash])
+
+
+def _draw_band(ax: Axes, band: Band) -> None:
+    """Draw a shaded vertical span onto *ax*.
+
+    Args:
+        ax: The axes to draw on.
+        band: The span to draw.
+
+    """
+    ax.axvspan(band.x0, band.x1, color=mpl_color(band.color), linewidth=0)
+    if band.label is not None:
+        # Placed at the top of the span in axes coordinates, matching where
+        # Plotly puts its annotation.
+        ax.annotate(
+            band.label,
+            xy=(band.x0, 1.0),
+            xycoords=("data", "axes fraction"),
+            xytext=(2, -2),
+            textcoords="offset points",
+            ha="left",
+            va="top",
+            fontsize=band.label_size,
+        )
 
 
 def _draw_heatmap(fig: Figure, ax: Axes, grid: HeatmapGrid) -> None:
@@ -269,6 +346,10 @@ def render_mpl(spec: FigureSpec) -> Figure:
         _draw_bars(ax, bar)
     if panel.heatmap is not None:
         _draw_heatmap(fig, ax, panel.heatmap)
+    for ref in panel.ref_lines:
+        _draw_ref_line(ax, ref)
+    for band in panel.bands:
+        _draw_band(ax, band)
 
     ax.set_facecolor("white")
     # Stated either way rather than leaning on ``rcParams["axes.grid"]``: that
