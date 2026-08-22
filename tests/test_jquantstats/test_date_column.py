@@ -68,6 +68,7 @@ def test_data_and_portfolio_data_agree(returns: pl.DataFrame, prices: pl.DataFra
     )
 
     def first_date(obj: Data) -> object:
+        """Read the earliest date through the canonical 'date' column."""
         return obj.index["date"].min()
 
     assert data.date_col == portfolio.data.date_col == ["date"]

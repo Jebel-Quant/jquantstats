@@ -514,3 +514,53 @@ class BenchmarkAlignmentWarning(UserWarning):
 
         warnings.filterwarnings("ignore", category=BenchmarkAlignmentWarning)
     """
+
+
+class UnknownPlotBackendError(JQuantStatsError, ValueError):
+    """Raised when an unrecognised plotting backend is selected.
+
+    Args:
+        backend: The rejected backend name.
+        supported: The backend names that are accepted, in display order.
+
+    Examples:
+        >>> raise UnknownPlotBackendError("ggplot", ["matplotlib", "plotly"])
+        Traceback (most recent call last):
+            ...
+        jquantstats.exceptions.UnknownPlotBackendError: unknown plot backend 'ggplot'; ...
+    """
+
+    def __init__(self, backend: str, supported: list[str]) -> None:
+        """Initialize with the rejected backend and the accepted alternatives."""
+        expected = ", ".join(repr(name) for name in supported)
+        super().__init__(f"unknown plot backend {backend!r}; expected one of {expected}")
+        self.backend = backend
+        self.supported = supported
+
+
+class MissingBackendError(JQuantStatsError, ImportError):
+    """Raised when a plotting backend is selected but its library is not installed.
+
+    Subclasses `ImportError` as well as `JQuantStatsError` so that callers
+    already guarding optional rendering with ``except ImportError`` keep
+    working unchanged.
+
+    Args:
+        backend: The backend that could not be loaded.
+        extra: The packaging extra that installs it.
+
+    Examples:
+        >>> raise MissingBackendError("matplotlib", "mpl")
+        Traceback (most recent call last):
+            ...
+        jquantstats.exceptions.MissingBackendError: the 'matplotlib' plot backend requires matplotlib...
+    """
+
+    def __init__(self, backend: str, extra: str) -> None:
+        """Initialize with the unavailable backend and the extra that provides it."""
+        super().__init__(
+            f"the {backend!r} plot backend requires {backend}, which is not installed. "
+            f"Install it with: pip install 'jquantstats[{extra}]'"
+        )
+        self.backend = backend
+        self.extra = extra

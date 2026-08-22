@@ -36,6 +36,14 @@ Repository = "https://github.com/jebel-quant/jquantstats"
 # Optional dependencies that can be installed with extras (e.g., pip install jquantstats[plot])
 [project.optional-dependencies]
 plot = ["kaleido>=1.3.0,<2"]
+# The optional matplotlib rendering backend, selected with
+# `jquantstats.set_plot_backend("matplotlib")` or a per-call `backend="matplotlib"`.
+# Plotly stays a core dependency and the default; this only adds the *second* renderer,
+# so the "6 runtime deps, no pandas" claim in docs/engineering.md stays true.
+#
+# Named `mpl` because `plot` was already taken above — and `plot` means something else
+# entirely (kaleido, static image export *for the plotly figures*).
+mpl = ["matplotlib>=3.9"]
 web = [
     "fastapi>=0.115.0",
     "uvicorn>=0.32.0",
@@ -77,6 +85,19 @@ test = [
     "hypothesis>=6.150.0",
     "syrupy>=4.9.1",
     "python-dotenv>=1.0",
+    # Declared here IN ADDITION to the `mpl` extra, and neither declaration is redundant:
+    #   * The extra is what `uv sync --all-extras` installs. mutation.yml and
+    #     benchmark-pr.yml run exactly that, without --all-groups, and uv's default group
+    #     set is `dev` only — so without the extra those two jobs run the suite with
+    #     matplotlib absent.
+    #   * The group is what a bare `uv sync && uv run pytest` installs.
+    # Either gap has the same consequence, and it is NOT a skip: coverage is measured
+    # directory-scoped over src/, so an unimported src/jquantstats/_plots/_mpl/*.py is
+    # reported at 0% rather than dropping out of the report — a hard failure against
+    # `fail_under = 100`, with a misleading message. That is why there is no
+    # `pytest.importorskip("matplotlib")` anywhere; contrast test_kaleido.py, where the
+    # dependency genuinely can be absent because it needs a Chrome subprocess.
+    "matplotlib>=3.9",
 ]
 # There is no `lint` group: nothing resolves one from the project environment. ruff runs
 # through the pre-commit hooks `make fmt` executes via uvx, and import-linter — which
@@ -185,8 +206,16 @@ deptry_ignore = ["api"]
 # `deptry_ignore` under [tool.rhiza-task] above — it was the Makefile's
 # DEPTRY_FOLDERS line before rhiza v1.4.0), so its import there is observed
 # directly.
+#   matplotlib        - TEMPORARY, and the only entry here that is not permanent.
+#                       The optional rendering backend (#628). Today the only reference
+#                       is `find_spec("matplotlib")` in _plots/_backend.py, which deptry
+#                       cannot see, so it looks unused. DELETE THIS ENTRY in the PR that
+#                       lands _plots/_render/_mpl.py — from then on matplotlib is a real
+#                       import in src/ and deptry observes it directly. If that PR leaves
+#                       this line in place, an accidental *removal* of the matplotlib
+#                       import would stop being caught.
 [tool.deptry.per_rule_ignores]
-DEP002 = ["kaleido", "uvicorn", "python-multipart"]
+DEP002 = ["kaleido", "uvicorn", "python-multipart", "matplotlib"]
 
 # Package to module name mapping
 [tool.deptry.package_module_name_map]
@@ -207,6 +236,7 @@ narwhals = "narwhals"
 python-multipart = "python_multipart"
 pyarrow = "pyarrow"
 httpx = "httpx"
+matplotlib = "matplotlib"
 
 # Coverage configuration
 [tool.coverage.run]
@@ -272,6 +302,13 @@ replace = '[project]\1version = "{new_version}"'
 [tool.importlinter]
 root_package = "jquantstats"
 exclude_type_checking_imports = true
+
+# NOTE on the pyplot ban: it deliberately is NOT an import-linter contract.
+# import-linter rejects `matplotlib.pyplot` with "subpackages of external packages are
+# not valid" — it can only forbid whole external distributions, and forbidding
+# `matplotlib` outright would ban the renderer itself. The ban is enforced instead by
+# tests/test_jquantstats/test__plots/test_no_pyplot.py, which scans the source tree,
+# plus a runtime leak-detector fixture. See that module for the reasoning.
 
 [[tool.importlinter.contracts]]
 name = "analytics subpackages must not import the concrete Data/Portfolio at runtime"
