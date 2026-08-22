@@ -44,6 +44,7 @@ _D3_FORMATS: dict[TickFormat, str] = {
     "percent1": ".1%",
     "percent2": ".2%",
     "currency0": ",.0f",
+    "si2": ".2s",
 }
 
 # Semantic dash style -> Plotly's `line.dash` vocabulary.
@@ -92,8 +93,10 @@ def _scatter(line: LineSeries) -> go.Scatter:
         style["dash"] = _DASHES[line.dash]
 
     fill: dict[str, object] = {}
-    if line.fill_color is not None:
-        fill = {"fill": "tozeroy", "fillcolor": line.fill_color}
+    if line.fill:
+        fill["fill"] = "tozeroy"
+        if line.fill_color is not None:
+            fill["fillcolor"] = line.fill_color
 
     grouping: dict[str, object] = {}
     if line.legend_group is not None:
@@ -124,6 +127,10 @@ def _bar(bar: BarSeries) -> go.Bar:
         styling["marker"] = {"color": list(bar.colors), "line": _BAR_OUTLINE}
     if bar.opacity is not None:
         styling["opacity"] = bar.opacity
+    if bar.legend_group is not None:
+        styling["legendgroup"] = bar.legend_group
+    if bar.show_legend is not None:
+        styling["showlegend"] = bar.show_legend
 
     trace = go.Bar(x=bar.x, y=bar.y, name=bar.name, **styling)
     if bar.hover is not None:
@@ -200,12 +207,13 @@ def _heatmap(grid: HeatmapGrid) -> go.Heatmap:
     return trace
 
 
-def _add_ref_line(fig: go.Figure, ref: RefLine) -> None:
+def _add_ref_line(fig: go.Figure, ref: RefLine, at: dict[str, int]) -> None:
     """Draw a fixed-value marker line onto *fig*.
 
     Args:
         fig: The figure to draw on.
         ref: The line to draw.
+        at: Subplot position, empty for a single-panel figure.
 
     """
     # An unset dash is left unstated rather than sent as "solid": that would
@@ -221,17 +229,18 @@ def _add_ref_line(fig: go.Figure, ref: RefLine) -> None:
         }
 
     if ref.orientation == "h":
-        fig.add_hline(y=ref.value, **style)
+        fig.add_hline(y=ref.value, **style, **at)
     else:
-        fig.add_vline(x=ref.value, **style)
+        fig.add_vline(x=ref.value, **style, **at)
 
 
-def _add_band(fig: go.Figure, band: Band) -> None:
+def _add_band(fig: go.Figure, band: Band, at: dict[str, int]) -> None:
     """Draw a shaded vertical span onto *fig*.
 
     Args:
         fig: The figure to draw on.
         band: The span to draw.
+        at: Subplot position, empty for a single-panel figure.
 
     """
     kwargs: dict[str, object] = {}
@@ -241,7 +250,7 @@ def _add_band(fig: go.Figure, band: Band) -> None:
             "annotation_position": "top left",
             "annotation_font_size": band.label_size,
         }
-    fig.add_vrect(x0=band.x0, x1=band.x1, fillcolor=band.color, line_width=0, **kwargs)
+    fig.add_vrect(x0=band.x0, x1=band.x1, fillcolor=band.color, line_width=0, **kwargs, **at)
 
 
 def _axis_kwargs(axis: Axis, *, vertical: bool = False) -> dict[str, object]:
@@ -287,15 +296,35 @@ def render_plotly(spec: FigureSpec) -> go.Figure:
 
     """
     fig = _blank_figure(spec)
-    for index, panel in enumerate(spec.panels, start=1):
-        # A single-panel figure has no subplot grid, so the traces carry no
-        # position; a side-by-side one places each panel in its own column.
-        at = {} if spec.arrangement == "single" else {"row": 1, "col": index}
+    positions = [_position(spec, index) for index in range(1, len(spec.panels) + 1)]
+    for panel, at in zip(spec.panels, positions, strict=True):
         _draw_panel(fig, panel, at)
 
+    # Layout first, then per-panel axes: the shared layout sets grid and axis
+    # defaults across the whole figure, and a panel's own settings refine them.
     _apply_layout(fig, spec)
-    _apply_axes(fig, spec)
+    for panel, at in zip(spec.panels, positions, strict=True):
+        _apply_panel_axes(fig, panel, at)
     return fig
+
+
+def _position(spec: FigureSpec, index: int) -> dict[str, int]:
+    """Locate the *index*-th panel within the figure's subplot grid.
+
+    Args:
+        spec: The chart being rendered.
+        index: One-based panel number.
+
+    Returns:
+        dict[str, int]: Row and column keyword arguments, empty for a
+        single-panel figure, which has no grid to place anything in.
+
+    """
+    if spec.arrangement == "single":
+        return {}
+    if spec.arrangement == "stacked":
+        return {"row": index, "col": 1}
+    return {"row": 1, "col": index}
 
 
 def _blank_figure(spec: FigureSpec) -> go.Figure:
@@ -310,12 +339,18 @@ def _blank_figure(spec: FigureSpec) -> go.Figure:
     """
     if spec.arrangement == "single":
         return go.Figure()
-    return make_subplots(
-        rows=1,
-        cols=len(spec.panels),
-        subplot_titles=[panel.title for panel in spec.panels],
-        shared_yaxes=spec.shared_y,
-    )
+
+    titles = [panel.title for panel in spec.panels]
+    if spec.arrangement == "stacked":
+        return make_subplots(
+            rows=len(spec.panels),
+            cols=1,
+            shared_xaxes=spec.shared_x,
+            row_heights=[panel.height_ratio for panel in spec.panels],
+            subplot_titles=titles,
+            vertical_spacing=spec.vertical_spacing,
+        )
+    return make_subplots(rows=1, cols=len(spec.panels), subplot_titles=titles, shared_yaxes=spec.shared_y)
 
 
 def _draw_panel(fig: go.Figure, panel: Panel, at: dict[str, int]) -> None:
@@ -338,9 +373,9 @@ def _draw_panel(fig: go.Figure, panel: Panel, at: dict[str, int]) -> None:
     if panel.heatmap is not None:
         fig.add_trace(_heatmap(panel.heatmap), **at)
     for ref in panel.ref_lines:
-        _add_ref_line(fig, ref)
+        _add_ref_line(fig, ref, at)
     for band in panel.bands:
-        _add_band(fig, band)
+        _add_band(fig, band, at)
 
 
 def _apply_layout(fig: go.Figure, spec: FigureSpec) -> None:
@@ -377,21 +412,18 @@ def _apply_layout(fig: go.Figure, spec: FigureSpec) -> None:
         fig.update_layout(barmode=spec.bar_mode)
 
 
-def _apply_axes(fig: go.Figure, spec: FigureSpec) -> None:
-    """Apply axis configuration across *spec*'s panels.
-
-    Panels of a side-by-side chart share their axis settings, so the first
-    panel's configuration is applied to all of them.
+def _apply_panel_axes(fig: go.Figure, panel: Panel, at: dict[str, int]) -> None:
+    """Apply one panel's axis configuration.
 
     Args:
         fig: The figure to configure.
-        spec: The chart being rendered.
+        panel: The panel whose axes to configure.
+        at: Subplot position, empty for a single-panel figure.
 
     """
-    panel = spec.panels[0]
     x_kwargs = _axis_kwargs(panel.xaxis)
     if x_kwargs:
-        fig.update_xaxes(**x_kwargs)
+        fig.update_xaxes(**x_kwargs, **at)
     y_kwargs = _axis_kwargs(panel.yaxis, vertical=True)
     if y_kwargs:
-        fig.update_yaxes(**y_kwargs)
+        fig.update_yaxes(**y_kwargs, **at)

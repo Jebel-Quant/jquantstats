@@ -465,6 +465,99 @@ def test_rolling_beta_requires_a_benchmark_on_both_backends(data_no_benchmark) -
             data_no_benchmark.plots.rolling_beta(backend=backend)
 
 
+def test_data_dashboard_stacks_three_panels(data) -> None:
+    """The returns dashboard is three views over one shared time axis."""
+    mpl_fig = data.plots.snapshot(backend="matplotlib")
+    assert [ax.get_title() for ax in mpl_fig.axes] == ["Cumulative Returns", "Drawdowns", "Monthly Returns"]
+
+    plotly_fig = data.plots.snapshot(backend="plotly")
+    assert [a.text for a in plotly_fig.layout.annotations] == ["Cumulative Returns", "Drawdowns", "Monthly Returns"]
+
+
+def test_portfolio_dashboard_stacks_two_panels(pf) -> None:
+    """The portfolio dashboard pairs NAV with the drawdown it produced."""
+    mpl_fig = pf.plots.snapshot(backend="matplotlib")
+    assert [ax.get_title() for ax in mpl_fig.axes] == ["Accumulated Profit", "Drawdown"]
+
+
+def test_stacked_panels_share_one_time_axis(data) -> None:
+    """Sharing x is what lets a drawdown be read against its months."""
+    axes = data.plots.snapshot(backend="matplotlib").axes
+    first = axes[0].get_xlim()
+    assert all(ax.get_xlim() == first for ax in axes[1:])
+
+
+def test_dashboard_headline_panel_is_the_tallest(data) -> None:
+    """Cumulative returns get half the height; the rest split the remainder."""
+    heights = [ax.get_position().height for ax in data.plots.snapshot(backend="matplotlib").axes]
+    assert heights[0] > heights[1]
+    assert heights[1] == pytest.approx(heights[2], rel=0.05)
+
+
+@pytest.mark.parametrize("log_scale", [False, True])
+def test_dashboard_log_scale_applies_only_to_the_top_panel(data, log_scale: bool) -> None:
+    """A log NAV axis must not turn the drawdown panel logarithmic too."""
+    axes = data.plots.snapshot(log_scale=log_scale, backend="matplotlib").axes
+    assert axes[0].get_yscale() == ("log" if log_scale else "linear")
+    assert axes[1].get_yscale() == "linear"
+
+
+def test_dashboard_backends_plot_the_same_panels(data) -> None:
+    """Every panel's series match across backends.
+
+    Traces are matched to panels by their subplot axis on the Plotly side,
+    since a stacked figure flattens them into one trace list.
+    """
+    plotly_fig = data.plots.snapshot(backend="plotly")
+    mpl_axes = data.plots.snapshot(backend="matplotlib").axes
+
+    for index, ax in enumerate(mpl_axes, start=1):
+        axis = "y" if index == 1 else f"y{index}"
+        traces = [t for t in plotly_fig.data if (t.yaxis or "y") == axis]
+        drawn = ax.get_lines() or ax.containers
+        # Reference lines are Line2D artists too, so compare by name.
+        named = {t.name for t in traces}
+        assert {a.get_label() for a in drawn} >= named
+
+
+@pytest.mark.parametrize(
+    ("method", "kwargs"),
+    [
+        ("lagged_performance_plot", {}),
+        ("lagged_performance_plot", {"lags": [0, 2]}),
+        ("lagged_performance_plot", {"log_scale": True}),
+        ("smoothed_holdings_performance_plot", {}),
+        ("smoothed_holdings_performance_plot", {"windows": [0, 3]}),
+    ],
+    ids=lambda v: str(sorted(v)) if isinstance(v, dict) else v,
+)
+def test_nav_comparison_backends_agree(pf, method: str, kwargs: dict) -> None:
+    """The lag and smoothing sweeps match across backends."""
+    plotly_fig = getattr(pf.plots, method)(**kwargs, backend="plotly")
+    mpl_fig = getattr(pf.plots, method)(**kwargs, backend="matplotlib")
+
+    lines = mpl_fig.axes[0].get_lines()
+    assert [line.get_label() for line in lines] == [t.name for t in plotly_fig.data]
+    for trace, line in zip(plotly_fig.data, lines, strict=True):
+        assert _floats(trace.y) == pytest.approx(_floats(line.get_ydata()), nan_ok=True)
+
+
+@pytest.mark.parametrize(
+    ("method", "bad"),
+    [
+        ("lagged_performance_plot", {"lags": (0, 1)}),
+        ("lagged_performance_plot", {"lags": [0, "1"]}),
+        ("smoothed_holdings_performance_plot", {"windows": [-1]}),
+    ],
+    ids=["tuple", "non-int", "negative"],
+)
+def test_nav_comparison_validation_is_backend_independent(pf, method: str, bad: dict) -> None:
+    """Validation sits in the builder, so both backends reject alike."""
+    for backend in ("plotly", "matplotlib"):
+        with pytest.raises(TypeError):
+            getattr(pf.plots, method)(**bad, backend=backend)
+
+
 def test_histogram_backends_bin_the_same_values(data) -> None:
     """Both backends receive the same observations to bin.
 

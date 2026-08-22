@@ -24,7 +24,7 @@ import polars as pl
 from matplotlib.axes import Axes
 from matplotlib.colors import LinearSegmentedColormap, TwoSlopeNorm, to_rgba
 from matplotlib.figure import Figure
-from matplotlib.ticker import StrMethodFormatter
+from matplotlib.ticker import EngFormatter, StrMethodFormatter
 
 from .._spec import (
     Axis,
@@ -94,6 +94,11 @@ def _tick_formatter(tick_format: TickFormat, prefix: str) -> Formatter:
         Formatter: A formatter applying the requested format and prefix.
 
     """
+    if tick_format == "si2":
+        # Plotly's ".2s" abbreviates with an SI suffix — 1500000 reads as
+        # "1.5M". `EngFormatter` is matplotlib's equivalent; `sep=""` keeps the
+        # suffix tight against the number as d3 writes it.
+        return EngFormatter(places=1, sep="")
     return StrMethodFormatter(f"{prefix}{_FORMATS[tick_format]}")
 
 
@@ -149,10 +154,12 @@ def _draw_line(ax: Axes, line: LineSeries) -> None:
         label=line.name,
         **styling,
     )
-    if line.fill_color is not None:
+    if line.fill:
         # `where` keeps the fill out of the gaps a NaN leaves in the line,
-        # which otherwise get shaded as though the value were zero.
-        ax.fill_between(x, y, 0, color=mpl_color(line.fill_color), where=~np.isnan(y), linewidth=0)
+        # which otherwise get shaded as though the value were zero. An unnamed
+        # fill colour is left to matplotlib, which matches it to the line.
+        shading: dict[str, Any] = {} if line.fill_color is None else {"color": mpl_color(line.fill_color)}
+        ax.fill_between(x, y, 0, where=~np.isnan(y), linewidth=0, **shading)
 
 
 def mpl_color(color: str) -> str | tuple[float, float, float, float]:
@@ -401,12 +408,35 @@ def render_mpl(spec: FigureSpec) -> Figure:
     """
     width, height = spec.figsize if spec.figsize is not None else (_DEFAULT_WIDTH_PX, spec.height)
     fig = Figure(figsize=(width / _DPI, (height or _DEFAULT_HEIGHT_PX) / _DPI), dpi=_DPI)
-    axes = fig.subplots(ncols=len(spec.panels), sharey=spec.shared_y, squeeze=False)[0]
+    axes = _make_axes(fig, spec)
 
     for ax, panel in zip(axes, spec.panels, strict=True):
         _draw_panel(fig, ax, panel, spec)
     fig.suptitle(spec.title)
     return fig
+
+
+def _make_axes(fig: Figure, spec: FigureSpec) -> Any:
+    """Create one Axes per panel, laid out as the spec asks.
+
+    Args:
+        fig: The figure to add axes to.
+        spec: The chart being rendered.
+
+    Returns:
+        The axes, flattened to one per panel in spec order.
+
+    """
+    if spec.arrangement == "stacked":
+        # Stacked panels share the time axis and split the height in the
+        # proportions the panels ask for, so the headline view gets the room.
+        return fig.subplots(
+            nrows=len(spec.panels),
+            sharex=spec.shared_x,
+            height_ratios=[panel.height_ratio for panel in spec.panels],
+            squeeze=False,
+        )[:, 0]
+    return fig.subplots(ncols=len(spec.panels), sharey=spec.shared_y, squeeze=False)[0]
 
 
 def _draw_panel(fig: Figure, ax: Axes, panel: Panel, spec: FigureSpec) -> None:

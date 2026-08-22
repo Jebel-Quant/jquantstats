@@ -8,6 +8,10 @@ from ._cumulative import compare_spec as compare_spec
 from ._cumulative import cumulative_returns_spec as cumulative_returns_spec
 from ._cumulative import earnings_spec as earnings_spec
 from ._cumulative import log_returns_spec as log_returns_spec
+from ._dashboard import data_snapshot_spec as data_snapshot_spec
+from ._dashboard import lagged_performance_spec as lagged_performance_spec
+from ._dashboard import portfolio_snapshot_spec as portfolio_snapshot_spec
+from ._dashboard import smoothed_holdings_performance_spec as smoothed_holdings_performance_spec
 from ._distribution import distribution_spec as distribution_spec
 from ._distribution import histogram_spec as histogram_spec
 from ._drawdown import compute_drawdown_periods as compute_drawdown_periods
@@ -36,11 +40,13 @@ __all__ = [
     "compute_drawdown_periods",
     "cumulative_returns_spec",
     "daily_returns_spec",
+    "data_snapshot_spec",
     "distribution_spec",
     "drawdown_spec",
     "drawdowns_periods_spec",
     "earnings_spec",
     "histogram_spec",
+    "lagged_performance_spec",
     "log_returns_spec",
     "montecarlo_distribution_spec",
     "montecarlo_spec",
@@ -49,11 +55,13 @@ __all__ = [
     "period_agg_exprs",
     "portfolio_rolling_sharpe_spec",
     "portfolio_rolling_volatility_spec",
+    "portfolio_snapshot_spec",
     "rolling_beta_expr",
     "rolling_beta_spec",
     "rolling_sharpe_spec",
     "rolling_sortino_spec",
     "rolling_volatility_spec",
+    "smoothed_holdings_performance_spec",
     "validate_window",
     "yearly_returns_spec",
 ]

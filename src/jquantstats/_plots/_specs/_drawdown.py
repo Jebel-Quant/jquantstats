@@ -111,6 +111,7 @@ def drawdown_spec(data: DataLike, title: str) -> FigureSpec:
                 y=((price_s - hwm) / hwm).to_list(),
                 color=colors[ticker],
                 width=1.5,
+                fill=True,
                 fill_color=hex_to_rgba(colors[ticker], _FILL_ALPHA),
                 hover=HoverSpec(label=ticker, value_format="percent2", date_header=False),
             )
