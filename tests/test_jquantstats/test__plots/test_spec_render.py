@@ -172,10 +172,21 @@ def test_render_rejects_multi_panel_specs() -> None:
         render_plotly(FigureSpec(title="T", panels=(panel, panel)))
 
 
-def test_solid_lines_omit_the_dash_property() -> None:
-    """`solid` is Plotly's default, so it is left unstated."""
-    fig = render_plotly(_spec(Panel(lines=(_line(dash="solid"),))))
+def test_unset_dash_omits_the_property() -> None:
+    """A line that says nothing about its dash gets nothing emitted."""
+    fig = render_plotly(_spec(Panel(lines=(_line(dash=None),))))
     assert "dash" not in json.loads(fig.to_json())["data"][0]["line"]
+
+
+def test_explicitly_solid_dash_is_stated() -> None:
+    """Asking for solid is not the same as saying nothing.
+
+    Some charts write ``dash="solid"`` and some omit the property entirely.
+    Plotly records the difference, so the spec has to be able to express both:
+    None means "leave it alone", ``"solid"`` means "state it".
+    """
+    fig = render_plotly(_spec(Panel(lines=(_line(dash="solid"),))))
+    assert json.loads(fig.to_json())["data"][0]["line"]["dash"] == "solid"
 
 
 def test_dashed_lines_state_the_dash_property() -> None:

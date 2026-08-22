@@ -6,15 +6,22 @@ Split out of the former single-module `_plots/_portfolio.py`; composed into
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal, overload
 
-import plotly.graph_objects as go
-import polars as pl
-
-from .._data._styling import _apply_base_layout
+from .._render import render
+from .._specs import (
+    annual_sharpe_spec,
+    portfolio_rolling_sharpe_spec,
+    portfolio_rolling_volatility_spec,
+)
 
 if TYPE_CHECKING:
+    from matplotlib.figure import Figure as MplFigure
+    from plotly.graph_objects import Figure as PlotlyFigure
+
+    from .._backend import Backend
     from .._protocol import PortfolioLike
+    from .._render import Figure
 
 
 class _RollingPortfolioPlotsMixin:
@@ -24,50 +31,13 @@ class _RollingPortfolioPlotsMixin:
 
     _portfolio: PortfolioLike
 
-    @staticmethod
-    def _validate_window(window: int) -> None:
-        """Reject a non-positive or non-integer rolling window.
+    @overload
+    def rolling_sharpe_plot(self, window: int = ..., *, backend: Literal["plotly"] | None = ...) -> PlotlyFigure: ...
 
-        Args:
-            window: The candidate rolling-window size.
+    @overload
+    def rolling_sharpe_plot(self, window: int = ..., *, backend: Literal["matplotlib"]) -> MplFigure: ...
 
-        Raises:
-            ValueError: If ``window`` is not a positive integer.
-        """
-        if not isinstance(window, int) or window <= 0:
-            raise ValueError(f"window must be a positive integer, got {window!r}")  # noqa: TRY003
-
-    @staticmethod
-    def _line_per_column(rolling: pl.DataFrame) -> go.Figure:
-        """Render one line trace per non-date column of *rolling*.
-
-        Shared by `rolling_sharpe_plot` and `rolling_volatility_plot`, which
-        differ only in the metric they fetch and the labels they apply.
-
-        Args:
-            rolling: A frame with an optional ``date`` column and one column
-                per asset.
-
-        Returns:
-            A Figure carrying the traces, with no layout applied yet.
-        """
-        fig = go.Figure()
-        date_col = rolling["date"] if "date" in rolling.columns else None
-        for col in rolling.columns:
-            if col == "date":
-                continue
-            fig.add_trace(
-                go.Scatter(
-                    x=date_col,
-                    y=rolling[col],
-                    mode="lines",
-                    name=col,
-                    line={"width": 1},
-                )
-            )
-        return fig
-
-    def rolling_sharpe_plot(self, window: int = 63) -> go.Figure:
+    def rolling_sharpe_plot(self, window: int = 63, *, backend: Backend | None = None) -> Figure:
         """Plot rolling annualised Sharpe ratio over time.
 
         Computes the rolling Sharpe for each asset column using the given
@@ -75,23 +45,26 @@ class _RollingPortfolioPlotsMixin:
 
         Args:
             window: Rolling-window size in periods. Defaults to 63.
+            backend: Renderer to use. Defaults to the ambient selection.
 
         Returns:
-            A Plotly Figure with one trace per asset.
+            Figure: A chart with one line per asset.
 
         Raises:
             ValueError: If ``window`` is not a positive integer.
+
         """
-        self._validate_window(window)
+        return render(portfolio_rolling_sharpe_spec(self._portfolio, window), backend)
 
-        fig = self._line_per_column(self._portfolio.stats.rolling_sharpe(rolling_period=window))
-        fig.add_hline(y=0, line_width=1, line_dash="dash", line_color="gray")
+    @overload
+    def rolling_volatility_plot(
+        self, window: int = ..., *, backend: Literal["plotly"] | None = ...
+    ) -> PlotlyFigure: ...
 
-        _apply_base_layout(fig, f"Rolling Sharpe Ratio ({window}-period window)")
-        fig.update_yaxes(title_text="Sharpe ratio")
-        return fig
+    @overload
+    def rolling_volatility_plot(self, window: int = ..., *, backend: Literal["matplotlib"]) -> MplFigure: ...
 
-    def rolling_volatility_plot(self, window: int = 63) -> go.Figure:
+    def rolling_volatility_plot(self, window: int = 63, *, backend: Backend | None = None) -> Figure:
         """Plot rolling annualised volatility over time.
 
         Computes the rolling volatility for each asset column using the given
@@ -99,57 +72,35 @@ class _RollingPortfolioPlotsMixin:
 
         Args:
             window: Rolling-window size in periods. Defaults to 63.
+            backend: Renderer to use. Defaults to the ambient selection.
 
         Returns:
-            A Plotly Figure with one trace per asset.
+            Figure: A chart with one line per asset.
 
         Raises:
             ValueError: If ``window`` is not a positive integer.
+
         """
-        self._validate_window(window)
+        return render(portfolio_rolling_volatility_spec(self._portfolio, window), backend)
 
-        fig = self._line_per_column(self._portfolio.stats.rolling_volatility(rolling_period=window))
+    @overload
+    def annual_sharpe_plot(self, *, backend: Literal["plotly"] | None = ...) -> PlotlyFigure: ...
 
-        _apply_base_layout(fig, f"Rolling Volatility ({window}-period window)")
-        fig.update_yaxes(title_text="Annualised volatility")
-        return fig
+    @overload
+    def annual_sharpe_plot(self, *, backend: Literal["matplotlib"]) -> MplFigure: ...
 
-    def annual_sharpe_plot(self) -> go.Figure:
+    def annual_sharpe_plot(self, *, backend: Backend | None = None) -> Figure:
         """Plot annualised Sharpe ratio broken down by calendar year.
 
         Computes the Sharpe ratio for each calendar year from the portfolio
         returns and renders a grouped bar chart with one bar per year per
         asset.
 
+        Args:
+            backend: Renderer to use. Defaults to the ambient selection.
+
         Returns:
-            A Plotly Figure with one bar group per asset.
+            Figure: A grouped bar chart, one bar group per asset.
+
         """
-        breakdown = self._portfolio.stats.annual_breakdown()
-
-        # Extract the sharpe row for each year
-        sharpe_rows = breakdown.filter(pl.col("metric") == "sharpe")
-        asset_cols = [c for c in sharpe_rows.columns if c not in ("year", "metric")]
-
-        fig = go.Figure()
-        for asset in asset_cols:
-            fig.add_trace(
-                go.Bar(
-                    x=sharpe_rows["year"],
-                    y=sharpe_rows[asset],
-                    name=asset,
-                )
-            )
-
-        fig.add_hline(y=0, line_width=1, line_color="gray")
-
-        fig.update_layout(
-            title="Annual Sharpe Ratio by Year",
-            barmode="group",
-            hovermode="x unified",
-            plot_bgcolor="white",
-            legend={"orientation": "h", "yanchor": "bottom", "y": 1.02, "xanchor": "right", "x": 1},
-        )
-        fig.update_yaxes(title_text="Sharpe ratio")
-        fig.update_xaxes(showgrid=True, gridwidth=0.5, gridcolor="lightgrey", title_text="Year")
-        fig.update_yaxes(showgrid=True, gridwidth=0.5, gridcolor="lightgrey")
-        return fig
+        return render(annual_sharpe_spec(self._portfolio), backend)

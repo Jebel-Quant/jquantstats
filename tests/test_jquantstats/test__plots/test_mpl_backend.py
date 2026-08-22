@@ -23,8 +23,8 @@ import jquantstats
 from jquantstats._plots import _backend
 from jquantstats._plots._render import render, render_plotly
 from jquantstats._plots._render._mpl import _DEFAULT_WIDTH_PX, _DPI, mpl_color, render_mpl
-from jquantstats._plots._spec import Axis, Band, FigureSpec, HeatmapGrid, LineSeries, Panel, RefLine
-from jquantstats.exceptions import MissingBackendError
+from jquantstats._plots._spec import Axis, Band, BarSeries, FigureSpec, HeatmapGrid, LineSeries, Panel, RefLine
+from jquantstats.exceptions import MissingBackendError, NoBenchmarkError
 
 
 def _normalise_colour(colour: str) -> tuple[float, ...]:
@@ -303,6 +303,31 @@ def test_heatmap_with_a_midpoint_centres_the_ramp(data) -> None:
     assert norm.vcenter == 0
 
 
+def test_line_without_x_is_drawn_against_its_index() -> None:
+    """A series may omit its x-axis.
+
+    The portfolio rolling charts pass whatever their metric frame carries, so
+    a frame without a date column yields `x=None`. Plotly numbers the points
+    itself; matplotlib is given the same numbering explicitly.
+    """
+    ax = render_mpl(_spec(Panel(lines=(_line(x=None),)))).axes[0]
+    assert list(ax.get_lines()[0].get_xdata()) == [0, 1, 2]
+
+
+def test_palette_bars_can_still_be_translucent() -> None:
+    """Opacity works without named colours.
+
+    The bar charts always name their colours and the annual breakdown names
+    none *and* sets no opacity, so this combination has no chart behind it —
+    but the spec can express it, and folding opacity into a colour is
+    impossible when the colour comes from the backend's palette. matplotlib's
+    own ``alpha`` is the right tool there.
+    """
+    bar = BarSeries(name="A", x=pl.Series("x", [1, 2]), y=pl.Series("y", [1.0, 2.0]), opacity=0.5)
+    ax = render_mpl(_spec(Panel(bars=(bar,)))).axes[0]
+    assert ax.containers[0][0].get_alpha() == 0.5
+
+
 def test_band_without_a_label_draws_no_text() -> None:
     """A span may shade without naming itself."""
     panel = Panel(lines=(_line(),), bands=(Band(x0=1, x1=2, color="rgba(0, 0, 0, 0.2)"),))
@@ -350,6 +375,94 @@ def test_heatmap_with_no_values_still_renders() -> None:
     )
     fig = render_mpl(FigureSpec(title="T", panels=(Panel(heatmap=grid),), chrome="bare"))
     assert fig.axes[0].images[0].get_array().count() == 0
+
+
+@pytest.mark.parametrize(
+    ("method", "kwargs"),
+    [
+        ("rolling_sharpe", {}),
+        ("rolling_sharpe", {"rolling_period": 63}),
+        ("rolling_sortino", {}),
+        ("rolling_volatility", {}),
+        ("rolling_beta", {}),
+        ("rolling_beta", {"rolling_period2": None}),
+        ("rolling_beta", {"figsize": (900, 400)}),
+    ],
+    ids=lambda v: str(sorted(v)) if isinstance(v, dict) else v,
+)
+def test_rolling_backends_plot_the_same_numbers(data, method: str, kwargs: dict) -> None:
+    """Both backends draw identical rolling metrics.
+
+    Reference lines are Line2D artists on the matplotlib side, so the series
+    are matched by name rather than by position.
+    """
+    plotly_fig = getattr(data.plots, method)(**kwargs, backend="plotly")
+    mpl_fig = getattr(data.plots, method)(**kwargs, backend="matplotlib")
+
+    names = [trace.name for trace in plotly_fig.data]
+    series = {ln.get_label(): ln for ln in mpl_fig.axes[0].get_lines() if ln.get_label() in set(names)}
+    assert sorted(series) == sorted(names)
+
+    for trace in plotly_fig.data:
+        assert _floats(trace.y) == pytest.approx(_floats(series[trace.name].get_ydata()), nan_ok=True)
+
+
+@pytest.mark.parametrize("window", [21, 63])
+def test_portfolio_rolling_backends_agree(pf, window: int) -> None:
+    """The portfolio facade's rolling charts match across backends too."""
+    for method in ("rolling_sharpe_plot", "rolling_volatility_plot"):
+        plotly_fig = getattr(pf.plots, method)(window=window, backend="plotly")
+        mpl_fig = getattr(pf.plots, method)(window=window, backend="matplotlib")
+
+        names = {trace.name for trace in plotly_fig.data}
+        series = {ln.get_label(): ln for ln in mpl_fig.axes[0].get_lines() if ln.get_label() in names}
+        assert set(series) == names
+
+        for trace in plotly_fig.data:
+            assert _floats(trace.y) == pytest.approx(_floats(series[trace.name].get_ydata()), nan_ok=True)
+
+
+def test_portfolio_rolling_charts_take_the_backend_palette(pf) -> None:
+    """These charts name no colours, unlike the Data ones.
+
+    The spec leaves `LineSeries.color` unset, so each backend assigns from its
+    own palette rather than the shared one.
+    """
+    spec_lines = pf.plots.rolling_sharpe_plot(backend="plotly").data
+    assert all(trace.line.color is None for trace in spec_lines)
+
+    mpl_fig = pf.plots.rolling_sharpe_plot(backend="matplotlib")
+    assert all(line.get_color() for line in mpl_fig.axes[0].get_lines())
+
+
+def test_annual_sharpe_backends_plot_the_same_bars(pf) -> None:
+    """The per-year breakdown matches, and takes the backend palette."""
+    plotly_fig = pf.plots.annual_sharpe_plot(backend="plotly")
+    mpl_fig = pf.plots.annual_sharpe_plot(backend="matplotlib")
+
+    containers = mpl_fig.axes[0].containers
+    assert len(containers) == len(plotly_fig.data)
+
+    for trace, container in zip(plotly_fig.data, containers, strict=True):
+        assert trace.name == container.get_label()
+        assert trace.marker.color is None, "no colours named; the backend picks"
+        heights = [patch.get_height() for patch in container]
+        assert _floats(trace.y) == pytest.approx(_floats(heights), nan_ok=True)
+
+
+def test_rolling_window_validation_is_backend_independent(pf) -> None:
+    """A bad window is rejected in the builder, before any renderer runs."""
+    for backend in ("plotly", "matplotlib"):
+        for method in ("rolling_sharpe_plot", "rolling_volatility_plot"):
+            with pytest.raises(ValueError, match="window must be a positive integer"):
+                getattr(pf.plots, method)(window=0, backend=backend)
+
+
+def test_rolling_beta_requires_a_benchmark_on_both_backends(data_no_benchmark) -> None:
+    """Validation lives above the dispatch, so both backends raise alike."""
+    for backend in ("plotly", "matplotlib"):
+        with pytest.raises(NoBenchmarkError):
+            data_no_benchmark.plots.rolling_beta(backend=backend)
 
 
 def test_drawdown_backends_plot_the_same_curves(data) -> None:

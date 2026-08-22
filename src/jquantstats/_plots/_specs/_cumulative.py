@@ -49,7 +49,7 @@ def _lines(
     prefix: str = "",
     suffix: str = "",
     width: float = 2,
-    dash: Dash = "solid",
+    dash: Dash | None = None,
 ) -> list[LineSeries]:
     """Build one line series per ticker, all sharing a style.
 

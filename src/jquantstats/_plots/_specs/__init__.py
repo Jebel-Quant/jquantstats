@@ -16,8 +16,18 @@ from ._periodic import monthly_heatmap_spec as monthly_heatmap_spec
 from ._periodic import monthly_returns_spec as monthly_returns_spec
 from ._periodic import period_agg_exprs as period_agg_exprs
 from ._periodic import yearly_returns_spec as yearly_returns_spec
+from ._rolling import annual_sharpe_spec as annual_sharpe_spec
+from ._rolling import portfolio_rolling_sharpe_spec as portfolio_rolling_sharpe_spec
+from ._rolling import portfolio_rolling_volatility_spec as portfolio_rolling_volatility_spec
+from ._rolling import rolling_beta_expr as rolling_beta_expr
+from ._rolling import rolling_beta_spec as rolling_beta_spec
+from ._rolling import rolling_sharpe_spec as rolling_sharpe_spec
+from ._rolling import rolling_sortino_spec as rolling_sortino_spec
+from ._rolling import rolling_volatility_spec as rolling_volatility_spec
+from ._rolling import validate_window as validate_window
 
 __all__ = [
+    "annual_sharpe_spec",
     "compare_spec",
     "compute_drawdown_periods",
     "cumulative_returns_spec",
@@ -29,5 +39,13 @@ __all__ = [
     "monthly_heatmap_spec",
     "monthly_returns_spec",
     "period_agg_exprs",
+    "portfolio_rolling_sharpe_spec",
+    "portfolio_rolling_volatility_spec",
+    "rolling_beta_expr",
+    "rolling_beta_spec",
+    "rolling_sharpe_spec",
+    "rolling_sortino_spec",
+    "rolling_volatility_spec",
+    "validate_window",
     "yearly_returns_spec",
 ]

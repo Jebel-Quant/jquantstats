@@ -66,6 +66,11 @@ Values: TypeAlias = "pl.Series | list[Any]"
 TickFormat = Literal["float2", "float4", "percent0", "percent1", "percent2", "currency0"]
 
 #: Line styles, kept to the set the charts actually use.
+#:
+#: A field typed ``Dash | None`` treats None as *say nothing* and leave the
+#: backend's default, which is distinct from asking for ``"solid"``
+#: explicitly. Some charts state it and some do not, and Plotly records the
+#: difference in its serialised output.
 Dash = Literal["solid", "dash"]
 
 #: Named colour ramps for matrix charts, resolved per backend.
@@ -112,11 +117,13 @@ class LineSeries:
 
     Attributes:
         name: Legend entry for the series.
-        x: Horizontal positions, typically the date column.
+        x: Horizontal positions, typically the date column, or None to let the
+            backend number the points.
         y: Vertical positions.
-        color: Line colour as ``#RRGGBB``; both backends accept that spelling.
+        color: Line colour as ``#RRGGBB``, or None to take the backend's next
+            palette colour.
         width: Stroke width.
-        dash: Stroke pattern.
+        dash: Stroke pattern, or None to leave the backend's default.
         fill_color: Shade the area between the line and zero in this colour,
             or None to leave the line unfilled. Used by the underwater curve.
         hover: Tooltip description, or None to leave the backend's default.
@@ -124,14 +131,14 @@ class LineSeries:
     """
 
     name: str
-    x: Values
     y: Values
-    color: str
+    x: Values | None = None
+    color: str | None = None
     # Left as an int so a whole-number width serialises as `2` rather than
     # `2.0`. Plotly preserves the distinction in its JSON, and the fidelity
     # snapshots compare that JSON exactly.
     width: float = 2
-    dash: Dash = "solid"
+    dash: Dash | None = None
     fill_color: str | None = None
     hover: HoverSpec | None = None
 
@@ -144,9 +151,10 @@ class BarSeries:
         name: Legend entry for the series.
         x: Bar positions — dates, or the category each bar sits at.
         y: Bar heights.
-        colors: One colour per bar. Per-bar rather than per-series because
-            these charts colour a bar by the sign of its value.
-        opacity: Fill opacity.
+        colors: One colour per bar, or None to take the backend's palette.
+            Per-bar rather than per-series because several of these charts
+            colour a bar by the sign of its value.
+        opacity: Fill opacity, or None for the backend's default.
         hover: Tooltip description, or None to leave the backend's default.
 
     """
@@ -154,8 +162,8 @@ class BarSeries:
     name: str
     x: Values
     y: Values
-    colors: tuple[str, ...]
-    opacity: float = 0.85
+    colors: tuple[str, ...] | None = None
+    opacity: float | None = None
     hover: HoverSpec | None = None
 
 
@@ -169,7 +177,7 @@ class RefLine:
             vertical one.
         color: Line colour.
         width: Stroke width.
-        dash: Stroke pattern.
+        dash: Stroke pattern, or None to leave the backend's default.
 
     """
 
@@ -177,7 +185,7 @@ class RefLine:
     orientation: Literal["h", "v"] = "h"
     color: str = "gray"
     width: float = 1
-    dash: Dash = "solid"
+    dash: Dash | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -298,7 +306,7 @@ class FigureSpec:
     Attributes:
         title: Chart title.
         panels: The panels to draw, top to bottom.
-        height: Figure height in pixels.
+        height: Figure height in pixels, or None to let the backend size it.
         figsize: Optional ``(width, height)`` in pixels, overriding *height*.
             Pixels for both backends; the matplotlib renderer converts to
             inches so one public signature means the same thing either way.
@@ -312,7 +320,7 @@ class FigureSpec:
 
     title: str
     panels: tuple[Panel, ...]
-    height: int = 600
+    height: int | None = 600
     figsize: tuple[int, int] | None = None
     date_range_selector: bool = True
     chrome: Chrome = "timeseries"
