@@ -206,16 +206,8 @@ deptry_ignore = ["api"]
 # `deptry_ignore` under [tool.rhiza-task] above — it was the Makefile's
 # DEPTRY_FOLDERS line before rhiza v1.4.0), so its import there is observed
 # directly.
-#   matplotlib        - TEMPORARY, and the only entry here that is not permanent.
-#                       The optional rendering backend (#628). Today the only reference
-#                       is `find_spec("matplotlib")` in _plots/_backend.py, which deptry
-#                       cannot see, so it looks unused. DELETE THIS ENTRY in the PR that
-#                       lands _plots/_render/_mpl.py — from then on matplotlib is a real
-#                       import in src/ and deptry observes it directly. If that PR leaves
-#                       this line in place, an accidental *removal* of the matplotlib
-#                       import would stop being caught.
 [tool.deptry.per_rule_ignores]
-DEP002 = ["kaleido", "uvicorn", "python-multipart", "matplotlib"]
+DEP002 = ["kaleido", "uvicorn", "python-multipart"]
 
 # Package to module name mapping
 [tool.deptry.package_module_name_map]
