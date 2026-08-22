@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
-from typing import Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
-import plotly.graph_objects as go
 import polars as pl
 
 from jquantstats._protocol import DataLike, StatsLike
+
+if TYPE_CHECKING:
+    import plotly.graph_objects as go
 
 __all__ = ["DataLike", "PlotsLike", "PortfolioLike", "StatsLike"]
 

@@ -11,11 +11,12 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-import plotly.graph_objects as go
 import polars as pl
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 if TYPE_CHECKING:
+    import plotly.graph_objects as go
+
     from ._protocol import PortfolioLike
 
 from .._plots._backend import plot_backend

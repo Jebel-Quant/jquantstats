@@ -465,6 +465,106 @@ def test_rolling_beta_requires_a_benchmark_on_both_backends(data_no_benchmark) -
             data_no_benchmark.plots.rolling_beta(backend=backend)
 
 
+def test_lead_lag_backends_plot_the_same_bars(pf) -> None:
+    """The Sharpe-by-delay sweep matches across backends."""
+    plotly_fig = pf.plots.lead_lag_ir_plot(start=-3, end=3, backend="plotly")
+    mpl_fig = pf.plots.lead_lag_ir_plot(start=-3, end=3, backend="matplotlib")
+
+    (container,) = mpl_fig.axes[0].containers
+    heights = [patch.get_height() for patch in container]
+    assert _floats(plotly_fig.data[0].y) == pytest.approx(_floats(heights), nan_ok=True)
+
+
+def test_lead_lag_picks_out_the_undelayed_portfolio(pf) -> None:
+    """Lag zero is the portfolio being judged, so it is coloured apart."""
+    plotly_fig = pf.plots.lead_lag_ir_plot(start=-2, end=2, backend="plotly")
+    colours = list(plotly_fig.data[0].marker.color)
+    # Lags run -2..2, so index 2 is lag zero.
+    assert colours[2] == "red"
+    assert set(colours) - {"red"} == {"#1f77b4"}
+
+
+def test_lead_lag_swaps_reversed_bounds(pf) -> None:
+    """Passing the bounds the wrong way round is tolerated, not an error."""
+    forward = pf.plots.lead_lag_ir_plot(start=-2, end=2, backend="plotly")
+    reversed_ = pf.plots.lead_lag_ir_plot(start=2, end=-2, backend="plotly")
+    assert list(forward.data[0].x) == list(reversed_.data[0].x)
+
+
+def test_lead_lag_rejects_non_integer_bounds_on_both_backends(pf) -> None:
+    """Validation sits in the builder, so both backends reject alike."""
+    for backend in ("plotly", "matplotlib"):
+        with pytest.raises(TypeError):
+            pf.plots.lead_lag_ir_plot(start=0.5, backend=backend)
+
+
+def test_correlation_backends_plot_the_same_matrix(pf) -> None:
+    """The correlation grid holds the same values on both backends."""
+    plotly_fig = pf.plots.correlation_heatmap(backend="plotly")
+    mpl_fig = pf.plots.correlation_heatmap(backend="matplotlib")
+
+    expected = [list(row) for row in plotly_fig.data[0].z]
+    actual = mpl_fig.axes[0].images[0].get_array()
+    assert actual.shape == (len(expected), len(expected[0]))
+    for r, row in enumerate(expected):
+        for c, value in enumerate(row):
+            assert float(actual[r, c]) == pytest.approx(value)
+
+
+def test_correlation_is_pinned_to_the_full_range(pf) -> None:
+    """A correlation runs -1 to 1 whatever this data happens to span.
+
+    Fitting the ramp to the observed range would make a weakly-correlated
+    portfolio look strongly correlated.
+    """
+    trace = pf.plots.correlation_heatmap(backend="plotly").data[0]
+    assert (trace.zmin, trace.zmax) == (-1, 1)
+
+    norm = pf.plots.correlation_heatmap(backend="matplotlib").axes[0].images[0].norm
+    assert (norm.vmin, norm.vmax) == (-1, 1)
+
+
+def test_correlation_keeps_its_tooltip(pf) -> None:
+    """Moving off `px.imshow` must not silently drop the hover text.
+
+    `px.imshow` generated a hovertemplate automatically; a plain heatmap has
+    to ask for one.
+    """
+    assert pf.plots.correlation_heatmap(backend="plotly").data[0].hovertemplate
+
+
+def test_portfolio_monthly_heatmap_backends_agree(pf) -> None:
+    """The portfolio calendar matches, with years as discrete rows."""
+    plotly_fig = pf.plots.monthly_returns_heatmap(backend="plotly")
+    mpl_fig = pf.plots.monthly_returns_heatmap(backend="matplotlib")
+
+    assert plotly_fig.layout.yaxis.type == "category"
+    assert [t.get_text() for t in mpl_fig.axes[0].get_xticklabels()][:3] == ["Jan", "Feb", "Mar"]
+    assert list(plotly_fig.data[0].y) == [t.get_text() for t in mpl_fig.axes[0].get_yticklabels()]
+
+
+def test_trading_cost_backends_plot_the_same_curve(pf) -> None:
+    """Sharpe against cost matches, and both mark the zero-cost baseline."""
+    plotly_fig = pf.plots.trading_cost_impact_plot(max_bps=5, backend="plotly")
+    mpl_fig = pf.plots.trading_cost_impact_plot(max_bps=5, backend="matplotlib")
+
+    curve = next(ln for ln in mpl_fig.axes[0].get_lines() if ln.get_label() == plotly_fig.data[0].name)
+    assert _floats(plotly_fig.data[0].y) == pytest.approx(_floats(curve.get_ydata()), nan_ok=True)
+
+    assert [a.text for a in plotly_fig.layout.annotations] == ["0 bps baseline"]
+    assert [t.get_text() for t in mpl_fig.axes[0].texts] == ["0 bps baseline"]
+
+
+def test_trading_cost_curve_carries_markers(pf) -> None:
+    """Each basis point is an evaluated observation, so it gets a point."""
+    plotly_fig = pf.plots.trading_cost_impact_plot(max_bps=5, backend="plotly")
+    assert plotly_fig.data[0].mode == "lines+markers"
+
+    mpl_fig = pf.plots.trading_cost_impact_plot(max_bps=5, backend="matplotlib")
+    curve = next(ln for ln in mpl_fig.axes[0].get_lines() if ln.get_label().startswith("Sharpe"))
+    assert curve.get_marker() not in (None, "None", "")
+
+
 def test_data_dashboard_stacks_three_panels(data) -> None:
     """The returns dashboard is three views over one shared time axis."""
     mpl_fig = data.plots.snapshot(backend="matplotlib")

@@ -21,10 +21,11 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import polars as pl
+from matplotlib import colormaps
 from matplotlib.axes import Axes
 from matplotlib.colors import LinearSegmentedColormap, TwoSlopeNorm, to_rgba
 from matplotlib.figure import Figure
-from matplotlib.ticker import EngFormatter, StrMethodFormatter
+from matplotlib.ticker import EngFormatter, MultipleLocator, StrMethodFormatter
 
 from .._spec import (
     Axis,
@@ -69,10 +70,13 @@ _FORMATS = {
     "currency0": "{x:,.0f}",
 }
 
-# Named colour ramp -> the colours it interpolates between.
+# Named colour ramp -> how matplotlib names it. The custom one is built from
+# its stops; the other two are matplotlib built-ins that Plotly borrowed the
+# names from, so they need no translation beyond case.
 _COLORSCALES: dict[ColorScale, tuple[str, ...]] = {
     "red_white_green": ("#d62728", "#ffffff", "#2ca02c"),
 }
+_BUILTIN_COLORMAPS: dict[ColorScale, str] = {"rdylgn": "RdYlGn", "rdbu_r": "RdBu_r"}
 
 # Semantic dash style -> matplotlib's linestyle vocabulary.
 _LINESTYLES = {"solid": "-", "dash": "--", None: "-"}
@@ -146,6 +150,12 @@ def _draw_line(ax: Axes, line: LineSeries) -> None:
     # A line that names no colour is left to matplotlib's own colour cycle,
     # matching how Plotly treats an unset `line.color`.
     styling: dict[str, Any] = {} if line.color is None else {"color": mpl_color(line.color)}
+    if line.markers:
+        styling["marker"] = "o"
+    if line.marker_size is not None:
+        # matplotlib sizes a marker by diameter in points, Plotly by area-ish
+        # "size"; the square root keeps the two visually comparable.
+        styling["markersize"] = line.marker_size**0.5 * 2
     ax.plot(
         x,
         y,
@@ -327,6 +337,22 @@ def _draw_boxes(ax: Axes, boxes: tuple[BoxSeries, ...]) -> None:
         patch.set_facecolor(mpl_color(box.color))
 
 
+def _colormap(scale: ColorScale) -> Any:
+    """Resolve a named colour ramp to a matplotlib colormap.
+
+    Args:
+        scale: The ramp's semantic name.
+
+    Returns:
+        The colormap, built from explicit stops or looked up by name.
+
+    """
+    builtin = _BUILTIN_COLORMAPS.get(scale)
+    if builtin is not None:
+        return colormaps[builtin]
+    return LinearSegmentedColormap.from_list(scale, _COLORSCALES[scale])
+
+
 def _draw_heatmap(fig: Figure, ax: Axes, grid: HeatmapGrid) -> None:
     """Draw a value matrix onto *ax*, with per-cell labels and a colour bar.
 
@@ -342,10 +368,13 @@ def _draw_heatmap(fig: Figure, ax: Axes, grid: HeatmapGrid) -> None:
     values = np.array([[float("nan") if v is None else v for v in row] for row in grid.z], dtype=float)
     masked = np.ma.masked_invalid(values)
 
-    cmap = LinearSegmentedColormap.from_list(grid.colorscale, _COLORSCALES[grid.colorscale])
+    cmap = _colormap(grid.colorscale)
     norm = None
     if grid.zmid is not None and masked.count():
-        low, high = float(masked.min()), float(masked.max())
+        # Pinned bounds win over the data's own range: a correlation runs -1 to
+        # 1 whatever this particular matrix happens to span.
+        low = float(masked.min()) if grid.zmin is None else grid.zmin
+        high = float(masked.max()) if grid.zmax is None else grid.zmax
         # TwoSlopeNorm needs the centre strictly inside the range; widen a
         # one-sided or degenerate span so an all-positive year still renders.
         low = min(low, grid.zmid - 1e-9)
@@ -384,6 +413,8 @@ def _apply_axis(ax: Axes, axis: Axis, *, vertical: bool) -> None:
     if axis.log:
         set_scale = ax.set_yscale if vertical else ax.set_xscale
         set_scale("log")
+    if axis.dtick is not None:
+        target.set_major_locator(MultipleLocator(axis.dtick))
     if axis.opposite_side:
         # Each axis has its own vocabulary for "the far edge", which is why
         # the spec says `opposite_side` rather than naming a compass point.

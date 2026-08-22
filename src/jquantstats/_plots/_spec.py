@@ -79,7 +79,7 @@ TickFormat = Literal["float2", "float4", "percent0", "percent1", "percent2", "cu
 Dash = Literal["solid", "dash"]
 
 #: Named colour ramps for matrix charts, resolved per backend.
-ColorScale = Literal["red_white_green"]
+ColorScale = Literal["red_white_green", "rdylgn", "rdbu_r"]
 
 #: How much furniture a chart carries.
 #:
@@ -91,7 +91,9 @@ ColorScale = Literal["red_white_green"]
 #: ``panels`` is the small-multiples treatment: one panel per asset sharing a
 #: scale, with the legend naming the categories repeated in each panel rather
 #: than the panels themselves.
-Chrome = Literal["timeseries", "bare", "panels"]
+#: ``plain`` is the standard treatment minus the legend and the range
+#: selector: a single-series diagnostic that names itself in its title.
+Chrome = Literal["timeseries", "bare", "panels", "plain"]
 
 #: How a chart's panels are laid out.
 #:
@@ -146,6 +148,9 @@ class LineSeries:
             palette colour.
         width: Stroke width.
         dash: Stroke pattern, or None to leave the backend's default.
+        markers: Draw a point at each observation as well as the line. Used
+            where the observations are few and individually meaningful.
+        marker_size: Point size, or None for the backend's default.
         fill: Shade the area between the line and zero. Used by the underwater
             curves.
         fill_color: What colour to shade it, or None to let the backend match
@@ -169,6 +174,8 @@ class LineSeries:
     # snapshots compare that JSON exactly.
     width: float = 2
     dash: Dash | None = None
+    markers: bool = False
+    marker_size: int | None = None
     fill: bool = False
     fill_color: str | None = None
     hover: HoverSpec | None = None
@@ -312,6 +319,9 @@ class HeatmapGrid:
         colorscale: The colour ramp to map values through.
         zmid: Value anchored to the middle of a diverging ramp, or None to
             span the data range.
+        zmin: Value pinned to the low end of the ramp, or None for the data's
+            minimum.
+        zmax: Value pinned to the high end, or None for the data's maximum.
         colorbar_title: Heading for the colour scale legend.
         hover_label: Word naming the quantity in the tooltip, or None for no
             tooltip. Interactive-only, so matplotlib ignores it.
@@ -326,6 +336,8 @@ class HeatmapGrid:
     # An int, so a whole-number anchor serialises as `0` rather than `0.0`;
     # Plotly preserves the distinction and the fidelity snapshots compare it.
     zmid: float | None = 0
+    zmin: float | None = None
+    zmax: float | None = None
     colorbar_title: str = ""
     hover_label: str | None = None
 
@@ -343,6 +355,10 @@ class Axis:
         tick_format: How to render tick values, or None for the default.
         tick_prefix: Written before each tick value, e.g. a currency sign.
         log: Use a logarithmic scale.
+        kind: Force an axis type, or None to let the backend infer one.
+            ``"category"`` keeps year labels as discrete rows rather than
+            numbers on a continuous scale.
+        dtick: Spacing between ticks, or None for the backend's choice.
         opposite_side: Draw the axis on the far edge — the top for a
             horizontal axis, the right for a vertical one. The monthly
             calendar puts its months along the top, where they read as column
@@ -354,6 +370,8 @@ class Axis:
     tick_format: TickFormat | None = None
     tick_prefix: str = ""
     log: bool = False
+    kind: Literal["category"] | None = None
+    dtick: float | None = None
     # Deliberately a flag rather than a compass point. Which edge counts as
     # "opposite" depends on the axis, and naming it absolutely would admit
     # nonsense a renderer would then have to police — an x-axis on the "left".
@@ -417,6 +435,11 @@ class FigureSpec:
             down the whole dashboard.
         vertical_spacing: Gap between stacked panels as a figure fraction, or
             None for the backend's default.
+        hover_mode: How tooltips gather points, or None for the backend's
+            default. Only consulted for ``plain`` chrome; the other treatments
+            each fix their own.
+        width: Figure width in pixels, or None to let the backend size it.
+            Distinct from *figsize*, which sets both dimensions at once.
         bar_mode: How bars from different series share an x position, or None
             for the backend's default.
 
@@ -432,4 +455,6 @@ class FigureSpec:
     shared_y: bool = False
     shared_x: bool = False
     vertical_spacing: float | None = None
+    hover_mode: Literal["x", "x unified"] | None = None
+    width: int | None = None
     bar_mode: Literal["group", "overlay", "relative"] | None = None

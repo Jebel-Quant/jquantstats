@@ -12,6 +12,10 @@ from ._dashboard import data_snapshot_spec as data_snapshot_spec
 from ._dashboard import lagged_performance_spec as lagged_performance_spec
 from ._dashboard import portfolio_snapshot_spec as portfolio_snapshot_spec
 from ._dashboard import smoothed_holdings_performance_spec as smoothed_holdings_performance_spec
+from ._diagnostics import correlation_heatmap_spec as correlation_heatmap_spec
+from ._diagnostics import lead_lag_ir_spec as lead_lag_ir_spec
+from ._diagnostics import monthly_returns_heatmap_spec as monthly_returns_heatmap_spec
+from ._diagnostics import trading_cost_impact_spec as trading_cost_impact_spec
 from ._distribution import distribution_spec as distribution_spec
 from ._distribution import histogram_spec as histogram_spec
 from ._drawdown import compute_drawdown_periods as compute_drawdown_periods
@@ -38,6 +42,7 @@ __all__ = [
     "annual_sharpe_spec",
     "compare_spec",
     "compute_drawdown_periods",
+    "correlation_heatmap_spec",
     "cumulative_returns_spec",
     "daily_returns_spec",
     "data_snapshot_spec",
@@ -47,10 +52,12 @@ __all__ = [
     "earnings_spec",
     "histogram_spec",
     "lagged_performance_spec",
+    "lead_lag_ir_spec",
     "log_returns_spec",
     "montecarlo_distribution_spec",
     "montecarlo_spec",
     "monthly_heatmap_spec",
+    "monthly_returns_heatmap_spec",
     "monthly_returns_spec",
     "period_agg_exprs",
     "portfolio_rolling_sharpe_spec",
@@ -62,6 +69,7 @@ __all__ = [
     "rolling_sortino_spec",
     "rolling_volatility_spec",
     "smoothed_holdings_performance_spec",
+    "trading_cost_impact_spec",
     "validate_window",
     "yearly_returns_spec",
 ]

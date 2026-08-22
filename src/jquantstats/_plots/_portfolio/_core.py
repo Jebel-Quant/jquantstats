@@ -4,17 +4,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import plotly.io as pio
-
 from ._diagnostics import _DiagnosticPlotsMixin
 from ._nav import _NavPlotsMixin
 from ._rolling import _RollingPortfolioPlotsMixin
 
 if TYPE_CHECKING:
     from .._protocol import PortfolioLike
-
-# Ensure Plotly works with Marimo (set after imports to satisfy linters)
-pio.renderers.default = "plotly_mimetype"
 
 
 class PortfolioPlots(

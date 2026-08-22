@@ -3,16 +3,30 @@
 These decide *which* colours a chart uses. How those colours are applied to a
 figure is a renderer's job, so nothing here imports a drawing library.
 
-The palette is Plotly's qualitative sequence, kept because changing it would
-alter every existing chart. `plotly.express` is imported only to read that list
-of hex strings; no figure is built and no renderer is selected.
+The palette is Plotly's qualitative sequence, copied out rather than imported.
+Reading it from `plotly.express` would make this module — and everything that
+picks a colour, which is every spec builder — depend on a drawing library, and
+would silently restyle every chart if Plotly ever revised the sequence. The
+fidelity snapshots pin these exact values, so a copy is the honest form.
 """
 
 from __future__ import annotations
 
-import plotly.express as px
+__all__ = ["PALETTE", "bar_colors", "hex_to_rgba", "ticker_colors", "yearly_bar_colors"]
 
-__all__ = ["bar_colors", "hex_to_rgba", "ticker_colors", "yearly_bar_colors"]
+#: Plotly's ``qualitative.Plotly`` sequence, as of plotly 6.
+PALETTE = (
+    "#636EFA",
+    "#EF553B",
+    "#00CC96",
+    "#AB63FA",
+    "#FFA15A",
+    "#19D3F3",
+    "#FF6692",
+    "#B6E880",
+    "#FF97FF",
+    "#FECB52",
+)
 
 #: Green and red for a single-asset chart, where a bar's colour can carry the
 #: sign outright rather than having to stay identifiable as one asset among several.
@@ -58,8 +72,7 @@ def ticker_colors(tickers: list[str]) -> dict[str, str]:
         '#636EFA'
 
     """
-    palette = px.colors.qualitative.Plotly
-    return {ticker: palette[i % len(palette)] for i, ticker in enumerate(tickers)}
+    return {ticker: PALETTE[i % len(PALETTE)] for i, ticker in enumerate(tickers)}
 
 
 def bar_colors(values: list[float | None], positive_color: str, single_asset: bool = False) -> list[str]:
