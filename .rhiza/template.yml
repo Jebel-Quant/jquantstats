@@ -10,6 +10,9 @@ templates:
 # Destination paths, as they land in this repo. Source-path entries
 # (bundles/github/...) are inert since the exclude semantics were fixed.
 exclude:
+  # The mutation-testing workflow. Retired upstream in rhiza v1.5.0 and removed here;
+  # it survived the orphan sweep only because it was never listed in template.lock.
+  - .github/workflows/rhiza_mutation.yml
 
   - .github/workflows/rhiza_fuzzing.yml
   - .github/workflows/rhiza_weekly.yml

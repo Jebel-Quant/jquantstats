@@ -73,4 +73,4 @@ circular, since those classes compose the subpackages. Instead:
 | Cost models (per-unit vs turnover-bps) | `_cost_model.py`, applied in `_portfolio_cost.py` |
 | HTML reports | `_reports/` + `templates/portfolio_report.html` |
 | Web API (optional `[web]` extra) | `api/app.py` |
-| Quality gates | 100% line+branch coverage, 100% docstring coverage, ruff, ty, mutation gate (`bin/mutation_gate.py`) |
+| Quality gates | 100% line+branch coverage, 100% docstring coverage, ruff, ty |

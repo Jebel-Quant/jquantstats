@@ -13,7 +13,7 @@ neither ships a compiled extension).
 > of large modules of free functions that operate on (and monkey-patch onto)
 > pandas Series. jquantstats is an **object-oriented, Polars-native** library:
 > many small modules composed via mixins and protocols into frozen, immutable,
-> memoised objects, behind a strict-typed, 100%-covered, mutation-tested quality
+> memoised objects, behind a strict-typed, 100%-covered quality
 > gate. QuantStats optimises for *familiarity and reach*; jquantstats optimises
 > for *correctness, type-safety, and maintainability*.
 
@@ -33,7 +33,7 @@ neither ships a compiled extension).
 | Type coverage | Full annotations, strict (`ty`), `py.typed` | Partial (~50% in `stats.py`), `py.typed` |
 | Docstring coverage | 100% enforced (`interrogate`) | Good, not gated |
 | Tests shipped | 15k LOC test suite in repo | Not shipped in wheel |
-| Quality gates | 100% line+branch cov, mutation, property, snapshot | Lighter (pytest + coverage, no enforced gate) |
+| Quality gates | 100% line+branch cov, property, snapshot | Lighter (pytest + coverage, no enforced gate) |
 | Plotting engine | Plotly and matplotlib, both native | Matplotlib core + optional `to_plotly()` converter |
 | Python | 3.11+ | 3.10+ |
 
@@ -196,16 +196,13 @@ This is where the engineering philosophies diverge most.
 
 **QuantStats** does not ship its test suite in the wheel. Its dev tooling is
 conventional: `pytest`, `pytest-cov`, `ruff`, `pyright`. There is no evidence of
-an enforced coverage threshold, mutation testing, or property-based testing.
+an enforced coverage threshold or property-based testing.
 
 **jquantstats** treats verification as a first-class deliverable:
 
 - **~15k LOC of tests** (larger than the ~10.6k LOC of source).
 - **100% line *and* branch coverage**, enforced (`fail_under=100`) with a
   dedicated `test_coverage_gate.py`.
-- **Mutation testing** (`mutmut`, gated in CI via `.github/workflows/mutation.yml`
-  and a `mutation_gate.py`) — verifies the tests actually *catch* injected bugs,
-  not just execute lines.
 - **Property-based testing** (`hypothesis`) for numerical invariants.
 - **Snapshot/regression testing** (`syrupy`).
 - **Performance benchmarks** (`pytest-benchmark`, with a PR-benchmark workflow).
@@ -275,7 +272,7 @@ battle-testing in the wild is necessarily shallower.
 | Maximum community/edge-case maturity | QuantStats |
 | Immutability, memoisation, zero global state | jquantstats |
 | Strict typing + enforced docstrings | jquantstats |
-| 100% coverage, mutation & property testing | jquantstats |
+| 100% coverage & property testing | jquantstats |
 | Polars-native performance, lean base deps | jquantstats |
 | Small, single-responsibility, testable modules | jquantstats |
 
