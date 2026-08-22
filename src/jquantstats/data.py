@@ -155,45 +155,40 @@ class Data(_ReshapeMixin):
                 their common dates drops rows from either frame.
 
         Examples:
-            Basic usage:
+            Basic usage. Note the ``Date`` column is canonicalised to ``date``:
 
-            ```python
-            from jquantstats import Data
-            import polars as pl
-
-            returns = pl.DataFrame({
-                "Date": ["2023-01-01", "2023-01-02", "2023-01-03"],
-                "Asset1": [0.01, -0.02, 0.03]
-            }).with_columns(pl.col("Date").str.to_date())
-
-            data = Data.from_returns(returns=returns)
-            ```
+            >>> import polars as pl
+            >>> from jquantstats import Data
+            >>> returns = pl.DataFrame(
+            ...     {"Date": ["2023-01-01", "2023-01-02", "2023-01-03"], "Asset1": [0.01, -0.02, 0.03]}
+            ... ).with_columns(pl.col("Date").str.to_date())
+            >>> data = Data.from_returns(returns=returns)
+            >>> data.assets
+            ['Asset1']
+            >>> data.all.columns
+            ['date', 'Asset1']
 
             With benchmark and risk-free rate:
 
-            ```python
-            benchmark = pl.DataFrame({
-                "Date": ["2023-01-01", "2023-01-02", "2023-01-03"],
-                "Market": [0.005, -0.01, 0.02]
-            }).with_columns(pl.col("Date").str.to_date())
+            >>> benchmark = pl.DataFrame(
+            ...     {"Date": ["2023-01-01", "2023-01-02", "2023-01-03"], "Market": [0.005, -0.01, 0.02]}
+            ... ).with_columns(pl.col("Date").str.to_date())
+            >>> data = Data.from_returns(returns=returns, benchmark=benchmark, rf=0.0002)
+            >>> data.benchmark.columns
+            ['Market']
 
-            data = Data.from_returns(returns=returns, benchmark=benchmark, rf=0.0002)
-            ```
+            Handling nulls automatically. ``"drop"`` mirrors pandas/'uantStats
+            behaviour and loses the offending row; ``"forward_fill"`` keeps it:
 
-            Handling nulls automatically:
-
-            ```python
-            returns_with_nulls = pl.DataFrame({
-                "Date": ["2023-01-01", "2023-01-02", "2023-01-03"],
-                "Asset1": [0.01, None, 0.03]
-            }).with_columns(pl.col("Date").str.to_date())
-
-            # Drop rows with nulls (mirrors pandas/QuantStats behaviour)
-            data = Data.from_returns(returns=returns_with_nulls, null_strategy="drop")
-
-            # Or forward-fill nulls
-            data = Data.from_returns(returns=returns_with_nulls, null_strategy="forward_fill")
-            ```
+            >>> returns_with_nulls = pl.DataFrame(
+            ...     {"Date": ["2023-01-01", "2023-01-02", "2023-01-03"], "Asset1": [0.01, None, 0.03]}
+            ... ).with_columns(pl.col("Date").str.to_date())
+            >>> Data.from_returns(returns=returns_with_nulls, null_strategy="drop").returns["Asset1"].to_list()
+            [0.01, 0.03]
+            >>> Data.from_returns(
+            ...     returns=returns_with_nulls, null_strategy="forward_fill"
+            ... ).returns["Asset1"].to_list()
+            [0.01, 0.01, 0.03]
 
         """
         # Resolve the date column once, up front: a temporal axis is renamed to the
@@ -285,17 +280,18 @@ class Data(_ReshapeMixin):
                 returns are derived so the offending frame is named explicitly.
 
         Examples:
-            ```python
-            from jquantstats import Data
-            import polars as pl
+            Prices become returns, so the first row is consumed:
 
-            prices = pl.DataFrame({
-                "Date": ["2023-01-01", "2023-01-02", "2023-01-03"],
-                "Asset1": [100.0, 101.0, 99.0]
-            }).with_columns(pl.col("Date").str.to_date())
-
-            data = Data.from_prices(prices=prices)
-            ```
+            >>> import polars as pl
+            >>> from jquantstats import Data
+            >>> prices = pl.DataFrame(
+            ...     {"Date": ["2023-01-01", "2023-01-02", "2023-01-03"], "Asset1": [100.0, 101.0, 99.0]}
+            ... ).with_columns(pl.col("Date").str.to_date())
+            >>> data = Data.from_prices(prices=prices)
+            >>> data.returns.height
+            2
+            >>> [round(r, 6) for r in data.returns["Asset1"].to_list()]
+            [0.01, -0.019802]
 
         """
         prices_pl, resolved_col = _canonicalise_date_column(_to_polars(prices), "prices", date_col)
