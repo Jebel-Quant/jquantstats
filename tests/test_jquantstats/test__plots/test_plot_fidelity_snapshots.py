@@ -3,13 +3,13 @@
 Unlike ``test_plot_snapshots.py`` (which fingerprints only trace counts and a
 few layout keys), these tests pin the **complete** figure JSON — colors,
 hovertemplates, axis configuration, legend placement, marker styles — via
-``fig.to_json()``.  They exist to kill mutation-testing survivors in
-``_plots/_data.py``: any change to a styling literal or layout constant
-alters the serialized figure.
+``fig.to_json()``.  They exist to pin the styling of ``_plots/_data.py``:
+any change to a styling literal or layout constant alters the serialized
+figure.
 
 Long data arrays are digested to length + head/tail samples so the snapshot
-file stays reviewable; computation mutants still shift the digests, while
-styling mutants are pinned verbatim.
+file stays reviewable; a change in a computed value still shifts the digests,
+while styling is pinned verbatim.
 
 The shared ``data`` fixture is deterministic; charts that draw through
 numpy's global RNG (Monte Carlo, distribution sampling) are seeded.
@@ -48,7 +48,7 @@ def _nan_safe(value):
     Non-finite floats become their repr (``nan != nan`` breaks equality);
     finite floats are rounded to 12 significant digits (older polars/plotly
     in the lowest-dependency CI job differ in the last bit of computed
-    chains, while any mutation moves values far beyond 1e-12 relative);
+    chains, while any real change moves values far beyond 1e-12 relative);
     midnight timestamps lose their time part (plotly's date-axis
     serialization flipped between ``YYYY-MM-DD`` and
     ``YYYY-MM-DDT00:00:00`` across versions).

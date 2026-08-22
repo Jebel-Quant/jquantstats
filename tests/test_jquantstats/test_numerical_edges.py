@@ -102,13 +102,13 @@ def test_trading_cost_impact_is_nan_for_zero_variance_returns() -> None:
     assert impact["sharpe"].is_nan().all()
 
 
-# ── Mutation-testing killers (issue #808) ─────────────────────────────────────
-# These pin behaviors that line coverage alone could not distinguish from
-# mutants: exact values, boundary inclusivity, and decorator error paths.
+# ── Exactness and boundary pins (issue #808) ──────────────────────────────────
+# These pin behaviors that line coverage alone could not distinguish:
+# exact values, boundary inclusivity, and decorator error paths.
 
 
 def test_drawdown_series_exact_values():
-    """Drawdown values are exact, not just bounded — kills sign/operator mutants."""
+    """Drawdown values are exact, not just bounded."""
     dd = _drawdown_series(pl.Series([0.0, -0.1, 0.2], dtype=pl.Float64))
     assert [round(x, 10) for x in dd.to_list()] == [0.0, 0.1, 0.0]
 

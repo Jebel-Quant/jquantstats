@@ -27,7 +27,7 @@ diverged considerably. This document explains where they differ, what
 | Market-data fetching | Not built in (bring your own data) | Built in via `yfinance` |
 | Python support | 3.11+ | 3.10+ |
 | Type hints / `py.typed` | Full, ships marker | Partial |
-| Test rigor | 100% line+branch coverage, mutation testing, property tests | Lighter |
+| Test rigor | 100% line+branch coverage, property tests | Lighter |
 | Maturity / community | Newer, smaller | Established, large user base |
 | API style | Explicit `Portfolio` / `Data` objects | `extend_pandas()` monkey-patches Series |
 
@@ -169,8 +169,8 @@ frozen, slotted dataclass core — no global side effects.
 
 ### Code quality posture
 `jquantstats` enforces 100% line **and** branch coverage, 100% docstring
-coverage, strict typing (ships a `py.typed` marker), plus mutation testing
-(`mutmut`), property-based tests (`hypothesis`), and snapshot tests (`syrupy`).
+coverage, strict typing (ships a `py.typed` marker), plus property-based tests
+(`hypothesis`) and snapshot tests (`syrupy`).
 This is a heavier quality bar than QuantStats maintains.
 
 ---

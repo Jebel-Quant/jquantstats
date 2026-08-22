@@ -27,7 +27,6 @@ resolves the environment for you.
 | `make serve` | Serve the docs locally |
 | `make marimo` | Run/validate the marimo notebooks |
 | `make benchmark` | Run the QuantStats-parity benchmark |
-| `make mutation` | Run mutation testing |
 | `make clean` | Remove build/test artifacts |
 
 Run `make` (or `make help` if available) to list all targets. The Makefile is

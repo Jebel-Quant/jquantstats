@@ -78,7 +78,6 @@ test = [
     # `stress` run pytest WITHOUT injecting this plugin — without it they warn
     # "Unknown config option: timeout" and a hanging test hangs forever.
     "pytest-timeout>=2.0",
-    "mutmut==2.5.1",       # pinned: the 3.x CLI is incompatible with bin/mutation_gate.py, which runs it from the project env (no --with)
     # Imported by tests that `make test` collects, and `make test` injects neither.
     # hypothesis in particular is reached through pytest.importorskip, so dropping it
     # would not fail the suite — it would silently skip the property tests.
@@ -86,9 +85,9 @@ test = [
     "syrupy>=4.9.1",
     "python-dotenv>=1.0",
     # Declared here IN ADDITION to the `mpl` extra, and neither declaration is redundant:
-    #   * The extra is what `uv sync --all-extras` installs. mutation.yml and
-    #     benchmark-pr.yml run exactly that, without --all-groups, and uv's default group
-    #     set is `dev` only — so without the extra those two jobs run the suite with
+    #   * The extra is what `uv sync --all-extras` installs. benchmark-pr.yml runs
+    #     exactly that, without --all-groups, and uv's default group
+    #     set is `dev` only — so without the extra that job runs the suite with
     #     matplotlib absent.
     #   * The group is what a bare `uv sync && uv run pytest` installs.
     # Either gap has the same consequence, and it is NOT a skip: coverage is measured
