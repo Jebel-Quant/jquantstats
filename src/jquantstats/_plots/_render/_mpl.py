@@ -30,10 +30,13 @@ from .._spec import (
     Axis,
     Band,
     BarSeries,
+    BoxSeries,
     ColorScale,
     FigureSpec,
     HeatmapGrid,
+    HistogramSeries,
     LineSeries,
+    Panel,
     RefLine,
     TickFormat,
     Values,
@@ -234,6 +237,21 @@ def _draw_ref_line(ax: Axes, ref: RefLine) -> None:
     """
     draw = ax.axhline if ref.orientation == "h" else ax.axvline
     draw(ref.value, color=mpl_color(ref.color), linewidth=ref.width, linestyle=_LINESTYLES[ref.dash])
+    if ref.label is not None:
+        # Anchored to the line in data coordinates and to the top of the axes,
+        # matching where Plotly places its annotation.
+        anchor = (0.0, ref.value) if ref.orientation == "h" else (ref.value, 1.0)
+        coords = ("axes fraction", "data") if ref.orientation == "h" else ("data", "axes fraction")
+        ax.annotate(
+            ref.label,
+            xy=anchor,
+            xycoords=coords,
+            xytext=(-2, -2),
+            textcoords="offset points",
+            ha="right",
+            va="top",
+            fontsize=ref.label_size,
+        )
 
 
 def _draw_band(ax: Axes, band: Band) -> None:
@@ -258,6 +276,48 @@ def _draw_band(ax: Axes, band: Band) -> None:
             va="top",
             fontsize=band.label_size,
         )
+
+
+def _draw_histogram(ax: Axes, hist: HistogramSeries) -> None:
+    """Draw one histogram series onto *ax*.
+
+    Args:
+        ax: The axes to draw on.
+        hist: The series to bin and draw.
+
+    """
+    # `bins=None` is matplotlib's own "use the default count", so an unset bin
+    # count passes straight through rather than needing a separate call.
+    ax.hist(
+        _as_array(hist.values),
+        bins=hist.bins,
+        color=mpl_color(hist.color),
+        alpha=hist.opacity,
+        label=hist.name,
+    )
+
+
+def _draw_boxes(ax: Axes, boxes: tuple[BoxSeries, ...]) -> None:
+    """Draw a panel's box-and-whisker series onto *ax*.
+
+    Drawn together rather than one at a time: matplotlib positions boxes by
+    index within a single call, and wants the category labels alongside.
+
+    Args:
+        ax: The axes to draw on.
+        boxes: The series to summarise, left to right.
+
+    """
+    if not boxes:
+        return
+    artists = ax.boxplot(
+        [_as_array(box.values) for box in boxes],
+        tick_labels=[box.name for box in boxes],
+        showfliers=True,
+        patch_artist=True,
+    )
+    for patch, box in zip(artists["boxes"], boxes, strict=True):
+        patch.set_facecolor(mpl_color(box.color))
 
 
 def _draw_heatmap(fig: Figure, ax: Axes, grid: HeatmapGrid) -> None:
@@ -332,27 +392,40 @@ def render_mpl(spec: FigureSpec) -> Figure:
     """Render *spec* as a static matplotlib figure.
 
     Args:
-        spec: The chart to draw. Must describe exactly one panel; multi-panel
-            charts arrive with the dashboards.
+        spec: The chart to draw.
 
     Returns:
         Figure: The rendered figure. It is not registered with pyplot, so the
         caller owns it and nothing accumulates between calls.
 
-    Raises:
-        ValueError: If *spec* does not contain exactly one panel.
-
     """
-    (panel,) = spec.panels
-
     width, height = spec.figsize if spec.figsize is not None else (_DEFAULT_WIDTH_PX, spec.height)
     fig = Figure(figsize=(width / _DPI, (height or _DEFAULT_HEIGHT_PX) / _DPI), dpi=_DPI)
-    ax = fig.subplots()
+    axes = fig.subplots(ncols=len(spec.panels), sharey=spec.shared_y, squeeze=False)[0]
 
+    for ax, panel in zip(axes, spec.panels, strict=True):
+        _draw_panel(fig, ax, panel, spec)
+    fig.suptitle(spec.title)
+    return fig
+
+
+def _draw_panel(fig: Figure, ax: Axes, panel: Panel, spec: FigureSpec) -> None:
+    """Draw one panel's marks and configure its axes.
+
+    Args:
+        fig: The figure owning *ax*, needed to attach a colour bar.
+        ax: The axes to draw on.
+        panel: The panel to draw.
+        spec: The chart being rendered, for its figure-wide chrome.
+
+    """
     for line in panel.lines:
         _draw_line(ax, line)
     for bar in panel.bars:
         _draw_bars(ax, bar)
+    for hist in panel.histograms:
+        _draw_histogram(ax, hist)
+    _draw_boxes(ax, panel.boxes)
     if panel.heatmap is not None:
         _draw_heatmap(fig, ax, panel.heatmap)
     for ref in panel.ref_lines:
@@ -365,17 +438,22 @@ def render_mpl(spec: FigureSpec) -> Figure:
     # default is global and third-party libraries flip it on import (quantstats
     # does), which would otherwise put a grid behind a matrix chart depending on
     # what else the caller happened to import.
-    if spec.chrome == "timeseries":
-        ax.grid(visible=True, color=_GRID_COLOR, linewidth=_GRID_WIDTH)
-    else:
+    if spec.chrome == "bare":
         ax.grid(visible=False)
+    elif spec.chrome == "panels":
+        # Horizontal rules help compare box heights across panels; vertical
+        # ones would only clutter what is a categorical axis.
+        ax.grid(visible=True, axis="y", color=_GRID_COLOR, linewidth=_GRID_WIDTH)
+    else:
+        ax.grid(visible=True, color=_GRID_COLOR, linewidth=_GRID_WIDTH)
+
+    if panel.title is not None:
+        ax.set_title(panel.title)
     _apply_axis(ax, panel.xaxis, vertical=False)
     _apply_axis(ax, panel.yaxis, vertical=True)
 
     # Colour carries the value on a matrix chart, so its series names would
     # label nothing; only series charts get a legend.
-    series_count = len(panel.lines) + len(panel.bars)
-    if series_count and spec.chrome == "timeseries":
+    series_count = len(panel.lines) + len(panel.bars) + len(panel.histograms)
+    if series_count and spec.chrome != "bare":
         ax.legend(loc="upper left", frameon=False, ncols=series_count)
-    fig.suptitle(spec.title)
-    return fig

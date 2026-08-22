@@ -27,17 +27,21 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Literal, TypeAlias
 
+import numpy as np
 import polars as pl
 
 __all__ = [
+    "Arrangement",
     "Axis",
     "Band",
     "BarSeries",
+    "BoxSeries",
     "Chrome",
     "ColorScale",
     "Dash",
     "FigureSpec",
     "HeatmapGrid",
+    "HistogramSeries",
     "HoverSpec",
     "LineSeries",
     "Panel",
@@ -46,15 +50,15 @@ __all__ = [
     "Values",
 ]
 
-#: Plotted values: a polars Series, or a plain Python list.
+#: Plotted values: a polars Series, a numpy array, or a plain Python list.
 #:
-#: Both are accepted deliberately. Plotly serialises them differently — a Series
-#: becomes a compact binary buffer, a list a plain JSON array — and each chart's
+#: All three are accepted deliberately. Plotly serialises a Series or an array
+#: to a compact binary buffer and a list to a plain JSON array, and each chart's
 #: existing wire format is pinned by the fidelity snapshots. Builders therefore
 #: pass through whichever container the chart already used rather than
 #: normalising, so moving a chart onto this seam changes nothing. Renderers must
-#: accept either.
-Values: TypeAlias = "pl.Series | list[Any]"
+#: accept any of them.
+Values: TypeAlias = "pl.Series | np.ndarray[Any, Any] | list[Any]"
 
 #: How to render a number, named by intent rather than by any backend's syntax.
 #:
@@ -83,7 +87,17 @@ ColorScale = Literal["red_white_green"]
 #: ``bare`` is for matrix charts, where colour encodes the value rather than
 #: the series — a legend would name nothing and a shared-x hover has no
 #: meaning, so only the title, height and background are set.
-Chrome = Literal["timeseries", "bare"]
+#: ``panels`` is the small-multiples treatment: one panel per asset sharing a
+#: scale, with the legend naming the categories repeated in each panel rather
+#: than the panels themselves.
+Chrome = Literal["timeseries", "bare", "panels"]
+
+#: How a chart's panels are laid out.
+#:
+#: ``side_by_side`` places them in a row sharing the vertical scale, so the
+#: same measurement can be compared across assets. Stacked panels arrive with
+#: the dashboards.
+Arrangement = Literal["single", "side_by_side"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -101,6 +115,10 @@ class HoverSpec:
         suffix: Written immediately after the value, e.g. ``"x"`` to mark a
             growth multiple.
         date_header: Show the x-value as a bold ``Mon YYYY`` heading above.
+        axis: Which coordinate carries the value. Histograms bin along x, so
+            their tooltip reads the x-value; everything else reads y.
+        hide_extra: Suppress the trace-name box Plotly appends beside the
+            tooltip.
 
     """
 
@@ -109,6 +127,8 @@ class HoverSpec:
     prefix: str = ""
     suffix: str = ""
     date_header: bool = True
+    axis: Literal["x", "y"] = "y"
+    hide_extra: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -127,6 +147,12 @@ class LineSeries:
         fill_color: Shade the area between the line and zero in this colour,
             or None to leave the line unfilled. Used by the underwater curve.
         hover: Tooltip description, or None to leave the backend's default.
+        show_legend: Whether to give this series its own legend entry, or None
+            to say nothing and leave the backend's default. The fan charts
+            state it on every path — True for the first of a bundle, False for
+            the rest — so that hundreds of lines produce one entry.
+        legend_group: Name tying several series together, so toggling the
+            legend shows or hides them as one.
 
     """
 
@@ -140,6 +166,54 @@ class LineSeries:
     width: float = 2
     dash: Dash | None = None
     fill_color: str | None = None
+    hover: HoverSpec | None = None
+    show_legend: bool | None = None
+    legend_group: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class HistogramSeries:
+    """One set of binned values drawn as a histogram.
+
+    Attributes:
+        name: Legend entry for the series.
+        values: The observations to bin.
+        color: Bar colour.
+        bins: Requested bin count, or None for the backend's own choice.
+        opacity: Fill opacity. These charts overlay several series, so the
+            default is translucent.
+        hover: Tooltip description, or None to leave the backend's default.
+
+    """
+
+    name: str
+    values: Values
+    color: str
+    bins: int | None = None
+    opacity: float = 0.6
+    hover: HoverSpec | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class BoxSeries:
+    """One box-and-whisker summary of a set of values.
+
+    Attributes:
+        name: Category label, shown on the axis and in the legend.
+        values: The observations to summarise.
+        color: Box colour.
+        show_legend: Give this series its own legend entry. With one panel per
+            asset the same categories repeat, so only the first panel does.
+        legend_group: Name tying the same category across panels together.
+        hover: Tooltip description, or None to leave the backend's default.
+
+    """
+
+    name: str
+    values: Values
+    color: str
+    show_legend: bool = True
+    legend_group: str | None = None
     hover: HoverSpec | None = None
 
 
@@ -178,6 +252,8 @@ class RefLine:
         color: Line colour.
         width: Stroke width.
         dash: Stroke pattern, or None to leave the backend's default.
+        label: Text naming the line, or None for no label.
+        label_size: Point size for that text.
 
     """
 
@@ -186,6 +262,8 @@ class RefLine:
     color: str = "gray"
     width: float = 1
     dash: Dash | None = None
+    label: str | None = None
+    label_size: int = 10
 
 
 @dataclass(frozen=True, slots=True)
@@ -280,6 +358,8 @@ class Panel:
     Attributes:
         lines: Line series to draw.
         bars: Bar series to draw.
+        histograms: Histogram series to draw.
+        boxes: Box-and-whisker series to draw.
         heatmap: A value matrix to draw, or None.
         ref_lines: Fixed-value marker lines.
         bands: Shaded vertical spans, drawn behind the series.
@@ -291,6 +371,8 @@ class Panel:
 
     lines: tuple[LineSeries, ...] = ()
     bars: tuple[BarSeries, ...] = ()
+    histograms: tuple[HistogramSeries, ...] = ()
+    boxes: tuple[BoxSeries, ...] = ()
     heatmap: HeatmapGrid | None = None
     ref_lines: tuple[RefLine, ...] = ()
     bands: tuple[Band, ...] = ()
@@ -313,6 +395,9 @@ class FigureSpec:
         date_range_selector: Offer the Plotly range-selector buttons. Ignored
             by matplotlib, which has no interactive widgets.
         chrome: How much surrounding furniture the chart carries.
+        arrangement: How the panels are laid out.
+        shared_y: Give side-by-side panels one vertical scale, so their
+            distributions are directly comparable.
         bar_mode: How bars from different series share an x position, or None
             for the backend's default.
 
@@ -324,4 +409,6 @@ class FigureSpec:
     figsize: tuple[int, int] | None = None
     date_range_selector: bool = True
     chrome: Chrome = "timeseries"
+    arrangement: Arrangement = "single"
+    shared_y: bool = False
     bar_mode: Literal["group", "overlay", "relative"] | None = None

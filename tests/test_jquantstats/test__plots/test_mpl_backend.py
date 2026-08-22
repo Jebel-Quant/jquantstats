@@ -465,6 +465,107 @@ def test_rolling_beta_requires_a_benchmark_on_both_backends(data_no_benchmark) -
             data_no_benchmark.plots.rolling_beta(backend=backend)
 
 
+def test_histogram_backends_bin_the_same_values(data) -> None:
+    """Both backends receive the same observations to bin.
+
+    Bin *edges* are each backend's own business — Plotly's `nbinsx` is a hint
+    and matplotlib's `bins` is exact — so the counts are what is compared.
+    """
+    plotly_fig = data.plots.histogram(bins=20, backend="plotly")
+    mpl_fig = data.plots.histogram(bins=20, backend="matplotlib")
+
+    assert len(mpl_fig.axes[0].containers) == len(plotly_fig.data)
+    for trace, container in zip(plotly_fig.data, mpl_fig.axes[0].containers, strict=True):
+        assert sum(patch.get_height() for patch in container) == pytest.approx(len(trace.x))
+
+
+def test_distribution_puts_one_panel_per_asset(data) -> None:
+    """The by-period chart is small multiples, one panel per asset."""
+    plotly_fig = data.plots.distribution(backend="plotly")
+    mpl_fig = data.plots.distribution(backend="matplotlib")
+
+    assert len(mpl_fig.axes) == len(data.assets)
+    assert [ax.get_title() for ax in mpl_fig.axes] == data.assets
+    assert [a.text for a in plotly_fig.layout.annotations] == data.assets
+
+
+def test_distribution_boxes_summarise_the_same_periods(data) -> None:
+    """Each panel holds one box per holding period, in the same order."""
+    periods = ["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]
+    mpl_fig = data.plots.distribution(backend="matplotlib")
+
+    for ax in mpl_fig.axes:
+        assert [t.get_text() for t in ax.get_xticklabels()] == periods
+
+
+def test_distribution_panels_share_a_vertical_scale(data) -> None:
+    """Sharing the y-axis is what makes the panels comparable."""
+    axes = data.plots.distribution(backend="matplotlib").axes
+    first = axes[0].get_ylim()
+    assert all(ax.get_ylim() == first for ax in axes[1:])
+
+
+def test_montecarlo_backends_draw_the_same_paths(data) -> None:
+    """The fan and the observed path match across backends.
+
+    The simulation is seeded, so the same data yields the same bundle every
+    time and the two backends can be compared point for point.
+    """
+    plotly_fig = data.plots.montecarlo(n=4, period=30, backend="plotly")
+    mpl_fig = data.plots.montecarlo(n=4, period=30, backend="matplotlib")
+
+    lines = mpl_fig.axes[0].get_lines()
+    assert len(lines) == len(plotly_fig.data)
+    for trace, line in zip(plotly_fig.data, lines, strict=True):
+        assert _floats(trace.y) == pytest.approx(_floats(line.get_ydata()), nan_ok=True)
+
+
+def test_montecarlo_names_each_bundle_once(data) -> None:
+    """Hundreds of paths must not become hundreds of legend entries."""
+    plotly_fig = data.plots.montecarlo(n=6, period=30, backend="plotly")
+    shown = [trace for trace in plotly_fig.data if trace.showlegend is not False]
+    # One "Sim" entry and one "Observed" entry per asset.
+    assert len(shown) == 2 * len(data.assets)
+
+
+def test_montecarlo_distribution_marks_the_observed_value(data) -> None:
+    """The observed metric is marked against the simulated distribution."""
+    plotly_fig = data.plots.montecarlo_distribution(n=40, period=30, backend="plotly")
+    mpl_fig = data.plots.montecarlo_distribution(n=40, period=30, backend="matplotlib")
+
+    plotly_labels = [a.text for a in plotly_fig.layout.annotations]
+    mpl_labels = [t.get_text() for t in mpl_fig.axes[0].texts]
+    assert plotly_labels == mpl_labels
+    assert all(label.endswith(" observed") for label in mpl_labels)
+
+
+@pytest.mark.parametrize("metric", ["sharpe", "drawdown", "cagr"])
+def test_montecarlo_distribution_supports_every_metric(data, metric: str) -> None:
+    """Each metric renders on both backends and labels its own axis."""
+    titles = {"sharpe": "Sharpe Ratio", "drawdown": "Max Drawdown", "cagr": "CAGR"}
+    plotly_fig = data.plots.montecarlo_distribution(n=20, period=30, metric=metric, backend="plotly")
+    mpl_fig = data.plots.montecarlo_distribution(n=20, period=30, metric=metric, backend="matplotlib")
+
+    assert plotly_fig.layout.xaxis.title.text == titles[metric]
+    assert mpl_fig.axes[0].get_xlabel() == titles[metric]
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "message"),
+    [
+        ({"n": 0}, "n must be a positive integer"),
+        ({"period": 0}, "period must be a positive integer"),
+        ({"metric": "not-a-metric"}, "metric must be one of"),
+    ],
+    ids=["n", "period", "metric"],
+)
+def test_montecarlo_validation_is_backend_independent(data, kwargs: dict, message: str) -> None:
+    """Validation sits in the builder, so both backends reject alike."""
+    for backend in ("plotly", "matplotlib"):
+        with pytest.raises(ValueError, match=message):
+            data.plots.montecarlo_distribution(**kwargs, backend=backend)
+
+
 def test_drawdown_backends_plot_the_same_curves(data) -> None:
     """The underwater curve matches, reference line excluded.
 
@@ -623,11 +724,15 @@ def test_lineless_spec_draws_no_legend() -> None:
     assert fig.axes[0].get_legend() is None
 
 
-def test_render_rejects_multi_panel_specs() -> None:
-    """Multi-panel rendering arrives with the dashboards, not before."""
+def test_multi_panel_specs_render_side_by_side() -> None:
+    """Panels are laid out in a row, one Axes each.
+
+    This replaces an earlier assertion that multi-panel specs were rejected;
+    the by-period distribution chart is the first that needs them.
+    """
     panel = Panel(lines=(_line(),))
-    with pytest.raises(ValueError, match="too many values"):
-        render_mpl(FigureSpec(title="T", panels=(panel, panel)))
+    fig = render_mpl(FigureSpec(title="T", panels=(panel, panel), arrangement="side_by_side"))
+    assert len(fig.axes) == 2
 
 
 def test_hover_is_dropped_rather_than_emulated(data) -> None:

@@ -126,6 +126,9 @@ def test_rendering_does_not_import_pyplot() -> None:
     The import-time check above would still pass if the renderer imported
     pyplot lazily inside its drawing code, which is precisely where a
     ``plt.subplots()`` would end up.
+
+    One matplotlib-internal exception exists — see
+    `test_box_charts_may_import_pyplot_but_never_register_a_figure`.
     """
     script = (
         "import sys, datetime as dt, polars as pl\n"
@@ -143,3 +146,32 @@ def test_rendering_does_not_import_pyplot() -> None:
         check=True,
     )
     assert result.stdout.strip() == "False", "rendering a matplotlib figure pulled in pyplot"
+
+
+def test_box_charts_may_import_pyplot_but_never_register_a_figure() -> None:
+    """Box drawing pulls pyplot in from inside matplotlib, harmlessly.
+
+    ``Axes.bxp`` reads ``rcParams.items()``, and ``RcParams.__getitem__``
+    imports pyplot to resolve the lazily-chosen backend name
+    (``matplotlib/__init__.py``). So rendering `distribution` on the matplotlib
+    backend leaves ``matplotlib.pyplot`` in ``sys.modules`` even though this
+    package never imports it.
+
+    That is backend *name resolution*, not figure management, and it is the
+    latter that issue #628 is about. What must still hold — and what this
+    pins — is that no figure is registered in pyplot's global manager, so
+    nothing accumulates. Recorded as a known exception so nobody later
+    "fixes" the import away by reaching for ``plt``.
+    """
+    script = (
+        "import sys, datetime as dt, polars as pl\n"
+        "from jquantstats import Data\n"
+        "d0 = dt.date(2021, 1, 1)\n"
+        "r = pl.DataFrame({'date': [d0 + dt.timedelta(days=i) for i in range(40)],\n"
+        "                  'A': [0.01, -0.02, 0.03, -0.004] * 10})\n"
+        "Data.from_returns(returns=r).plots.distribution(backend='matplotlib')\n"
+        "import matplotlib.pyplot as plt\n"
+        "print(plt.get_fignums())\n"
+    )
+    result = subprocess.run([sys.executable, "-c", script], capture_output=True, text=True, check=True)
+    assert result.stdout.strip() == "[]", "a box chart registered a figure with pyplot"

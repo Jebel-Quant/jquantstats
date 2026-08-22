@@ -1,17 +1,20 @@
-"""Return-distribution charts (histogram and per-period box plots)."""
+"""Return-distribution charts (overlaid histograms and by-period box plots)."""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal, overload
 
-import plotly.graph_objects as go
-import polars as pl
-from plotly.subplots import make_subplots
-
-from ._styling import _apply_base_layout, _ticker_colors
+from .._render import render
+from .._specs import distribution_spec, histogram_spec
 
 if TYPE_CHECKING:
+    from matplotlib.figure import Figure as MplFigure
+    from plotly.graph_objects import Figure as PlotlyFigure
+
     from jquantstats._protocol import DataLike
+
+    from .._backend import Backend
+    from .._render import Figure
 
 
 class _DistributionPlotsMixin:
@@ -21,7 +24,21 @@ class _DistributionPlotsMixin:
 
     _data: DataLike
 
-    def histogram(self, title: str = "Returns Distribution", bins: int = 50) -> go.Figure:
+    @overload
+    def histogram(
+        self, title: str = ..., bins: int = ..., *, backend: Literal["plotly"] | None = ...
+    ) -> PlotlyFigure: ...
+
+    @overload
+    def histogram(self, title: str = ..., bins: int = ..., *, backend: Literal["matplotlib"]) -> MplFigure: ...
+
+    def histogram(
+        self,
+        title: str = "Returns Distribution",
+        bins: int = 50,
+        *,
+        backend: Backend | None = None,
+    ) -> Figure:
         """Overlaid return histograms, one per series.
 
         Each asset (and the benchmark, when present) is drawn as a
@@ -32,41 +49,31 @@ class _DistributionPlotsMixin:
         Args:
             title: Chart title. Defaults to ``"Returns Distribution"``.
             bins: Number of histogram bins. Defaults to 50.
+            backend: Renderer to use. Defaults to the ambient selection.
 
         Returns:
-            go.Figure: Interactive Plotly histogram figure.
+            Figure: A histogram figure.
 
         """
-        df = self._data.all
-        date_col = df.columns[0]
-        tickers = [c for c in df.columns if c != date_col]
-        colors = _ticker_colors(tickers)
+        return render(histogram_spec(self._data, title=title, bins=bins), backend)
 
-        fig = go.Figure()
-        for ticker in tickers:
-            values = df[ticker].drop_nulls().to_list()
-            fig.add_trace(
-                go.Histogram(
-                    x=values,
-                    name=ticker,
-                    nbinsx=bins,
-                    marker_color=colors[ticker],
-                    opacity=0.6,
-                    hovertemplate=f"{ticker}: %{{x:.2%}}<extra></extra>",
-                )
-            )
+    @overload
+    def distribution(
+        self, title: str = ..., compounded: bool = ..., *, backend: Literal["plotly"] | None = ...
+    ) -> PlotlyFigure: ...
 
-        _apply_base_layout(fig, title, with_range_selector=False)
-        fig.update_layout(barmode="overlay")
-        fig.update_xaxes(title_text="Return", tickformat=".1%")
-        fig.update_yaxes(title_text="Count")
-        return fig
+    @overload
+    def distribution(
+        self, title: str = ..., compounded: bool = ..., *, backend: Literal["matplotlib"]
+    ) -> MplFigure: ...
 
     def distribution(
         self,
         title: str = "Return Distribution by Period",
         compounded: bool = True,
-    ) -> go.Figure:
+        *,
+        backend: Backend | None = None,
+    ) -> Figure:
         """Return distributions across daily, weekly, monthly, quarterly and yearly periods.
 
         Renders a box plot for each aggregation period so the user can compare
@@ -76,69 +83,10 @@ class _DistributionPlotsMixin:
         Args:
             title: Chart title. Defaults to ``"Return Distribution by Period"``.
             compounded: Compound returns within each period. Defaults to True.
+            backend: Renderer to use. Defaults to the ambient selection.
 
         Returns:
-            go.Figure: Interactive Plotly figure with one subplot per asset.
+            Figure: A figure with one panel per asset.
 
         """
-        df = self._data.all
-        date_col = df.columns[0]
-        tickers = [c for c in df.columns if c != date_col]
-        colors = _ticker_colors(tickers)
-
-        periods = [
-            ("Daily", None),
-            ("Weekly", "1w"),
-            ("Monthly", "1mo"),
-            ("Quarterly", "3mo"),
-            ("Yearly", "1y"),
-        ]
-
-        n_assets = len(tickers)
-        fig = make_subplots(
-            rows=1,
-            cols=n_assets,
-            subplot_titles=tickers,
-            shared_yaxes=True,
-        )
-
-        for col_idx, ticker in enumerate(tickers, start=1):
-            for period_name, trunc in periods:
-                if trunc is None:
-                    values = df[ticker].drop_nulls().to_list()
-                else:
-                    agg_expr = (
-                        ((1.0 + pl.col(ticker)).product() - 1.0).alias("ret")
-                        if compounded
-                        else pl.col(ticker).sum().alias("ret")
-                    )
-                    agg_df = (
-                        df.with_columns(pl.col(date_col).dt.truncate(trunc).alias("_period"))
-                        .group_by("_period")
-                        .agg(agg_expr)
-                    )
-                    values = agg_df["ret"].drop_nulls().to_list()
-
-                fig.add_trace(
-                    go.Box(
-                        y=values,
-                        name=period_name,
-                        marker_color=colors[ticker],
-                        showlegend=(col_idx == 1),
-                        legendgroup=period_name,
-                        boxpoints="outliers",
-                        hovertemplate=f"{period_name}: %{{y:.2%}}<extra></extra>",
-                    ),
-                    row=1,
-                    col=col_idx,
-                )
-
-        fig.update_layout(
-            title=title,
-            height=500,
-            plot_bgcolor="white",
-            legend={"orientation": "h", "yanchor": "bottom", "y": 1.05, "xanchor": "right", "x": 1},
-        )
-        fig.update_yaxes(tickformat=".1%", showgrid=True, gridwidth=0.5, gridcolor="lightgrey")
-        fig.update_xaxes(showgrid=False)
-        return fig
+        return render(distribution_spec(self._data, title=title, compounded=compounded), backend)

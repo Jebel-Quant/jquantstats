@@ -21,8 +21,10 @@ from jquantstats._plots._spec import (
     Axis,
     Band,
     BarSeries,
+    BoxSeries,
     FigureSpec,
     HeatmapGrid,
+    HistogramSeries,
     HoverSpec,
     LineSeries,
     Panel,
@@ -165,11 +167,16 @@ def test_opposite_side_resolves_per_axis() -> None:
 # ── renderer ─────────────────────────────────────────────────────────────────
 
 
-def test_render_rejects_multi_panel_specs() -> None:
-    """Multi-panel rendering arrives with the dashboards, not before."""
+def test_multi_panel_specs_render_side_by_side() -> None:
+    """Panels are laid out in a row, one Axes each.
+
+    This replaces an earlier assertion that multi-panel specs were rejected;
+    the by-period distribution chart is the first that needs them.
+    """
     panel = Panel(lines=(_line(),))
-    with pytest.raises(ValueError, match="too many values"):
-        render_plotly(FigureSpec(title="T", panels=(panel, panel)))
+    fig = render_plotly(FigureSpec(title="T", panels=(panel, panel), arrangement="side_by_side"))
+    layout = json.loads(fig.to_json())["layout"]
+    assert {"xaxis", "xaxis2"} <= set(layout), "expected one x-axis per panel"
 
 
 def test_unset_dash_omits_the_property() -> None:
@@ -211,6 +218,27 @@ def test_bar_without_hover_emits_no_hovertemplate() -> None:
     )
     fig = render_plotly(_spec(Panel(bars=(bar,))))
     assert "hovertemplate" not in json.loads(fig.to_json())["data"][0]
+
+
+def test_histogram_without_hover_emits_no_hovertemplate() -> None:
+    """Histograms may opt out of a tooltip too."""
+    hist = HistogramSeries(name="A", values=[0.1, 0.2], color="#636efa")
+    fig = render_plotly(_spec(Panel(histograms=(hist,))))
+    assert "hovertemplate" not in json.loads(fig.to_json())["data"][0]
+
+
+def test_histogram_without_bins_leaves_the_count_to_the_backend() -> None:
+    """A histogram may decline to fix its bin count."""
+    hist = HistogramSeries(name="A", values=[0.1, 0.2], color="#636efa")
+    assert "nbinsx" not in json.loads(render_plotly(_spec(Panel(histograms=(hist,)))).to_json())["data"][0]
+
+
+def test_box_without_hover_or_group_emits_neither() -> None:
+    """A box may stand alone, with no tooltip and no legend grouping."""
+    box = BoxSeries(name="Daily", values=[0.1, -0.2, 0.3], color="#636efa")
+    payload = json.loads(render_plotly(_spec(Panel(boxes=(box,)))).to_json())["data"][0]
+    assert "hovertemplate" not in payload
+    assert "legendgroup" not in payload
 
 
 def test_heatmap_without_hover_label_emits_no_hovertemplate() -> None:
