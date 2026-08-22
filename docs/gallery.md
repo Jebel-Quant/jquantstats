@@ -42,9 +42,10 @@ uv run --with pillow python book/shots/generate.py
 
 !!! note "The images are static; the figures are not"
 
-    Each chart is a `plotly.graph_objects.Figure`. In a notebook or a browser
-    you get hover tooltips, zoom, legend toggles and — on the time-series
-    charts — a working range selector. The images below are flattened exports;
+    Each chart below is a `plotly.graph_objects.Figure`. In a notebook or a
+    browser you get hover tooltips, zoom, legend toggles and — on the
+    time-series charts — a working range selector. The images below are
+    flattened exports;
     click any of them for the full-resolution version.
 
 ---

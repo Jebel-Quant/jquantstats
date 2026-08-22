@@ -21,7 +21,7 @@ diverged considerably. This document explains where they differ, what
 | Dimension | jquantstats | QuantStats |
 |---|---|---|
 | DataFrame engine | Polars-native (narwhals abstraction; no pandas at runtime) | pandas |
-| Plotting | Plotly-native (interactive HTML) | Matplotlib (static); optional `plotly` extra *converts* figures |
+| Plotting | Plotly *and* matplotlib, both rendered natively | Matplotlib; the optional `plotly` extra *converts* finished figures |
 | Primary input | **Prices + positions** *or* returns | Returns series only |
 | Position-level analytics | Yes (turnover, costs, attribution, lag) | No |
 | Market-data fetching | Not built in (bring your own data) | Built in via `yfinance` |
@@ -143,15 +143,23 @@ distinct from IEEE-754 `NaN`, and null-handling is explicit:
 `null_strategy={"raise","drop","forward_fill"}`). QuantStats is pandas through
 and through.
 
-### Interactive vs. static plots
-`jquantstats` renders **Plotly** figures natively — zoomable, hoverable, and
-embeddable as self-contained interactive HTML (`portfolio.report.to_html()`).
-QuantStats' core plotting is **Matplotlib** (with `seaborn` as a dependency),
-producing static images that are simpler and lighter but not interactive.
-Recent QuantStats versions add an optional `plotly` extra, but it is a
-`to_plotly(fig)` *converter* that wraps existing Matplotlib figures rather than
-a native interactive charting layer — so the experience is still
-Matplotlib-first.
+### Two native backends vs. one plus a converter
+Both libraries can give you a Plotly figure and a Matplotlib one. The
+difference is how.
+
+`jquantstats` describes each chart once, in a backend-agnostic form, and has two
+renderers turn that description into a figure. Neither backend wraps the other,
+and both draw from the same numbers — so `data.plots.drawdown()` and
+`data.plots.drawdown(backend="matplotlib")` plot identical series. Plotly is the
+default, giving zoomable, hoverable charts that embed as self-contained
+interactive HTML (`portfolio.report.to_html()`); matplotlib is an optional extra
+(`pip install jquantstats[mpl]`) that produces static figures far more cheaply
+when a script builds many charts at once.
+
+QuantStats' core plotting is **Matplotlib** (with `seaborn` as a dependency).
+Its optional `plotly` extra is a `to_plotly(fig)` *converter* that re-wraps a
+finished Matplotlib figure, so interactivity is bolted on rather than rendered
+— the experience is still Matplotlib-first.
 
 ### API design
 QuantStats favours `extend_pandas()` monkey-patching, which is discoverable but
@@ -202,8 +210,9 @@ advantages:
 - You have **positions and prices**, and want to analyse *how* the strategy
   traded — turnover, costs, execution delay, tilt/timing attribution.
 - You want **net-of-cost** realism and cost-sensitivity sweeps.
-- You prefer **interactive Plotly** reports and a **Polars-native**, strictly
-  typed, heavily tested codebase.
+- You want **interactive Plotly** reports, or **static matplotlib** figures
+  from the same call, on a **Polars-native**, strictly typed, heavily tested
+  codebase.
 - You're building on modern Python (3.11+) and want explicit objects over
   pandas monkey-patching.
 

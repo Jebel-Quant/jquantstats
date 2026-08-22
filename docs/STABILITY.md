@@ -27,6 +27,9 @@ are covered by the stability guarantee described below.
 | `Plots` | class | `jquantstats._plots` |
 | `NativeFrame` | type alias | `jquantstats._types` |
 | `NativeFrameOrScalar` | type alias | `jquantstats._types` |
+| `set_plot_backend` | function | `jquantstats._plots._backend` |
+| `get_plot_backend` | function | `jquantstats._plots._backend` |
+| `plot_backend` | context manager | `jquantstats._plots._backend` |
 
 All of the above are importable directly from `jquantstats`:
 
@@ -110,10 +113,28 @@ was settled in 0.11: before then `Data.from_returns` defaulted to `Date` while
 thing to write against.  An index nominated with `date_col=` that is *not*
 temporal — an integer row index, say — keeps its own name.
 
+**The plotting backend.**  `"plotly"` is the default and changing that default
+would be a breaking change, held for 1.0.  Two consequences follow from the
+selection being global, and neither will change before then:
+
+- The *type* of a figure now depends on the backend in effect.  A plot method
+  returns a `plotly.graph_objects.Figure` or a `matplotlib.figure.Figure`.
+  Methods are overloaded on the literal `backend` argument, so a call that
+  passes none is still typed as returning Plotly's — which is a lie once
+  `set_plot_backend` has been called.  Pass `backend=` explicitly if you change
+  the global default and care about static types.
+- The interactive affordances — hover tooltips, the date range-selector
+  buttons, legend click-to-toggle — have no matplotlib equivalent and will not
+  gain one.  They are absent from matplotlib figures by design, not by
+  omission.
+
+HTML reports render Plotly whatever the selected backend, and that is a
+guarantee rather than an implementation detail: they embed Plotly JSON.
+
 **What may still move.**  Individual metric methods on `Stats` may gain
 keyword arguments, change default values, or be renamed for consistency as
 the QuantStats-parity work settles; chart signatures on `Plots` may change
-as the Plotly builders are refactored.  Anything private — see
+as the chart builders are refactored.  Anything private — see
 [What is *not* stable](#what-is-not-stable) — may change in any release,
 including the internal module layout, which has been reorganised more than
 once during 0.x.

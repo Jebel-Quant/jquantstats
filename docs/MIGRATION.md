@@ -30,7 +30,7 @@ your existing workflows over.
 | | QuantStats | jquantstats |
 |---|---|---|
 | DataFrame engine | pandas | Polars (zero pandas at runtime) |
-| Charts | static matplotlib/seaborn | interactive Plotly |
+| Charts | matplotlib/seaborn | Plotly by default, matplotlib on request |
 | Type annotations | partial | full (PEP 484, `py.typed`) |
 | Multi-asset | single `pd.Series` per call | multi-column DataFrame, one call |
 | API style | functions (`qs.stats.sharpe(r)`) | object methods (`data.stats.sharpe()`) |

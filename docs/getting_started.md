@@ -65,6 +65,7 @@ pip install jquantstats
 Optional extras:
 
 ```bash
+pip install jquantstats[mpl]    # matplotlib rendering backend
 pip install jquantstats[plot]   # static chart export via kaleido
 pip install jquantstats[web]    # FastAPI web server
 ```
@@ -287,6 +288,50 @@ fig.show()
 ```python
 html = data.reports.full()
 ```
+
+---
+
+## Choosing a plotting backend
+
+Charts render with Plotly by default. Install the `mpl` extra and you can ask
+for matplotlib instead, which is markedly cheaper when a script builds many
+charts at once — the reason the option exists.
+
+```bash
+pip install jquantstats[mpl]
+```
+
+Three ways to select it, most specific first:
+
+```python
+import jquantstats as jqs
+
+# 1. one call
+fig = data.plots.drawdown(backend="matplotlib")
+
+# 2. a block — restored on exit, even if the body raises
+with jqs.plot_backend("matplotlib"):
+    fig = data.plots.drawdown()
+
+# 3. the process-wide default
+jqs.set_plot_backend("matplotlib")
+fig = data.plots.drawdown()
+```
+
+Both backends draw from the same numbers, so the two figures plot identical
+series. What differs is what a figure *is*: `plotly.graph_objects.Figure` one
+way, `matplotlib.figure.Figure` the other.
+
+!!! note "The matplotlib backend is static"
+
+    Hover tooltips, the date range-selector buttons and legend click-to-toggle
+    are interactive features with no matplotlib equivalent, so they are simply
+    absent. Everything that determines *what* is plotted — series, colours,
+    axis scales and tick formats — is reproduced.
+
+HTML reports (`portfolio.report.to_html()`, `data.reports.full()`) always
+render Plotly regardless of the selected backend, since they embed Plotly JSON
+and link plotly.js.
 
 ---
 
