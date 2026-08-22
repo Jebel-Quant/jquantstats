@@ -7,7 +7,8 @@ Guidance for Claude Code sessions working in this repository.
 **jquantstats** — portfolio analytics for quants, built on [Polars](https://pola.rs/)
 (zero pandas at runtime) with interactive [Plotly](https://plotly.com/python/) charts.
 Python `>=3.11`, MIT-licensed, published to PyPI. This is a
-[Rhiza](https://github.com/jebel-quant/rhiza)-managed repository (template `v1.2.0`).
+[Rhiza](https://github.com/jebel-quant/rhiza)-managed repository; the pinned template
+version lives in `.rhiza/template.yml` (`ref:`).
 
 ## Commands
 
@@ -21,18 +22,20 @@ resolves the environment for you.
 | `make test` | Run pytest with coverage (fails under the coverage threshold) |
 | `make typecheck` | Static type checking |
 | `make docs-coverage` | Docstring coverage report (interrogate) |
-| `make deptry` | Detect unused / missing / misplaced dependencies |
+| `make deps` | Detect unused / missing / misplaced dependencies (deptry) |
 | `make security` | Security scan (bandit / semgrep) |
 | `make book` | Build the MkDocs documentation site |
 | `make serve` | Serve the docs locally |
-| `make marimo` | Run/validate the marimo notebooks |
+| `make marimo` | Start the marimo editor (`make marimo-validate` checks they all run) |
 | `make benchmark` | Run the QuantStats-parity benchmark |
 | `make mutation` | Run mutation testing |
 | `make clean` | Remove build/test artifacts |
 
-Run `make` (or `make help` if available) to list all targets. The Makefile is
-repo-owned (see its header) and can be edited without breaking template sync; it
-includes the template-managed API via `.rhiza/rhiza.mk`.
+Run `make help` to list all targets. The Makefile is **template-owned** (synced from
+rhiza's `core` bundle — see its header) and must not be edited here: it is a thin shim
+whose catch-all rule forwards every goal to `uvx rhiza-task <goal>`, so the target list
+comes from `rhiza-task`, not from the Makefile. Repo-specific targets belong in
+`local.mk`, which the Makefile includes if present.
 
 ## Architecture
 
@@ -71,13 +74,15 @@ and pulled in via a sync — do **not** patch them locally, or the next sync wil
 revert your change. Everything below is locally owned and edited here:
 
 - `src/`, `tests/`, `api/`
-- `pyproject.toml`, `README.md`, `CLAUDE.md`, `Makefile`, `mkdocs.yml`
+- `pyproject.toml`, `README.md`, `CLAUDE.md`, `mkdocs.yml` (but **not** the `Makefile`,
+  which is template-owned)
 - `docs/*.md` project documentation (but **not** `docs/mkdocs-base.yml`)
 
 ## Conventions
 
-- **Coverage threshold:** `COVERAGE_FAIL_UNDER = 100` (`.rhiza/make.d/custom-env.mk`) —
-  the suite must keep 100% line coverage.
+- **Coverage threshold:** `coverage_fail_under = 100` (`[tool.rhiza-task]` in
+  `pyproject.toml`) — the suite must keep 100% line coverage. The `test` task passes
+  `--cov-fail-under` on the command line, which outranks `[tool.coverage.report]`.
 - **Docstrings:** Google style; interrogate is expected to report 100% (`make docs-coverage`).
 - **Tests** live under `tests/`; `test_quantstats.py` validates metrics against the
   `quantstats` reference implementation (a dev-only dependency).
