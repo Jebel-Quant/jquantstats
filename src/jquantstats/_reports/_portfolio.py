@@ -18,6 +18,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 if TYPE_CHECKING:
     from ._protocol import PortfolioLike
 
+from .._plots._backend import plot_backend
 from ._formatting import _fmt, _is_finite, _plotly_div, _table_html
 
 # templates/ lives one level above this subpackage (at src/jquantstats/templates/)
@@ -262,14 +263,19 @@ class Report:
             except Exception as exc:
                 return f'<p class="chart-unavailable">Chart unavailable: {exc}</p>'
 
-        snapshot_div = _try_div(pf.plots.snapshot)
-        rolling_sharpe_div = _try_div(pf.plots.rolling_sharpe_plot)
-        rolling_vol_div = _try_div(pf.plots.rolling_volatility_plot)
-        annual_sharpe_div = _try_div(pf.plots.annual_sharpe_plot)
-        monthly_heatmap_div = _try_div(pf.plots.monthly_returns_heatmap)
-        corr_div = _try_div(pf.plots.correlation_heatmap)
-        lead_lag_div = _try_div(pf.plots.lead_lag_ir_plot)
-        trading_cost_div = _try_div(pf.plots.trading_cost_impact_plot)
+        # The report embeds Plotly JSON and links plotly.js, so its charts must be
+        # Plotly figures no matter what `set_plot_backend` has been told. Without
+        # this, a matplotlib default would leave every chart as a "Chart
+        # unavailable" notice: `_try_div` swallows the resulting failure.
+        with plot_backend("plotly"):
+            snapshot_div = _try_div(pf.plots.snapshot)
+            rolling_sharpe_div = _try_div(pf.plots.rolling_sharpe_plot)
+            rolling_vol_div = _try_div(pf.plots.rolling_volatility_plot)
+            annual_sharpe_div = _try_div(pf.plots.annual_sharpe_plot)
+            monthly_heatmap_div = _try_div(pf.plots.monthly_returns_heatmap)
+            corr_div = _try_div(pf.plots.correlation_heatmap)
+            lead_lag_div = _try_div(pf.plots.lead_lag_ir_plot)
+            trading_cost_div = _try_div(pf.plots.trading_cost_impact_plot)
 
         # ── Stats table ───────────────────────────────────────────────────────
         stats_table = _stats_table_html(pf.stats.summary())

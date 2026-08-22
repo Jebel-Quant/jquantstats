@@ -36,3 +36,25 @@ def _reset_plot_backend():
     saved = jquantstats.get_plot_backend()
     yield
     jquantstats.set_plot_backend(saved)
+
+
+@pytest.fixture(autouse=True)
+def _no_pyplot_leak():
+    """Fail if library code registered a figure in pyplot's global manager.
+
+    The matplotlib backend builds figures with `matplotlib.figure.Figure` so
+    that nothing accumulates in pyplot's ``Gcf`` registry — the leak behind
+    issue #628. A plain ``plt.close("all")`` teardown would quietly clean up a
+    regression instead of reporting it, so the delta is asserted first and only
+    then cleared.
+    """
+    import matplotlib.pyplot as plt
+
+    before = set(plt.get_fignums())
+    yield
+    leaked = set(plt.get_fignums()) - before
+    plt.close("all")
+    assert not leaked, (
+        f"pyplot-managed figures {sorted(leaked)} leaked — build figures with "
+        "matplotlib.figure.Figure(), not plt.figure()/plt.subplots()"
+    )

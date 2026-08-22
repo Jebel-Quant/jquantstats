@@ -5,6 +5,7 @@ from pathlib import Path
 
 import polars as pl
 
+from ._plots._backend import plot_backend
 from .exceptions import MuSchemaError
 from .portfolio import Portfolio
 
@@ -61,11 +62,15 @@ class Result:
 
         self.portfolio.cashposition.write_csv(file=data / "position.csv")
 
-        fig = self.portfolio.plots.snapshot()
-        fig.write_html(file=plots / "snapshot.html", auto_open=False, include_plotlyjs="cdn")
-        fig = self.portfolio.plots.lead_lag_ir_plot()
-        fig.write_html(file=plots / "lag_ir.html", auto_open=False, include_plotlyjs="cdn")
-        fig = self.portfolio.plots.lagged_performance_plot()
-        fig.write_html(file=plots / "lagged_perf.html", auto_open=False, include_plotlyjs="cdn")
-        fig = self.portfolio.plots.smoothed_holdings_performance_plot()
-        fig.write_html(file=plots / "smooth_perf.html", auto_open=False, include_plotlyjs="cdn")
+        # `write_html` is a Plotly-only method, so these charts must be Plotly
+        # figures whatever `set_plot_backend` has been told; a matplotlib figure
+        # would raise AttributeError here.
+        with plot_backend("plotly"):
+            fig = self.portfolio.plots.snapshot()
+            fig.write_html(file=plots / "snapshot.html", auto_open=False, include_plotlyjs="cdn")
+            fig = self.portfolio.plots.lead_lag_ir_plot()
+            fig.write_html(file=plots / "lag_ir.html", auto_open=False, include_plotlyjs="cdn")
+            fig = self.portfolio.plots.lagged_performance_plot()
+            fig.write_html(file=plots / "lagged_perf.html", auto_open=False, include_plotlyjs="cdn")
+            fig = self.portfolio.plots.smoothed_holdings_performance_plot()
+            fig.write_html(file=plots / "smooth_perf.html", auto_open=False, include_plotlyjs="cdn")

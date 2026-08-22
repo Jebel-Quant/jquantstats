@@ -10,6 +10,7 @@ import polars as pl
 if TYPE_CHECKING:
     from jquantstats._protocol import DataLike
 
+from .._plots._backend import plot_backend
 from ._html import (
     _build_full_html,
     _drawdowns_section_html,
@@ -199,7 +200,12 @@ def _report_charts_html(plots: Any, temporal_index: bool) -> str:
                 f"Index is not temporal; skipping calendar-based charts: {skipped}.",
                 stacklevel=2,
             )
-        chart_parts = _collect_chart_divs(plots, _chart_methods, _calendar_charts, temporal_index)
+        # The report embeds Plotly JSON and links plotly.js, so its charts must be
+        # Plotly figures no matter what `set_plot_backend` has been told. Without
+        # this, a matplotlib default would leave every chart silently blank:
+        # `_try_plotly_div` swallows the resulting failure and returns "".
+        with plot_backend("plotly"):
+            chart_parts = _collect_chart_divs(plots, _chart_methods, _calendar_charts, temporal_index)
 
     return "\n".join(chart_parts) if chart_parts else "<p>No charts available.</p>"
 
