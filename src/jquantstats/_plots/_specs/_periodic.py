@@ -23,6 +23,9 @@ __all__ = [
     "yearly_returns_spec",
 ]
 
+# Bars are drawn slightly translucent so overlapping series stay readable.
+_BAR_OPACITY = 0.85
+
 _MONTH_NAMES = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 
 # A calendar row per year, plus room for the title and colour bar.
@@ -90,6 +93,7 @@ def _sign_coloured_bars(
             x=frame[x_col],
             y=frame[ticker],
             colors=tuple(bar_colors(frame[ticker].to_list(), colors[ticker], single_asset=single)),
+            opacity=_BAR_OPACITY,
             hover=HoverSpec(label=ticker, value_format="percent2", date_header=False),
         )
         for ticker in tickers
@@ -149,6 +153,7 @@ def yearly_returns_spec(data: DataLike, title: str, compounded: bool) -> FigureS
                 # A flat zero year counts as positive here, unlike the other
                 # bar charts — see `yearly_bar_colors`.
                 colors=tuple(yearly_bar_colors(yearly[ticker].to_list(), colors[ticker])),
+                opacity=_BAR_OPACITY,
                 hover=HoverSpec(label=ticker, value_format="percent2", date_header=False),
             )
             for ticker in tickers

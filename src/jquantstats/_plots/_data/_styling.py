@@ -49,7 +49,7 @@ def _date_range_selector() -> dict[str, Any]:
 def _apply_base_layout(
     fig: go.Figure,
     title: str,
-    height: int = 600,
+    height: int | None = 600,
     with_range_selector: bool = True,
 ) -> go.Figure:
     """Apply the standard jquantstats Plotly layout to a figure.
@@ -60,7 +60,8 @@ def _apply_base_layout(
     Args:
         fig: The Plotly figure to style in-place.
         title: Chart title.
-        height: Figure height in pixels. Defaults to 600.
+        height: Figure height in pixels. Defaults to 600. None leaves the
+            height unset, which Plotly treats as "size to the container".
         with_range_selector: Attach a date range-selector to ``xaxis``.
             Defaults to True.
 

@@ -48,10 +48,11 @@ __all__ = ["render_mpl"]
 # `figsize=(920, 420)` frames the same chart on either backend.
 _DPI = 100
 
-# Width for a spec that names none. Plotly lets a figure size itself to its
-# container; matplotlib needs a number up front, so charts that never set a
-# width get this one.
+# Sizes for a spec that names none. Plotly lets a figure size itself to its
+# container; matplotlib needs numbers up front, so charts that never fix a
+# dimension get these.
 _DEFAULT_WIDTH_PX = 1000
+_DEFAULT_HEIGHT_PX = 600
 
 # Semantic tick format -> a str.format field spec. Python's format mini-language
 # covers percentages too, so `StrMethodFormatter` serves every case and no
@@ -71,7 +72,7 @@ _COLORSCALES: dict[ColorScale, tuple[str, ...]] = {
 }
 
 # Semantic dash style -> matplotlib's linestyle vocabulary.
-_LINESTYLES = {"solid": "-", "dash": "--"}
+_LINESTYLES = {"solid": "-", "dash": "--", None: "-"}
 
 # The Plotly charts draw on white with a light grey grid; mirror that here so a
 # figure is recognisably the same chart whichever backend drew it.
@@ -130,14 +131,20 @@ def _draw_line(ax: Axes, line: LineSeries) -> None:
         line: The series to draw.
 
     """
-    x, y = _as_array(line.x), _as_array(line.y)
+    y = _as_array(line.y)
+    # A series with no x is drawn against its own index, which is what
+    # Plotly does with an unset `x` too.
+    x = np.arange(len(y)) if line.x is None else _as_array(line.x)
+    # A line that names no colour is left to matplotlib's own colour cycle,
+    # matching how Plotly treats an unset `line.color`.
+    styling: dict[str, Any] = {} if line.color is None else {"color": mpl_color(line.color)}
     ax.plot(
         x,
         y,
-        color=mpl_color(line.color),
         linewidth=line.width,
         linestyle=_LINESTYLES[line.dash],
         label=line.name,
+        **styling,
     )
     if line.fill_color is not None:
         # `where` keeps the fill out of the gaps a NaN leaves in the line,
@@ -202,17 +209,19 @@ def _draw_bars(ax: Axes, bar: BarSeries) -> None:
         bar: The series to draw.
 
     """
-    # Opacity is folded into each colour rather than passed as `alpha=`.
-    # matplotlib's alpha argument *replaces* a colour's own alpha channel,
-    # whereas Plotly multiplies its trace opacity by it — so passing it
-    # separately would render the faded negative bars at the wrong strength.
-    ax.bar(
-        _as_array(bar.x),
-        _as_array(bar.y),
-        color=[_faded(c, bar.opacity) for c in bar.colors],
-        linewidth=0,
-        label=bar.name,
-    )
+    styling: dict[str, Any] = {}
+    if bar.colors is not None:
+        # Opacity is folded into each colour rather than passed as `alpha=`.
+        # matplotlib's alpha argument *replaces* a colour's own alpha channel,
+        # whereas Plotly multiplies its trace opacity by it — so passing it
+        # separately would render the faded negative bars at the wrong strength.
+        styling["color"] = [_faded(c, bar.opacity if bar.opacity is not None else 1.0) for c in bar.colors]
+    elif bar.opacity is not None:
+        # No colours named, so there is no alpha to fold into and nothing to
+        # get wrong: matplotlib's own argument is the right tool.
+        styling["alpha"] = bar.opacity
+
+    ax.bar(_as_array(bar.x), _as_array(bar.y), linewidth=0, label=bar.name, **styling)
 
 
 def _draw_ref_line(ax: Axes, ref: RefLine) -> None:
@@ -337,7 +346,7 @@ def render_mpl(spec: FigureSpec) -> Figure:
     (panel,) = spec.panels
 
     width, height = spec.figsize if spec.figsize is not None else (_DEFAULT_WIDTH_PX, spec.height)
-    fig = Figure(figsize=(width / _DPI, height / _DPI), dpi=_DPI)
+    fig = Figure(figsize=(width / _DPI, (height or _DEFAULT_HEIGHT_PX) / _DPI), dpi=_DPI)
     ax = fig.subplots()
 
     for line in panel.lines:

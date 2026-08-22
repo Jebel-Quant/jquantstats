@@ -79,8 +79,11 @@ def _scatter(line: LineSeries) -> go.Scatter:
         go.Scatter: The trace, styled per the series.
 
     """
-    style: dict[str, object] = {"color": line.color, "width": line.width}
-    if line.dash != "solid":
+    style: dict[str, object] = {}
+    if line.color is not None:
+        style["color"] = line.color
+    style["width"] = line.width
+    if line.dash is not None:
         style["dash"] = _DASHES[line.dash]
 
     fill: dict[str, object] = {}
@@ -103,13 +106,15 @@ def _bar(bar: BarSeries) -> go.Bar:
         go.Bar: The trace, with one colour per bar.
 
     """
-    trace = go.Bar(
-        x=bar.x,
-        y=bar.y,
-        name=bar.name,
-        marker={"color": list(bar.colors), "line": _BAR_OUTLINE},
-        opacity=bar.opacity,
-    )
+    # A chart that names no colours takes Plotly's palette, and says nothing
+    # about markers or opacity at all.
+    styling: dict[str, object] = {}
+    if bar.colors is not None:
+        styling["marker"] = {"color": list(bar.colors), "line": _BAR_OUTLINE}
+    if bar.opacity is not None:
+        styling["opacity"] = bar.opacity
+
+    trace = go.Bar(x=bar.x, y=bar.y, name=bar.name, **styling)
     if bar.hover is not None:
         trace.update(hovertemplate=_hovertemplate(bar.hover))
     return trace
@@ -149,10 +154,10 @@ def _add_ref_line(fig: go.Figure, ref: RefLine) -> None:
         ref: The line to draw.
 
     """
-    # `dash` is left unstated when solid: that is Plotly's default, and naming
-    # it anyway would add a property to the serialised shape.
+    # An unset dash is left unstated rather than sent as "solid": that would
+    # add a property to the serialised shape which the chart never had.
     style: dict[str, object] = {"line_width": ref.width, "line_color": ref.color}
-    if ref.dash != "solid":
+    if ref.dash is not None:
         style["line_dash"] = _DASHES[ref.dash]
 
     if ref.orientation == "h":
