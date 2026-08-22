@@ -12,8 +12,10 @@ from typing import Any
 
 import plotly.graph_objects as go
 
+from .._style import bar_colors as _bar_colors
 from .._style import hex_to_rgba as _hex_to_rgba
 from .._style import ticker_colors as _ticker_colors
+from .._style import yearly_bar_colors as _yearly_bar_colors
 
 __all__ = [
     "_apply_base_layout",
@@ -91,33 +93,6 @@ def _apply_figsize(fig: go.Figure, figsize: tuple[int, int] | None) -> go.Figure
     if figsize is not None:
         fig.update_layout(width=figsize[0], height=figsize[1])
     return fig
-
-
-def _bar_colors(values: list[float | None], positive_color: str, single_asset: bool = False) -> list[str]:
-    """Return the shared positive/negative bar colors for a series of values."""
-    if single_asset:
-        return ["#2ca02c" if v is not None and v > 0 else "#d62728" for v in values]
-    negative_color = _hex_to_rgba(positive_color, alpha=0.4)
-    return [positive_color if v is not None and v > 0 else negative_color for v in values]
-
-
-def _yearly_bar_colors(values: list[float | None], positive_color: str) -> list[str]:
-    """Bar colors for the yearly-returns chart.
-
-    Deliberately distinct from `_bar_colors`: the yearly chart treats a flat
-    zero year as positive (``>= 0``) and fades negatives to alpha 0.5 rather
-    than 0.4, so the two cannot share an implementation without changing what
-    is rendered.
-
-    Args:
-        values: The per-year return values; ``None`` counts as negative.
-        positive_color: The asset's base color.
-
-    Returns:
-        One color string per value.
-    """
-    negative_color = _hex_to_rgba(positive_color, 0.5)
-    return [positive_color if v is not None and v >= 0 else negative_color for v in values]
 
 
 def _compute_drawdown_periods(prices: list[float], n: int) -> list[dict[str, Any]]:

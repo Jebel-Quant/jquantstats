@@ -17,7 +17,7 @@ import pytest
 
 from jquantstats._plots._render import render_plotly
 from jquantstats._plots._render._plotly import _axis_kwargs, _hovertemplate
-from jquantstats._plots._spec import Axis, FigureSpec, HoverSpec, LineSeries, Panel
+from jquantstats._plots._spec import Axis, BarSeries, FigureSpec, HeatmapGrid, HoverSpec, LineSeries, Panel
 from jquantstats._plots._specs import (
     compare_spec,
     cumulative_returns_spec,
@@ -41,6 +41,18 @@ def _line(**overrides) -> LineSeries:
 def _spec(panel: Panel, **overrides) -> FigureSpec:
     """Build a single-panel figure spec, overriding selected fields."""
     return FigureSpec(**{"title": "T", "panels": (panel,), **overrides})
+
+
+def _grid(**overrides) -> HeatmapGrid:
+    """Build a minimal 1x2 heatmap grid, overriding selected fields."""
+    defaults = {
+        "x_labels": ("Jan", "Feb"),
+        "y_labels": ("2024",),
+        "z": ((1.0, -1.0),),
+        "text": (("1.0%", "-1.0%"),),
+        "colorscale": "red_white_green",
+    }
+    return HeatmapGrid(**{**defaults, **overrides})
 
 
 # ── the spec is backend-neutral ───────────────────────────────────────────────
@@ -128,6 +140,18 @@ def test_axis_translates_every_property() -> None:
     assert kwargs == {"title_text": "V", "tickprefix": "$", "tickformat": ",.0f", "type": "log"}
 
 
+def test_opposite_side_resolves_per_axis() -> None:
+    """The far edge is the top for an x-axis and the right for a y-axis.
+
+    The spec says `opposite_side` rather than naming a compass point precisely
+    so that it cannot express an x-axis on the "left"; each renderer resolves
+    it against the axis it is configuring.
+    """
+    assert _axis_kwargs(Axis(opposite_side=True))["side"] == "top"
+    assert _axis_kwargs(Axis(opposite_side=True), vertical=True)["side"] == "right"
+    assert "side" not in _axis_kwargs(Axis())
+
+
 # ── renderer ─────────────────────────────────────────────────────────────────
 
 
@@ -154,6 +178,42 @@ def test_line_without_hover_emits_no_hovertemplate() -> None:
     """A series may opt out of a tooltip entirely."""
     fig = render_plotly(_spec(Panel(lines=(_line(hover=None),))))
     assert "hovertemplate" not in json.loads(fig.to_json())["data"][0]
+
+
+def test_bar_without_hover_emits_no_hovertemplate() -> None:
+    """Bars may opt out of a tooltip too."""
+    bar = BarSeries(
+        name="AAPL",
+        x=pl.Series("x", [1, 2]),
+        y=pl.Series("y", [0.1, -0.2]),
+        colors=("#2ca02c", "#d62728"),
+    )
+    fig = render_plotly(_spec(Panel(bars=(bar,))))
+    assert "hovertemplate" not in json.loads(fig.to_json())["data"][0]
+
+
+def test_heatmap_without_hover_label_emits_no_hovertemplate() -> None:
+    """A matrix may opt out of a tooltip too."""
+    fig = render_plotly(_spec(Panel(heatmap=_grid(hover_label=None)), chrome="bare"))
+    assert "hovertemplate" not in json.loads(fig.to_json())["data"][0]
+
+
+def test_bare_chrome_omits_the_timeseries_furniture() -> None:
+    """A matrix chart gets no legend, unified hover or range selector."""
+    layout = json.loads(render_plotly(_spec(Panel(heatmap=_grid()), chrome="bare")).to_json())["layout"]
+    assert "hovermode" not in layout
+    assert "legend" not in layout
+    assert "rangeselector" not in layout.get("xaxis", {})
+    assert layout["plot_bgcolor"] == "white"
+
+
+def test_bar_mode_is_only_emitted_when_asked_for() -> None:
+    """Plotly's default grouping stands unless a spec overrides it."""
+    bar = BarSeries(name="A", x=pl.Series("x", [1]), y=pl.Series("y", [1.0]), colors=("#000000",))
+    without = json.loads(render_plotly(_spec(Panel(bars=(bar,)))).to_json())["layout"]
+    with_mode = json.loads(render_plotly(_spec(Panel(bars=(bar,)), bar_mode="group")).to_json())["layout"]
+    assert "barmode" not in without
+    assert with_mode["barmode"] == "group"
 
 
 def test_figsize_sets_width_and_height() -> None:

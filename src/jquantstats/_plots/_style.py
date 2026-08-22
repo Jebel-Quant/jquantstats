@@ -12,7 +12,12 @@ from __future__ import annotations
 
 import plotly.express as px
 
-__all__ = ["hex_to_rgba", "ticker_colors"]
+__all__ = ["bar_colors", "hex_to_rgba", "ticker_colors", "yearly_bar_colors"]
+
+#: Green and red for a single-asset chart, where a bar's colour can carry the
+#: sign outright rather than having to stay identifiable as one asset among several.
+_POSITIVE = "#2ca02c"
+_NEGATIVE = "#d62728"
 
 
 def hex_to_rgba(hex_color: str, alpha: float = 0.5) -> str:
@@ -55,3 +60,52 @@ def ticker_colors(tickers: list[str]) -> dict[str, str]:
     """
     palette = px.colors.qualitative.Plotly
     return {ticker: palette[i % len(palette)] for i, ticker in enumerate(tickers)}
+
+
+def bar_colors(values: list[float | None], positive_color: str, single_asset: bool = False) -> list[str]:
+    """Colour each bar by the sign of its value.
+
+    With one asset the bars are plain green and red. With several, each keeps
+    its own palette colour and negatives are faded instead, so a bar stays
+    identifiable as belonging to its asset.
+
+    Args:
+        values: The plotted values; None counts as negative.
+        positive_color: The asset's base colour.
+        single_asset: Use the plain green/red palette.
+
+    Returns:
+        list[str]: One colour per value.
+
+    Examples:
+        >>> bar_colors([0.1, -0.1], "#636EFA", single_asset=True)
+        ['#2ca02c', '#d62728']
+
+    """
+    if single_asset:
+        return [_POSITIVE if v is not None and v > 0 else _NEGATIVE for v in values]
+    negative_color = hex_to_rgba(positive_color, alpha=0.4)
+    return [positive_color if v is not None and v > 0 else negative_color for v in values]
+
+
+def yearly_bar_colors(values: list[float | None], positive_color: str) -> list[str]:
+    """Colour each annual bar by the sign of its value.
+
+    Deliberately distinct from `bar_colors`: a flat zero year counts as
+    positive here (``>= 0``), and negatives fade to alpha 0.5 rather than 0.4.
+    The two cannot share an implementation without changing what is rendered.
+
+    Args:
+        values: The per-year return values; None counts as negative.
+        positive_color: The asset's base colour.
+
+    Returns:
+        list[str]: One colour per value.
+
+    Examples:
+        >>> yearly_bar_colors([0.0], "#636EFA")
+        ['#636EFA']
+
+    """
+    negative_color = hex_to_rgba(positive_color, 0.5)
+    return [positive_color if v is not None and v >= 0 else negative_color for v in values]
