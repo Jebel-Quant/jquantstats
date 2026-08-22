@@ -10,6 +10,12 @@ templates:
 # Destination paths, as they land in this repo. Source-path entries
 # (bundles/github/...) are inert since the exclude semantics were fixed.
 exclude:
+  # Issue and discussion forms. Multi-field forms with required textareas, for a
+  # repository whose issues are opened by the people who wrote the code. Removed
+  # upstream in rhiza v1.5.0; excluded here so the v1.4.2 sync stops delivering them.
+  - .github/ISSUE_TEMPLATE
+  - .github/DISCUSSION_TEMPLATE
+
   - .github/workflows/rhiza_fuzzing.yml
   - .github/workflows/rhiza_weekly.yml
   - .github/workflows/rhiza_scorecard.yml
