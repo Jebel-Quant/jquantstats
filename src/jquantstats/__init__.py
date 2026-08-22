@@ -49,12 +49,26 @@ object so you can always drop into the returns-series API from a Portfolio.
     >>> type(pf.data).__name__
     'Data'
 
+**Choosing a rendering backend:**
+
+Charts render with Plotly by default.  Install ``jquantstats[mpl]`` and select
+matplotlib for static figures instead — appreciably cheaper when a script builds
+many charts at once.  See `set_plot_backend`, `plot_backend` and
+`get_plot_backend`.
+
+    >>> from jquantstats import get_plot_backend
+    >>> get_plot_backend()
+    'plotly'
+
 For more information, visit the `jQuantStats Documentation <https://jebel-quant.github.io/jquantstats/book>`_.
 """
 
 import importlib.metadata
 
 from ._cost_model import CostModel as CostModel
+from ._plots._backend import get_plot_backend as get_plot_backend
+from ._plots._backend import plot_backend as plot_backend
+from ._plots._backend import set_plot_backend as set_plot_backend
 from ._types import NativeFrame as NativeFrame
 from ._types import NativeFrameOrScalar as NativeFrameOrScalar
 from .data import Data as Data
@@ -71,5 +85,8 @@ __all__ = [
     "NativeFrameOrScalar",
     "Portfolio",
     "Result",
+    "get_plot_backend",
     "interpolate",
+    "plot_backend",
+    "set_plot_backend",
 ]
