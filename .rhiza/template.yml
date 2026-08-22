@@ -11,5 +11,8 @@ templates:
 # (bundles/github/...) are inert since the exclude semantics were fixed.
 exclude:
   - .github/workflows/rhiza_fuzzing.yml
+  - .github/workflows/rhiza_mutation.yml
   - .github/workflows/rhiza_weekly.yml
   - .github/workflows/rhiza_scorecard.yml
+  - .github/ISSUE_TEMPLATE
+  - .github/DISCUSSION_TEMPLATE
