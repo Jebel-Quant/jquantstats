@@ -27,14 +27,14 @@ neither ships a compiled extension).
 | Paradigm | OO: frozen dataclasses, mixins, protocols | Procedural: module-level functions |
 | Public API | Explicit `Portfolio`/`Data` objects + accessors | Free functions + `extend_pandas()` monkey-patch |
 | State model | Immutable (frozen, slotted) + memoised | Stateless functions over mutable frames |
-| Source size | ~10.6k LOC across ~34 files | ~12.3k LOC across ~12 files |
-| Largest module | 1.4k LOC (`_plots/_data.py`) | 3.3k LOC (`stats.py`) |
+| Source size | ~16.0k LOC across ~77 files | ~12.3k LOC across ~12 files |
+| Largest module | 583 LOC (`portfolio.py`) | 3.3k LOC (`stats.py`) |
 | Runtime deps | 6 (no pandas) | 8 (incl. pandas, matplotlib, yfinance) |
 | Type coverage | Full annotations, strict (`ty`), `py.typed` | Partial (~50% in `stats.py`), `py.typed` |
 | Docstring coverage | 100% enforced (`interrogate`) | Good, not gated |
 | Tests shipped | 15k LOC test suite in repo | Not shipped in wheel |
 | Quality gates | 100% line+branch cov, mutation, property, snapshot | Lighter (pytest + coverage, no enforced gate) |
-| Plotting engine | Plotly-native | Matplotlib core + optional `to_plotly()` converter |
+| Plotting engine | Plotly and matplotlib, both native | Matplotlib core + optional `to_plotly()` converter |
 | Python | 3.11+ | 3.10+ |
 
 ---
@@ -99,7 +99,7 @@ src/jquantstats/
 │   └── _portfolio_cost.py         (cost models)
 ├── data.py                 Data (returns route)
 ├── _stats/   (5 mixins: _basic, _performance, _reporting, _rolling, _montecarlo)
-├── _plots/   (Plotly figures, protocol-segregated)
+├── _plots/   (backend-agnostic specs + Plotly/matplotlib renderers)
 ├── _reports/ (Jinja2 HTML)
 ├── _utils/, _cache.py, exceptions.py, result.py
 └── *_protocol.py  (interface-segregation protocols)
@@ -220,8 +220,10 @@ runs, a Makefile) reflecting a heavier engineering process.
 ## 6. Dependency footprint
 
 **jquantstats runtime (6):** `jinja2`, `narwhals`, `numpy`, `plotly`, `polars`,
-`scipy`. No pandas. Data fetching and web/static-export deps are *optional*
-extras (`web`, `plot`).
+`scipy`. No pandas — and no matplotlib, which is an *optional* extra rather than
+a runtime dependency, so the second plotting backend costs nothing unless you
+ask for it. The remaining optional extras are `mpl` (matplotlib), `plot`
+(static image export via kaleido) and `web` (the FastAPI service).
 
 **QuantStats runtime (8):** `matplotlib`, `numpy`, `pandas`, `python-dateutil`,
 `scipy`, `seaborn`, `tabulate`, `yfinance`. The base install therefore pulls in
@@ -242,10 +244,15 @@ opinionated dependency graph.
   *converter* (behind the `plotly` extra) that re-wraps Matplotlib figures — so
   interactivity is bolted on, not native. Reports are assembled in `reports.py`.
 
-- **jquantstats** builds **Plotly figures natively** (`_plots/`) and renders
-  self-contained interactive HTML through **Jinja2 templates** (`_reports/`,
-  hence the `jinja2` runtime dependency). Plot and report layers are
-  protocol-segregated from the data layer.
+- **jquantstats** builds **both natively**. Every chart is described once as a
+  backend-agnostic spec (`_plots/_specs/`), which one of two renderers
+  (`_plots/_render/`) turns into a Plotly or a matplotlib figure — so the
+  arithmetic behind a chart is written once and neither backend is a wrapper
+  over the other. Plotly is the default; `set_plot_backend("matplotlib")`
+  switches. Reports render self-contained interactive HTML through **Jinja2
+  templates** (`_reports/`, hence the `jinja2` runtime dependency), and stay
+  Plotly-only. Plot and report layers are protocol-segregated from the data
+  layer.
 
 ---
 

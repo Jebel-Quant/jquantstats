@@ -28,7 +28,7 @@ it significantly — particularly around position-level analysis that is impossi
 start from a return series alone. Key improvements include:
 
 - Polars-native design with zero pandas runtime dependency
-- Modern interactive visualizations using Plotly
+- Modern interactive visualizations using Plotly, or static ones using matplotlib
 - A **Portfolio route** — the primary entry point — that exposes tools unavailable in QuantStats
 - Comprehensive test coverage with pytest
 - Clean, fully type-annotated API
@@ -170,7 +170,7 @@ pf_smooth = pf.smoothed_holding(n=5)
 | Feature | jQuantStats | QuantStats |
 |---|---|---|
 | **DataFrame engine** | [Polars](https://pola.rs/) (zero pandas at runtime) | pandas |
-| **Visualisation** | Interactive [Plotly](https://plotly.com/python/) charts | Static matplotlib / seaborn |
+| **Visualisation** | [Plotly](https://plotly.com/python/) *or* [matplotlib](https://matplotlib.org/), both rendered natively | matplotlib / seaborn, with a `to_plotly()` converter |
 | **Input format** | `polars.DataFrame` | `pandas.Series` / `pandas.DataFrame` |
 | **Entry point — positions** | `Portfolio.from_cash_position(prices, cash_position, aum)` | — |
 | **Entry point — returns** | `Data.from_returns(returns, benchmark)` | `qs.reports.full(returns)` |
@@ -374,8 +374,10 @@ with configurable windows.
 - Position smoothing via `smoothed_holding(n)`
 - Risk-position entry via `from_risk_position()` with EWMA de-volatization
 
-**Interactive Visualizations** — all charts are Plotly (zoom, pan, hover tooltips,
-range selectors). Includes portfolio snapshot, lead/lag IR, correlation heatmap,
+**Visualizations, two ways** — every chart renders as an interactive Plotly figure
+(zoom, pan, hover tooltips, range selectors) or, with `pip install jquantstats[mpl]`
+and `set_plot_backend("matplotlib")`, as a static matplotlib one. Both draw from the
+same numbers. Includes portfolio snapshot, lead/lag IR, correlation heatmap,
 drawdown, rolling returns, rolling volatility, return distribution, monthly heatmap.
 
 **HTML Reports** — self-contained reports with embedded interactive charts and
@@ -388,6 +390,9 @@ categorized metric tables, rendered via Jinja2 templates.
 - polars
 - plotly
 - scipy
+
+Optional extras: `mpl` (matplotlib rendering backend), `plot` (static image
+export via kaleido), `web` (FastAPI service).
 
 ## Documentation
 

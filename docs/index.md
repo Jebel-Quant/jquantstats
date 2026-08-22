@@ -6,7 +6,7 @@ hide:
 
 # jquantstats
 
-**Portfolio analytics for quants** — built on Polars, powered by Plotly.
+**Portfolio analytics for quants** — built on Polars, plotted with Plotly or matplotlib.
 
 [![PyPI version](https://badge.fury.io/py/jquantstats.svg)](https://badge.fury.io/py/jquantstats)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](https://pypi.org/project/jquantstats/)
@@ -128,7 +128,7 @@ See [Getting Started](getting_started.md) for a complete walkthrough.
 | Feature | QuantStats | jquantstats |
 |---|---|---|
 | DataFrame engine | pandas | Polars |
-| Charts | matplotlib (static) | Plotly (interactive) |
+| Charts | matplotlib, plus a `to_plotly()` converter | Plotly *or* matplotlib, both native |
 | Multi-asset in one call | no | yes |
 | Portfolio route | no | yes |
 | Execution-delay analysis | no | `pf.lag(n)` |
