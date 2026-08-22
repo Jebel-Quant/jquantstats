@@ -8,9 +8,13 @@ from ._cumulative import compare_spec as compare_spec
 from ._cumulative import cumulative_returns_spec as cumulative_returns_spec
 from ._cumulative import earnings_spec as earnings_spec
 from ._cumulative import log_returns_spec as log_returns_spec
+from ._distribution import distribution_spec as distribution_spec
+from ._distribution import histogram_spec as histogram_spec
 from ._drawdown import compute_drawdown_periods as compute_drawdown_periods
 from ._drawdown import drawdown_spec as drawdown_spec
 from ._drawdown import drawdowns_periods_spec as drawdowns_periods_spec
+from ._montecarlo import montecarlo_distribution_spec as montecarlo_distribution_spec
+from ._montecarlo import montecarlo_spec as montecarlo_spec
 from ._periodic import daily_returns_spec as daily_returns_spec
 from ._periodic import monthly_heatmap_spec as monthly_heatmap_spec
 from ._periodic import monthly_returns_spec as monthly_returns_spec
@@ -32,10 +36,14 @@ __all__ = [
     "compute_drawdown_periods",
     "cumulative_returns_spec",
     "daily_returns_spec",
+    "distribution_spec",
     "drawdown_spec",
     "drawdowns_periods_spec",
     "earnings_spec",
+    "histogram_spec",
     "log_returns_spec",
+    "montecarlo_distribution_spec",
+    "montecarlo_spec",
     "monthly_heatmap_spec",
     "monthly_returns_spec",
     "period_agg_exprs",
