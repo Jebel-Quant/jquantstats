@@ -62,12 +62,13 @@ Values: TypeAlias = "pl.Series | np.ndarray[Any, Any] | list[Any]"
 
 #: How to render a number, named by intent rather than by any backend's syntax.
 #:
-#: ``float2``/``float4`` are fixed-point to that many decimals; ``percent1``/
+#: ``float2``/``float4`` are fixed-point to that many decimals; ``percent0`` to
 #: ``percent2`` scale to a percentage with that many decimals; ``currency0`` is
-#: a thousands-separated integer. Each renderer owns the mapping — Plotly wants
+#: a thousands-separated integer; ``si2`` abbreviates large numbers with an SI
+#: suffix, so a NAV of 1 500 000 reads as ``1.5M``. Each renderer owns the mapping — Plotly wants
 #: ``".2f"``, matplotlib wants a ``Formatter`` — so neither vocabulary leaks in
 #: here.
-TickFormat = Literal["float2", "float4", "percent0", "percent1", "percent2", "currency0"]
+TickFormat = Literal["float2", "float4", "percent0", "percent1", "percent2", "currency0", "si2"]
 
 #: Line styles, kept to the set the charts actually use.
 #:
@@ -94,10 +95,11 @@ Chrome = Literal["timeseries", "bare", "panels"]
 
 #: How a chart's panels are laid out.
 #:
-#: ``side_by_side`` places them in a row sharing the vertical scale, so the
-#: same measurement can be compared across assets. Stacked panels arrive with
-#: the dashboards.
-Arrangement = Literal["single", "side_by_side"]
+#: ``side_by_side`` places them in a row sharing the vertical scale, so the same
+#: measurement can be compared across assets. ``stacked`` places them in a
+#: column sharing the time axis, so different measurements line up at the same
+#: date — the dashboard shape.
+Arrangement = Literal["single", "side_by_side", "stacked"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -144,8 +146,10 @@ class LineSeries:
             palette colour.
         width: Stroke width.
         dash: Stroke pattern, or None to leave the backend's default.
-        fill_color: Shade the area between the line and zero in this colour,
-            or None to leave the line unfilled. Used by the underwater curve.
+        fill: Shade the area between the line and zero. Used by the underwater
+            curves.
+        fill_color: What colour to shade it, or None to let the backend match
+            the line. Only consulted when *fill* is set.
         hover: Tooltip description, or None to leave the backend's default.
         show_legend: Whether to give this series its own legend entry, or None
             to say nothing and leave the backend's default. The fan charts
@@ -165,6 +169,7 @@ class LineSeries:
     # snapshots compare that JSON exactly.
     width: float = 2
     dash: Dash | None = None
+    fill: bool = False
     fill_color: str | None = None
     hover: HoverSpec | None = None
     show_legend: bool | None = None
@@ -230,6 +235,11 @@ class BarSeries:
             colour a bar by the sign of its value.
         opacity: Fill opacity, or None for the backend's default.
         hover: Tooltip description, or None to leave the backend's default.
+        show_legend: Whether to give this series its own legend entry, or None
+            to say nothing. A dashboard names an asset once, on its headline
+            panel, rather than again in every panel.
+        legend_group: Name tying several series together, so toggling the
+            legend shows or hides them as one.
 
     """
 
@@ -239,6 +249,8 @@ class BarSeries:
     colors: tuple[str, ...] | None = None
     opacity: float | None = None
     hover: HoverSpec | None = None
+    show_legend: bool | None = None
+    legend_group: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -366,6 +378,8 @@ class Panel:
         xaxis: Horizontal axis configuration.
         yaxis: Vertical axis configuration.
         title: Heading for this panel, used when a chart has several.
+        height_ratio: This panel's share of the figure height, relative to its
+            siblings. A dashboard gives its headline panel the larger share.
 
     """
 
@@ -379,6 +393,7 @@ class Panel:
     xaxis: Axis = field(default_factory=Axis)
     yaxis: Axis = field(default_factory=Axis)
     title: str | None = None
+    height_ratio: float = 1.0
 
 
 @dataclass(frozen=True, slots=True)
@@ -398,6 +413,10 @@ class FigureSpec:
         arrangement: How the panels are laid out.
         shared_y: Give side-by-side panels one vertical scale, so their
             distributions are directly comparable.
+        shared_x: Give stacked panels one horizontal scale, so a date lines up
+            down the whole dashboard.
+        vertical_spacing: Gap between stacked panels as a figure fraction, or
+            None for the backend's default.
         bar_mode: How bars from different series share an x position, or None
             for the backend's default.
 
@@ -411,4 +430,6 @@ class FigureSpec:
     chrome: Chrome = "timeseries"
     arrangement: Arrangement = "single"
     shared_y: bool = False
+    shared_x: bool = False
+    vertical_spacing: float | None = None
     bar_mode: Literal["group", "overlay", "relative"] | None = None

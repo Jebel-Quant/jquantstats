@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal, overload
 
-import plotly.graph_objects as go
-
+from .._render import render
+from .._specs import data_snapshot_spec
 from ._cumulative import _CumulativePlotsMixin
-from ._dashboard import _plot_performance_dashboard
 from ._distribution import _DistributionPlotsMixin
 from ._drawdown import _DrawdownPlotsMixin
 from ._montecarlo import _MonteCarloPlotsMixin
@@ -15,7 +14,13 @@ from ._periodic import _PeriodicPlotsMixin
 from ._rolling import _RollingPlotsMixin
 
 if TYPE_CHECKING:
+    from matplotlib.figure import Figure as MplFigure
+    from plotly.graph_objects import Figure as PlotlyFigure
+
     from jquantstats._protocol import DataLike
+
+    from .._backend import Backend
+    from .._render import Figure
 
 
 class DataPlots(
@@ -53,24 +58,39 @@ class DataPlots(
         """Return a string representation of the DataPlots object."""
         return f"DataPlots(assets={self._data.assets})"
 
-    def snapshot(self, title: str = "Portfolio Summary", log_scale: bool = False) -> go.Figure:
+    @overload
+    def snapshot(
+        self, title: str = ..., log_scale: bool = ..., *, backend: Literal["plotly"] | None = ...
+    ) -> PlotlyFigure: ...
+
+    @overload
+    def snapshot(self, title: str = ..., log_scale: bool = ..., *, backend: Literal["matplotlib"]) -> MplFigure: ...
+
+    def snapshot(
+        self,
+        title: str = "Portfolio Summary",
+        log_scale: bool = False,
+        *,
+        backend: Backend | None = None,
+    ) -> Figure:
         """Create a comprehensive dashboard with multiple plots for portfolio analysis.
 
         This function generates a three-panel plot showing:
         1. Cumulative returns over time
         2. Drawdowns over time
-        3. Daily returns over time
+        3. Monthly returns over time
 
         This provides a complete visual summary of portfolio performance.
 
         Args:
-            title (str, optional): Title of the plot. Defaults to "Portfolio Summary".
-            compounded (bool, optional): Whether to use compounded returns. Defaults to True.
-            log_scale (bool, optional): Whether to use logarithmic scale for cumulative returns.
+            title: Accepted for backward compatibility but not used — the
+                chart titles itself from the assets it plots.
+            log_scale: Whether to use logarithmic scale for cumulative returns.
                 Defaults to False.
+            backend: Renderer to use. Defaults to the ambient selection.
 
         Returns:
-            go.Figure: A Plotly figure object containing the dashboard.
+            Figure: A three-panel dashboard.
 
         Example:
             >>> import polars as pl
@@ -86,5 +106,4 @@ class DataPlots(
             >>> fig.show()  # doctest: +SKIP
 
         """
-        fig = _plot_performance_dashboard(returns=self._data.all, log_scale=log_scale)
-        return fig
+        return render(data_snapshot_spec(self._data, log_scale=log_scale), backend)

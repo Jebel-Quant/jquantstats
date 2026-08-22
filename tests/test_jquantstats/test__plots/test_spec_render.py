@@ -299,10 +299,22 @@ def test_unfilled_lines_omit_the_fill_properties() -> None:
 
 
 def test_filled_lines_shade_to_zero() -> None:
-    """A fill colour shades the area between the line and zero."""
-    fig = render_plotly(_spec(Panel(lines=(_line(fill_color="rgba(0,0,0,0.3)"),))))
+    """`fill` shades the area between the line and zero."""
+    fig = render_plotly(_spec(Panel(lines=(_line(fill=True, fill_color="rgba(0,0,0,0.3)"),))))
     assert fig.data[0].fill == "tozeroy"
     assert fig.data[0].fillcolor == "rgba(0,0,0,0.3)"
+
+
+def test_filled_lines_may_leave_the_colour_to_the_backend() -> None:
+    """Filling and choosing a fill colour are separate decisions.
+
+    The portfolio dashboard's drawdown panel fills without naming a colour,
+    letting the backend match it to the line, so one field could not carry
+    both facts.
+    """
+    payload = json.loads(render_plotly(_spec(Panel(lines=(_line(fill=True),)))).to_json())["data"][0]
+    assert payload["fill"] == "tozeroy"
+    assert "fillcolor" not in payload
 
 
 def test_bar_mode_is_only_emitted_when_asked_for() -> None:
