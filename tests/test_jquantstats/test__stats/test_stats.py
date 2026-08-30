@@ -157,6 +157,73 @@ def test_volatility(stats):
     assert result["META"] == pytest.approx(0.40072031010504233)
 
 
+def test_mad(stats):
+    """Tests that the mad method calculates Mean Absolute Deviation correctly.
+
+    Args:
+        stats: The stats fixture containing a Stats object.
+
+    Verifies:
+        The annualized MAD value for META matches the expected value.
+    """
+    result = stats.mad(periods=252, annualize=True)
+    assert result["META"] == pytest.approx(0.26006904645978096)
+
+
+def test_mad_not_annualized(stats):
+    """Tests that the mad method calculates MAD correctly without annualization.
+
+    Args:
+        stats: The stats fixture containing a Stats object.
+
+    Verifies:
+        The non-annualized MAD value for META matches the expected value.
+    """
+    result = stats.mad(annualize=False)
+    assert result["META"] == pytest.approx(0.016382810015197223)
+
+
+def test_mad_aapl(stats):
+    """Tests that the mad method calculates MAD correctly for AAPL.
+
+    Args:
+        stats: The stats fixture containing a Stats object.
+
+    Verifies:
+        The annualized MAD value for AAPL matches the expected value.
+    """
+    result = stats.mad(periods=252, annualize=True)
+    assert result["AAPL"] == pytest.approx(0.28564761387721205)
+
+
+def test_mad_custom_periods(stats):
+    """Tests that the mad method respects custom periods parameter.
+
+    Args:
+        stats: The stats fixture containing a Stats object.
+
+    Verifies:
+        The MAD with custom periods=12 matches the expected value.
+    """
+    result = stats.mad(periods=12, annualize=True)
+    # sqrt(252/12) = sqrt(21) scaling difference from 252
+    expected = 0.016382810015197223 * (12**0.5)
+    assert result["META"] == pytest.approx(expected)
+
+
+def test_mad_invalid_periods_type(stats):
+    """Tests that mad raises TypeError for non-numeric periods.
+
+    Args:
+        stats: The stats fixture containing a Stats object.
+
+    Verifies:
+        A TypeError is raised when periods is not an int or float.
+    """
+    with pytest.raises(TypeError, match="Expected int or float for periods"):
+        stats.mad(periods="invalid")
+
+
 def test_rolling_volatility(stats):
     """Tests that the rolling_volatility method calculates rolling volatility correctly.
 
