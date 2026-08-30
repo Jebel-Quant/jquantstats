@@ -214,6 +214,34 @@ class _BasicCoreMixin:
         std_val = cast(float, series.std())
         return (std_val if std_val is not None else 0.0) * factor
 
+    @columnwise_stat
+    def mad(self, series: pl.Series, periods: int | float | None = None, annualize: bool = True) -> float:
+        """Calculate the Mean Absolute Deviation (MAD) of returns.
+
+        MAD is the mean of absolute deviations from the mean return:
+        mean(|r - mean(r)|). It is a robust measure of dispersion less
+        sensitive to outliers than standard deviation.
+
+        - Annualized by sqrt(periods) if `annualize` is True.
+
+        Args:
+            series (pl.Series): The series to calculate MAD for.
+            periods (int, optional): Number of periods per year. Defaults to periods_per_year.
+            annualize (bool, optional): Whether to annualize the result. Defaults to True.
+
+        Returns:
+            float: The MAD value.
+        """
+        raw_periods = periods or self._data._periods_per_year
+
+        if not isinstance(raw_periods, int | float):
+            raise TypeError(f"Expected int or float for periods, got {type(raw_periods).__name__}")  # noqa: TRY003
+
+        factor = _annualization_factor(raw_periods) if annualize else 1.0
+        mean_val = _mean(series)
+        mad_val = cast(float, (series - mean_val).abs().mean())
+        return (mad_val if mad_val is not None else 0.0) * factor
+
     # ── Win / loss metrics ────────────────────────────────────────────────────
 
     @columnwise_stat
