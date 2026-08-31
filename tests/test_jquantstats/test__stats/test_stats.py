@@ -1110,6 +1110,65 @@ def test_recovery_factor(stats):
         assert result[col] is not None
 
 
+def test_expected_drawdown(stats):
+    """Tests that expected_drawdown calculates average underwater drawdown correctly."""
+    result = stats.expected_drawdown()
+    # For META, expected drawdown (underwater avg) is positive value
+    assert isinstance(result, dict)
+    for col in result:
+        assert result[col] >= 0.0
+
+
+def test_drawdown_value_at_risk(stats):
+    """Tests that drawdown_value_at_risk calculates DD VaR correctly."""
+    result = stats.drawdown_value_at_risk(alpha=0.05)
+    assert isinstance(result, dict)
+    for col in result:
+        assert result[col] >= 0.0
+
+
+def test_drawdown_value_at_risk_custom_alpha(stats):
+    """Tests that custom alpha changes the DD VaR result."""
+    default = stats.drawdown_value_at_risk()["META"]
+    deep = stats.drawdown_value_at_risk(alpha=0.01)["META"]
+    assert deep >= default  # More extreme tail = larger VaR
+
+
+def test_conditional_drawdown_at_risk(stats):
+    """Tests that conditional_drawdown_at_risk calculates CDaR correctly."""
+    result = stats.conditional_drawdown_at_risk(alpha=0.05)
+    assert isinstance(result, dict)
+    for col in result:
+        assert result[col] >= 0.0
+
+
+def test_conditional_drawdown_at_risk_alpha_honoured(stats):
+    """Tests that a non-default alpha actually changes the CDaR."""
+    default = stats.conditional_drawdown_at_risk()["META"]
+    deep = stats.conditional_drawdown_at_risk(alpha=0.01)["META"]
+    assert deep >= default
+
+
+def test_tail_drawdown_ratio(stats):
+    """Tests that tail_drawdown_ratio calculates CDaR / Expected Drawdown."""
+    result = stats.tail_drawdown_ratio(alpha=0.05)
+    assert isinstance(result, dict)
+    for col in result:
+        assert result[col] >= 1.0  # CDaR >= Expected Drawdown
+
+
+def test_drawdown_var_invalid_alpha_low(stats):
+    """Tests that alpha <= 0 raises ValueError."""
+    with pytest.raises(ValueError, match="alpha must be in"):
+        stats.drawdown_value_at_risk(alpha=0)
+
+
+def test_drawdown_var_invalid_alpha_high(stats):
+    """Tests that alpha >= 1 raises ValueError."""
+    with pytest.raises(ValueError, match="alpha must be in"):
+        stats.drawdown_value_at_risk(alpha=1.0)
+
+
 def test_max_drawdown_duration_with_date(stats):
     """max_drawdown_duration returns positive integers for date-indexed data."""
     result = stats.max_drawdown_duration()
