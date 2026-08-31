@@ -5,6 +5,78 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com),
 and entries are generated from [Conventional Commits](https://www.conventionalcommits.org).
 
+## [0.11.0] - 2026-08-31
+
+### New Features
+- Claude Code plugin with a quantstats-migration skill, plus the CVaR and doc bugs it uncovered (#922)
+- *(plugin)* Shared portfolio context, plus analysis, diagnostics and robustness skills (#924)
+- *(portfolio)* Expose the returns bridge as as_data() (#931)
+- *(portfolio)* Add the share-count view — units, trades, weights (#932)
+- Add Mean Absolute Deviation (MAD) metric (closes #671) (#971)
+- Add conditional drawdown metrics (CDaR, DD VaR, Expected Drawdown, Tail DD Ratio) - resolves #862 (#973)
+
+### Bug Fixes
+- *(portfolio)* Normalise the date column at construction (#928)
+- *(truncate)* Route on the bound type, and parse ISO-8601 string bounds (#930)
+- *(data)* Auto-detect the date column and canonicalise it to 'date' (#933)
+
+### Documentation
+- Add a chart gallery for the plots and reports API (#918)
+
+### Dependencies
+- *(deps)* Prune [dependency-groups] to what the environment actually needs (#916)
+
+### Maintenance
+- Update rhiza to v1.2.5 (#902)
+- Update rhiza to v1.3.0 (#908)
+- Chore(deps)(deps): bump the github-actions group with 3 updates (#914)
+- Chore(deps)(deps): bump the python-dependencies group with 6 updates (#915)
+- Update rhiza to v1.3.2 (#917)
+- *(ci)* Bump the rhiza pin to v1.3.3 (#921)
+- Chore(deps)(deps): bump the github-actions group with 2 updates (#919)
+- Chore(deps)(deps): bump the python-dependencies group with 3 updates (#920)
+- Update rhiza to v1.3.3 (#923)
+- Chore(deps)(deps): bump the python-dependencies group with 3 updates (#934)
+- Update rhiza to v1.3.4 (#935)
+- Update rhiza to v1.4.2 (#936)
+- Remove and exclude the issue and discussion form templates (#949)
+- Update rhiza to v1.5.1 (#957)
+- Prune exclude entries the template no longer ships (#959)
+- Remove mutation testing (#960)
+- Drop the exclude entries for the retired mutation/fuzzing workflows (#961)
+- Update rhiza to v1.6.0 (#962)
+- Chore(deps)(deps): bump the python-dependencies group with 6 updates (#963)
+- Update rhiza to v1.7.1 (#964)
+- Chore(deps)(deps): bump urllib3 from 2.6.3 to 2.7.0 (#965)
+- Chore(deps)(deps): bump pillow from 12.2.0 to 12.3.0 (#966)
+- Chore(deps)(deps): bump starlette from 1.0.0 to 1.3.1 (#967)
+- Chore(deps)(deps): bump pymdown-extensions from 10.21.3 to 11.0.1 (#968)
+- Chore(deps)(deps): bump soupsieve from 2.8.3 to 2.8.4 (#969)
+- Chore(deps)(deps): bump idna from 3.13 to 3.15 (#970)
+
+### Other Changes
+- Remove GitHub Codespaces badge (#903)
+- Break the data-accessors import cycle, split _performance.py, fix the layout reason (#907)
+- Address quality findings #909-#912 (#913)
+- Execute the fenced docstring examples, and split resolve_bounds (#939)
+- Delete .github/workflows/mutation.yml (#941)
+- Delete .github/cliff.toml (#942)
+- Delete .github/ISSUE_TEMPLATE directory
+- Delete .github/ROADMAP.md (#954)
+- Delete .github/SECURITY.md (#953)
+- Delete .github/DISCUSSION_TEMPLATE directory (#955)
+- Delete .github/CONFIG.md (#956)
+- Backend selection scaffolding for an optional matplotlib renderer (#628) (#940)
+- Introduce the figure spec and route the cumulative charts through it (#628) (#943)
+- Add the matplotlib backend for the cumulative charts (#628) (#944)
+- Port the periodic charts to both backends (#628) (#945)
+- Port the drawdown charts to both backends (#628) (#946)
+- Port the rolling charts to both backends (#628) (#947)
+- Port the distribution and Monte Carlo charts to both backends (#628) (#948)
+- Port the dashboards and NAV comparisons to both backends (#628) (#950)
+- Port the portfolio diagnostics, completing the matplotlib backend (#628) (#951)
+- Correct the plotting comparisons now that both backends ship (#628) (#952)
+
 ## [0.10.0] - 2026-07-29
 
 ### New Features
