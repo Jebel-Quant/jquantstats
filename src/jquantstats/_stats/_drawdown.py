@@ -197,7 +197,7 @@ class _DrawdownMixin:
             return float("nan")
         var_threshold = underwater.quantile(1.0 - alpha, interpolation="linear")
         tail = underwater.filter(underwater >= var_threshold)
-        if tail.is_empty():
+        if tail.is_empty():  # pragma: no cover
             return float("nan")
         return float(tail.mean())
 
@@ -226,11 +226,11 @@ class _DrawdownMixin:
         if underwater.is_empty():
             return float("nan")
         expected = float(underwater.mean())
-        if expected == 0:
+        if expected == 0:  # pragma: no cover
             return float("nan")
         var_threshold = underwater.quantile(1.0 - alpha, interpolation="linear")
         tail = underwater.filter(underwater >= var_threshold)
-        if tail.is_empty():
+        if tail.is_empty():  # pragma: no cover
             return float("nan")
         cdar = float(tail.mean())
         return cdar / expected

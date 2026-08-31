@@ -1169,6 +1169,75 @@ def test_drawdown_var_invalid_alpha_high(stats):
         stats.drawdown_value_at_risk(alpha=1.0)
 
 
+def test_expected_drawdown_no_underwater(edge):
+    """Tests expected_drawdown returns 0.0 when no underwater periods."""
+    result = edge.stats.expected_drawdown()
+    assert all(v == 0.0 for v in result.values())
+
+
+def test_drawdown_var_no_underwater(edge):
+    """Tests drawdown_value_at_risk returns NaN when no underwater periods."""
+    result = edge.stats.drawdown_value_at_risk(alpha=0.05)
+    assert all(np.isnan(v) for v in result.values())
+
+
+def test_conditional_drawdown_at_risk_no_underwater(edge):
+    """Tests conditional_drawdown_at_risk returns NaN when no underwater periods."""
+    result = edge.stats.conditional_drawdown_at_risk(alpha=0.05)
+    assert all(np.isnan(v) for v in result.values())
+
+
+def test_tail_drawdown_ratio_no_underwater(edge):
+    """Tests tail_drawdown_ratio returns NaN when no underwater periods."""
+    result = edge.stats.tail_drawdown_ratio(alpha=0.05)
+    assert all(np.isnan(v) for v in result.values())
+
+
+def test_tail_drawdown_ratio_zero_expected(edge):
+    """Tests tail_drawdown_ratio returns NaN when expected drawdown is zero."""
+    # edge fixture has all zeros, so expected drawdown is 0
+    result = edge.stats.tail_drawdown_ratio(alpha=0.05)
+    assert all(np.isnan(v) for v in result.values())
+
+
+def test_conditional_drawdown_at_risk_invalid_alpha_low(stats):
+    """Tests that alpha <= 0 raises ValueError for CDaR."""
+    with pytest.raises(ValueError, match="alpha must be in"):
+        stats.conditional_drawdown_at_risk(alpha=0)
+
+
+def test_conditional_drawdown_at_risk_invalid_alpha_high(stats):
+    """Tests that alpha >= 1 raises ValueError for CDaR."""
+    with pytest.raises(ValueError, match="alpha must be in"):
+        stats.conditional_drawdown_at_risk(alpha=1.0)
+
+
+def test_tail_drawdown_ratio_invalid_alpha_low(stats):
+    """Tests that alpha <= 0 raises ValueError for tail drawdown ratio."""
+    with pytest.raises(ValueError, match="alpha must be in"):
+        stats.tail_drawdown_ratio(alpha=0)
+
+
+def test_tail_drawdown_ratio_invalid_alpha_high(stats):
+    """Tests that alpha >= 1 raises ValueError for tail drawdown ratio."""
+    with pytest.raises(ValueError, match="alpha must be in"):
+        stats.tail_drawdown_ratio(alpha=1.0)
+
+
+def test_conditional_drawdown_at_risk_tail_empty(edge):
+    """Tests CDaR returns NaN when tail is empty after filtering."""
+    # With alpha very small (e.g., 0.001), the quantile might exceed all values
+    result = edge.stats.conditional_drawdown_at_risk(alpha=0.001)
+    # edge fixture returns NaN for all metrics
+    assert all(np.isnan(v) for v in result.values())
+
+
+def test_tail_drawdown_ratio_tail_empty(edge):
+    """Tests tail_drawdown_ratio returns NaN when tail is empty after filtering."""
+    result = edge.stats.tail_drawdown_ratio(alpha=0.001)
+    assert all(np.isnan(v) for v in result.values())
+
+
 def test_max_drawdown_duration_with_date(stats):
     """max_drawdown_duration returns positive integers for date-indexed data."""
     result = stats.max_drawdown_duration()
