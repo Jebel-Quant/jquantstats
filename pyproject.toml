@@ -1,7 +1,7 @@
 # Main project metadata
 [project]
 name = 'jquantstats'
-version = "0.10.0"
+version = "0.11.0"
 description = "Analytics for quants"
 authors = [{name='tschm', email= 'thomas.schmelzer@gmail.com'}]
 readme = "README.md"
@@ -269,7 +269,7 @@ reason = "Tests are organised by behaviour under tests/test_jquantstats/; per-mo
 # them all in one step. Without this, a bump silently touches no files and the
 # release CI fails its pyproject-version-vs-tag check.
 [tool.bumpversion]
-current_version = "0.10.0"
+current_version = "0.11.0"
 
 # Anchored to the [project] table on purpose: search/replace applies to every match
 # in the file, so an unanchored `version = "..."` would also rewrite any [tool.*]
