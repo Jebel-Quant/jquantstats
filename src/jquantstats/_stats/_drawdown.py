@@ -12,6 +12,23 @@ from ._internals import _nav_series
 if TYPE_CHECKING:
     from ..data import Data
 
+
+def _drawdown_underwater(series: pl.Series) -> pl.Series:
+    """Return only the underwater (negative) drawdown values as positive fractions.
+
+    Args:
+        series: A Polars Series of returns values.
+
+    Returns:
+        A Polars Series of positive drawdown values (e.g., 0.15 for 15% drawdown)
+        for periods where the strategy is underwater. Empty if never underwater.
+    """
+    nav = _nav_series(series)
+    hwm = nav.cum_max()
+    dd = nav / hwm - 1  # negative or zero
+    return -dd.filter(dd < 0)  # positive values only
+
+
 # ── Drawdown statistics mixin ─────────────────────────────────────────────────
 
 
@@ -105,6 +122,118 @@ class _DrawdownMixin:
 
         """
         return _DrawdownMixin.max_drawdown_single_series(series)
+
+    @columnwise_stat
+    def expected_drawdown(self, series: pl.Series) -> float:
+        """Calculate the average drawdown during underwater periods.
+
+        This metric averages the drawdown only over periods where the strategy
+        is underwater (drawdown > 0), unlike `avg_drawdown` which averages
+        over all periods (including zeros).
+
+        Args:
+            series (pl.Series): The series to calculate expected drawdown for.
+
+        Returns:
+            float: The expected drawdown as a positive fraction (e.g. 0.15 for 15%).
+                   Returns 0.0 when there are no underwater periods.
+
+        """
+        underwater = _drawdown_underwater(series)
+        if underwater.is_empty():
+            return 0.0
+        return float(cast(float, underwater.mean()))
+
+    @columnwise_stat
+    def drawdown_value_at_risk(self, series: pl.Series, alpha: float = 0.05) -> float:
+        """Calculate the Drawdown Value-at-Risk (DD VaR) at confidence level alpha.
+
+        DD VaR is the alpha-quantile of the underwater drawdown distribution.
+        For alpha=0.05, it represents the drawdown level that only 5% of
+        underwater periods exceed.
+
+        Args:
+            series (pl.Series): The series to calculate DD VaR for.
+            alpha (float): Tail probability (e.g., 0.05 for 95% confidence).
+                Must be in (0, 1). Defaults to 0.05.
+
+        Returns:
+            float: The DD VaR as a positive fraction (e.g., 0.15 for 15%).
+
+        Raises:
+            ValueError: If alpha is not in (0, 1).
+
+        """
+        if not 0.0 < alpha < 1.0:
+            raise ValueError("alpha must be in (0, 1)")  # noqa: TRY003
+        underwater = _drawdown_underwater(series)
+        if underwater.is_empty():
+            return float("nan")
+        return float(cast(float, underwater.quantile(1.0 - alpha, interpolation="linear")))
+
+    @columnwise_stat
+    def conditional_drawdown_at_risk(self, series: pl.Series, alpha: float = 0.05) -> float:
+        """Calculate the Conditional Drawdown at Risk (CDaR) at confidence level alpha.
+
+        Also known as Expected Drawdown Shortfall. It is the expected drawdown
+        given that the drawdown exceeds the DD VaR threshold.
+
+        Args:
+            series (pl.Series): The series to calculate CDaR for.
+            alpha (float): Tail probability (e.g., 0.05 for 95% confidence).
+                Must be in (0, 1). Defaults to 0.05.
+
+        Returns:
+            float: The CDaR as a positive fraction (e.g., 0.20 for 20%).
+
+        Raises:
+            ValueError: If alpha is not in (0, 1).
+
+        """
+        if not 0.0 < alpha < 1.0:
+            raise ValueError("alpha must be in (0, 1)")  # noqa: TRY003
+        underwater = _drawdown_underwater(series)
+        if underwater.is_empty():
+            return float("nan")
+        var_threshold = underwater.quantile(1.0 - alpha, interpolation="linear")
+        tail = underwater.filter(underwater >= var_threshold)
+        if tail.is_empty():  # pragma: no cover
+            return float("nan")
+        return float(cast(float, tail.mean()))
+
+    @columnwise_stat
+    def tail_drawdown_ratio(self, series: pl.Series, alpha: float = 0.05) -> float:
+        """Calculate the Tail Drawdown Ratio (CDaR / Expected Drawdown).
+
+        This is the drawdown analog of the tail ratio. It measures how much
+        worse the tail drawdowns are compared to the average underwater drawdown.
+
+        Args:
+            series (pl.Series): The series to calculate tail drawdown ratio for.
+            alpha (float): Tail probability (e.g., 0.05 for 95% confidence).
+                Must be in (0, 1). Defaults to 0.05.
+
+        Returns:
+            float: The tail drawdown ratio (>= 1.0). Returns NaN if no drawdowns.
+
+        Raises:
+            ValueError: If alpha is not in (0, 1).
+
+        """
+        if not 0.0 < alpha < 1.0:
+            raise ValueError("alpha must be in (0, 1)")  # noqa: TRY003
+        underwater = _drawdown_underwater(series)
+        if underwater.is_empty():
+            return float("nan")
+        expected = float(cast(float, underwater.mean()))
+        if expected == 0:  # pragma: no cover
+            return float("nan")
+        var_threshold = underwater.quantile(1.0 - alpha, interpolation="linear")
+        tail = underwater.filter(underwater >= var_threshold)
+        if tail.is_empty():  # pragma: no cover
+            return float("nan")
+        cdar = float(cast(float, tail.mean()))
+        return cdar / expected
 
     def drawdown_details(self) -> dict[str, pl.DataFrame]:
         """Return detailed statistics for each individual drawdown period.
