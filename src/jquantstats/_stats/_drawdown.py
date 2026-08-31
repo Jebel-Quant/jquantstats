@@ -142,7 +142,7 @@ class _DrawdownMixin:
         underwater = _drawdown_underwater(series)
         if underwater.is_empty():
             return 0.0
-        return float(underwater.mean())
+        return float(cast(float, underwater.mean()))
 
     @columnwise_stat
     def drawdown_value_at_risk(self, series: pl.Series, alpha: float = 0.05) -> float:
@@ -169,7 +169,7 @@ class _DrawdownMixin:
         underwater = _drawdown_underwater(series)
         if underwater.is_empty():
             return float("nan")
-        return float(underwater.quantile(1.0 - alpha, interpolation="linear"))
+        return float(cast(float, underwater.quantile(1.0 - alpha, interpolation="linear")))
 
     @columnwise_stat
     def conditional_drawdown_at_risk(self, series: pl.Series, alpha: float = 0.05) -> float:
@@ -199,7 +199,7 @@ class _DrawdownMixin:
         tail = underwater.filter(underwater >= var_threshold)
         if tail.is_empty():  # pragma: no cover
             return float("nan")
-        return float(tail.mean())
+        return float(cast(float, tail.mean()))
 
     @columnwise_stat
     def tail_drawdown_ratio(self, series: pl.Series, alpha: float = 0.05) -> float:
@@ -225,14 +225,14 @@ class _DrawdownMixin:
         underwater = _drawdown_underwater(series)
         if underwater.is_empty():
             return float("nan")
-        expected = float(underwater.mean())
+        expected = float(cast(float, underwater.mean()))
         if expected == 0:  # pragma: no cover
             return float("nan")
         var_threshold = underwater.quantile(1.0 - alpha, interpolation="linear")
         tail = underwater.filter(underwater >= var_threshold)
         if tail.is_empty():  # pragma: no cover
             return float("nan")
-        cdar = float(tail.mean())
+        cdar = float(cast(float, tail.mean()))
         return cdar / expected
 
     def drawdown_details(self) -> dict[str, pl.DataFrame]:
