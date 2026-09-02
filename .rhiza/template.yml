@@ -10,5 +10,7 @@ templates:
 # Destination paths, as they land in this repo. Source-path entries
 # (bundles/github/...) are inert since the exclude semantics were fixed.
 exclude:
+  # The landing page is project-specific: it includes this repo's README.
+  - docs/index.md
   - .github/workflows/rhiza_weekly.yml
   - .github/workflows/rhiza_scorecard.yml
