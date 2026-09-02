@@ -13,6 +13,7 @@ Start from the shared context — read
 
 ```python
 import os, sys
+
 sys.path.insert(0, os.path.join(os.environ["CLAUDE_PLUGIN_ROOT"], "scripts"))
 from jqs_context import load
 
@@ -34,7 +35,7 @@ the future. This is a `Portfolio`-only test — a return series cannot express i
 ```python
 {n: pf.lag(n).stats.sharpe()["returns"] for n in range(4)}
 
-pf.plots.lead_lag_ir_plot(start=-10, end=19)        # IR across the lag spectrum
+pf.plots.lead_lag_ir_plot(start=-10, end=19)  # IR across the lag spectrum
 pf.plots.lagged_performance_plot(lags=[0, 1, 2, 5])
 ```
 
@@ -45,10 +46,10 @@ of the trade is a look-ahead artefact, not skill.
 ### 2. Trading costs
 
 ```python
-pf.trading_cost_impact(max_bps=20)          # pl.DataFrame — a cost sweep
+pf.trading_cost_impact(max_bps=20)  # pl.DataFrame — a cost sweep
 pf.plots.trading_cost_impact_plot(max_bps=20)
-pf.cost_adjusted_returns(cost_bps=5)        # a returns *frame*, not a metric
-pf.turnover_summary()                       # what the sweep is actually charging for
+pf.cost_adjusted_returns(cost_bps=5)  # a returns *frame*, not a metric
+pf.turnover_summary()  # what the sweep is actually charging for
 
 # Metrics on a cost- or fee-adjusted series go through pf.as_data(), which keeps
 # only the 'returns' column. Data.from_returns(frame) would also score the
@@ -69,7 +70,7 @@ Serially correlated returns understate risk, so the Sharpe flatters.
 pf.stats.autocorr(lag=1)
 pf.stats.acf(nlags=20)
 pf.stats.autocorr_penalty()
-pf.stats.smart_sharpe()      # sharpe / autocorr_penalty
+pf.stats.smart_sharpe()  # sharpe / autocorr_penalty
 pf.stats.smart_sortino()
 ```
 
@@ -81,11 +82,11 @@ smoothed holdings are the usual cause.
 A Sharpe from a short sample is barely an estimate.
 
 ```python
-pf.stats.sharpe_variance()                  # sampling variance of the estimate
-pf.stats.probabilistic_sharpe_ratio()       # P(true Sharpe > benchmark Sharpe)
+pf.stats.sharpe_variance()  # sampling variance of the estimate
+pf.stats.probabilistic_sharpe_ratio()  # P(true Sharpe > benchmark Sharpe)
 pf.stats.probabilistic_sortino_ratio()
 pf.stats.probabilistic_adjusted_sortino_ratio()
-pf.stats.probabilistic_ratio(base="sharpe") # or pass a callable
+pf.stats.probabilistic_ratio(base="sharpe")  # or pass a callable
 ```
 
 `probabilistic_sharpe_ratio` returns NaN when the standard deviation or the
@@ -98,12 +99,12 @@ around.
 Block bootstrap, so serial structure is partly preserved:
 
 ```python
-pf.stats.montecarlo(n=1000, period=252)           # pl.DataFrame (n, n_assets) terminal returns
+pf.stats.montecarlo(n=1000, period=252)  # pl.DataFrame (n, n_assets) terminal returns
 pf.stats.montecarlo_sharpe(n=1000, period=252)
 pf.stats.montecarlo_cagr(n=1000, period=252)
 pf.stats.montecarlo_drawdown(n=1000, period=252)  # the distribution that sizing depends on
 
-pf.data.plots.montecarlo(n=100, period=252)               # fan chart
+pf.data.plots.montecarlo(n=100, period=252)  # fan chart
 pf.data.plots.montecarlo_distribution(n=1000, period=252)
 ```
 
@@ -117,9 +118,9 @@ size regardless of its Sharpe.
 ```python
 pf.stats.worst_n_periods(n=5)
 pf.stats.outliers(quantile=0.95)
-pf.stats.remove_outliers(quantile=0.95)     # recompute metrics on the trimmed series
+pf.stats.remove_outliers(quantile=0.95)  # recompute metrics on the trimmed series
 pf.stats.outlier_win_ratio(), pf.stats.outlier_loss_ratio()
-pf.stats.hhi_positive(), pf.stats.hhi_negative()   # concentration of gains / losses
+pf.stats.hhi_positive(), pf.stats.hhi_negative()  # concentration of gains / losses
 ```
 
 If the Sharpe collapses once the top 5% of days are removed, the result rests on
@@ -160,7 +161,7 @@ and turnover is being wasted.
 pf.stats.risk_of_ruin()
 pf.stats.kelly_criterion()
 pf.stats.ulcer_index(), pf.stats.serenity_index()
-pf.stats.max_drawdown_duration()      # calendar days underwater
+pf.stats.max_drawdown_duration()  # calendar days underwater
 pf.stats.recovery_factor()
 ```
 

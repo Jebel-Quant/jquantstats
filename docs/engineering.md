@@ -45,8 +45,7 @@ neither ships a compiled extension).
 function that takes a `pd.Series`/`pd.DataFrame` and returns a scalar or Series:
 
 ```python
-def sharpe(returns, rf=0.0, periods=252, annualize=True, smart=False) -> float | _pd.Series:
-    ...
+def sharpe(returns, rf=0.0, periods=252, annualize=True, smart=False) -> float | _pd.Series: ...
 ```
 
 It carries explicit compatibility shims — `_compat.py` (430 LOC) and
@@ -130,7 +129,7 @@ independently testable.
 
 ```python
 qs.extend_pandas()
-returns.sharpe()          # method now lives on pd.Series globally
+returns.sharpe()  # method now lives on pd.Series globally
 qs.stats.sharpe(returns)  # or call the function directly
 ```
 
@@ -144,7 +143,7 @@ mutation:
 
 ```python
 pf = Portfolio.from_cash_position(prices=..., cash_position=..., aum=...)
-pf.stats.sharpe()    # accessor namespaces: .stats / .plots / .report / .utils
+pf.stats.sharpe()  # accessor namespaces: .stats / .plots / .report / .utils
 ```
 
 The core objects are **frozen, slotted dataclasses** — immutable after

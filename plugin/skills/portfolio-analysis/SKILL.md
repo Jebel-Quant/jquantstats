@@ -13,6 +13,7 @@ it with `load()` rather than asking the user to re-specify anything.
 
 ```python
 import os, sys
+
 sys.path.insert(0, os.path.join(os.environ["CLAUDE_PLUGIN_ROOT"], "scripts"))
 from jqs_context import load
 
@@ -30,8 +31,8 @@ Three rules cover most mistakes:
 **1. Metrics return a dict keyed by column, never a scalar.**
 
 ```python
-pf.stats.sharpe()                  # {'returns': 2.13}   — Portfolio aggregates to one series
-data.stats.sharpe()                # {'GOOG': 1.15, 'AAPL': 1.75}
+pf.stats.sharpe()  # {'returns': 2.13}   — Portfolio aggregates to one series
+data.stats.sharpe()  # {'GOOG': 1.15, 'AAPL': 1.75}
 ```
 
 A `Portfolio`'s series is always named `returns`. Multi-asset lives on `Data`.
@@ -54,7 +55,7 @@ isn't one.
 
 ```python
 net = pf.deduct_management_fee(annual_fee=0.0085, base=pf.cost_adjusted_returns(cost_bps=5))
-pf.as_data(net).stats.sharpe()      # {'returns': ...}
+pf.as_data(net).stats.sharpe()  # {'returns': ...}
 ```
 
 On `Data`: `assets`, `date_col`, `all` are properties; `returns`, `index`,
@@ -125,8 +126,8 @@ and tell the user the path:
 
 ```python
 fig = pf.plots.snapshot()
-fig.write_html("_analysis/snapshot.html")        # interactive
-fig.write_image("_analysis/snapshot.png")        # static; needs kaleido
+fig.write_html("_analysis/snapshot.html")  # interactive
+fig.write_image("_analysis/snapshot.png")  # static; needs kaleido
 ```
 
 For a full document: `pf.report.to_html(title=..., path=...)` returns a `Path`

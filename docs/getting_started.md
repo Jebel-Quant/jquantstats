@@ -42,8 +42,8 @@ returns = pl.DataFrame(
 ).with_columns(pl.col("Date").str.to_date())
 
 data = Data.from_returns(returns)
-print(data.stats.sharpe())        # {'Fund': ...} — annualised
-data.plots.snapshot().show()      # interactive Plotly chart
+print(data.stats.sharpe())  # {'Fund': ...} — annualised
+data.plots.snapshot().show()  # interactive Plotly chart
 ```
 
 Swap the inline frame for your own returns (pandas works too — any
@@ -116,18 +116,22 @@ those as two additional assets. `as_data` keeps only `returns`.
     import polars as pl
     from jquantstats import Portfolio
 
-    prices = pl.DataFrame({
-        "date": [date(2020, 1, 2), date(2020, 1, 3), date(2020, 1, 6)],
-        "AAPL": [75.09, 74.36, 75.80],
-        "MSFT": [160.62, 158.96, 159.03],
-    })
+    prices = pl.DataFrame(
+        {
+            "date": [date(2020, 1, 2), date(2020, 1, 3), date(2020, 1, 6)],
+            "AAPL": [75.09, 74.36, 75.80],
+            "MSFT": [160.62, 158.96, 159.03],
+        }
+    )
 
     # Dollar amount held per asset each day
-    positions = pl.DataFrame({
-        "date": [date(2020, 1, 2), date(2020, 1, 3), date(2020, 1, 6)],
-        "AAPL": [500_000.0, 500_000.0, 600_000.0],
-        "MSFT": [300_000.0, 300_000.0, 300_000.0],
-    })
+    positions = pl.DataFrame(
+        {
+            "date": [date(2020, 1, 2), date(2020, 1, 3), date(2020, 1, 6)],
+            "AAPL": [500_000.0, 500_000.0, 600_000.0],
+            "MSFT": [300_000.0, 300_000.0, 300_000.0],
+        }
+    )
 
     pf = Portfolio.from_cash_position(
         prices=prices,
@@ -142,7 +146,7 @@ those as two additional assets. `as_data` keeps only `returns`.
     # If you track shares rather than dollar amounts
     pf = Portfolio.from_position(
         prices=prices,
-        position=shares_df,   # units held per asset
+        position=shares_df,  # units held per asset
         aum=1_000_000,
     )
     ```
@@ -155,25 +159,25 @@ those as two additional assets. `as_data` keeps only `returns`.
         prices=prices,
         risk_position=risk_df,
         aum=1_000_000,
-        vola=32,   # EWMA lookback in periods (int, or dict[str, int] per asset)
+        vola=32,  # EWMA lookback in periods (int, or dict[str, int] per asset)
     )
     ```
 
 ### Core series
 
 ```python
-pf.returns          # daily portfolio returns  →  pl.Series
-pf.nav_compounded   # compounded NAV curve     →  pl.Series
-pf.drawdown         # drawdown from HWM        →  pl.Series
+pf.returns  # daily portfolio returns  →  pl.Series
+pf.nav_compounded  # compounded NAV curve     →  pl.Series
+pf.drawdown  # drawdown from HWM        →  pl.Series
 ```
 
 ### Stats
 
 ```python
-pf.stats.sharpe()        # (1)
+pf.stats.sharpe()  # (1)
 pf.stats.max_drawdown()
 pf.stats.volatility()
-pf.stats.summary()       # full metrics table  →  pl.DataFrame
+pf.stats.summary()  # full metrics table  →  pl.DataFrame
 ```
 
 1. Returns a `dict` keyed by column name, e.g.
@@ -182,9 +186,9 @@ pf.stats.summary()       # full metrics table  →  pl.DataFrame
 ### Plots
 
 ```python
-fig = pf.plots.snapshot()              # NAV + drawdown dashboard
+fig = pf.plots.snapshot()  # NAV + drawdown dashboard
 fig = pf.plots.rolling_sharpe_plot(window=60)
-fig.show()                             # opens in browser / notebook
+fig.show()  # opens in browser / notebook
 ```
 
 ### Report
@@ -210,16 +214,18 @@ positions). This is the lighter-weight path and accepts pandas DataFrames too.
     import polars as pl
     from jquantstats import Data
 
-    returns = pl.DataFrame({
-        "Date":      [date(2020, 1, 2), date(2020, 1, 3), date(2020, 1, 6)],
-        "Strategy":  [0.012, -0.009,  0.005],
-        "Benchmark": [0.004, -0.003,  0.002],
-    })
+    returns = pl.DataFrame(
+        {
+            "Date": [date(2020, 1, 2), date(2020, 1, 3), date(2020, 1, 6)],
+            "Strategy": [0.012, -0.009, 0.005],
+            "Benchmark": [0.004, -0.003, 0.002],
+        }
+    )
 
     data = Data.from_returns(
         returns=returns,
         benchmark="Benchmark",  # column name to use as benchmark
-        rf=0.0,                 # risk-free rate (float or time-varying DataFrame)
+        rf=0.0,  # risk-free rate (float or time-varying DataFrame)
     )
     ```
 
@@ -227,7 +233,7 @@ positions). This is the lighter-weight path and accepts pandas DataFrames too.
 
     ```python
     data = Data.from_prices(
-        prices=prices_df,   # pl.DataFrame: date + asset columns
+        prices=prices_df,  # pl.DataFrame: date + asset columns
     )
     ```
 
@@ -238,9 +244,7 @@ positions). This is the lighter-weight path and accepts pandas DataFrames too.
     import polars as pl
 
     # Convert pd.Series with DatetimeIndex to pl.DataFrame
-    returns_pl = pl.from_pandas(
-        returns_pd.rename("Strategy").reset_index()
-    )
+    returns_pl = pl.from_pandas(returns_pd.rename("Strategy").reset_index())
     data = Data.from_returns(returns=returns_pl)
     ```
 
@@ -256,9 +260,9 @@ same name the `Portfolio` internals use, so one reader works against both
 routes:
 
 ```python
-data.index["date"]      # the date series
-data.date_col           # ['date'] — the supported way to read the name
-pf.data.date_col        # ['date'] — a Portfolio's Data agrees
+data.index["date"]  # the date series
+data.date_col  # ['date'] — the supported way to read the name
+pf.data.date_col  # ['date'] — a Portfolio's Data agrees
 ```
 
 Pass `date_col="…"` to nominate a column explicitly. That is required for a
@@ -271,7 +275,7 @@ such an index keeps its own name rather than being relabelled `date`.
 data.stats.sharpe()
 data.stats.sortino()
 data.stats.cagr()
-data.stats.annual_breakdown()   # pl.DataFrame: year | return | sharpe | ...
+data.stats.annual_breakdown()  # pl.DataFrame: year | return | sharpe | ...
 ```
 
 ### Plots
@@ -345,13 +349,13 @@ and link plotly.js.
 Simulate what happens if signals are executed one or more days late:
 
 ```python
-pf_t0 = pf           # ideal T+0
-pf_t1 = pf.lag(1)    # T+1 fill — signal today, fills tomorrow
-pf_t2 = pf.lag(2)    # T+2 fill
+pf_t0 = pf  # ideal T+0
+pf_t1 = pf.lag(1)  # T+1 fill — signal today, fills tomorrow
+pf_t2 = pf.lag(2)  # T+2 fill
 
-print(pf_t0.stats.sharpe())   # {"portfolio": 1.34}
-print(pf_t1.stats.sharpe())   # {"portfolio": 1.28}
-print(pf_t2.stats.sharpe())   # {"portfolio": 1.19}
+print(pf_t0.stats.sharpe())  # {"portfolio": 1.34}
+print(pf_t1.stats.sharpe())  # {"portfolio": 1.28}
+print(pf_t2.stats.sharpe())  # {"portfolio": 1.19}
 
 # Visualise the full lead/lag sweep as a single chart
 fig = pf.plots.lead_lag_ir_plot(start=-5, end=10)

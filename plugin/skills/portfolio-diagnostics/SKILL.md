@@ -33,8 +33,8 @@ aggregations skip nulls, which shrinks the effective sample without saying so,
 while cumulative and rolling paths can propagate them.
 
 ```python
-frame.null_count()                            # nulls per column
-frame.select(pl.col(c).is_nan().sum() for c in numeric)   # NaNs are separate
+frame.null_count()  # nulls per column
+frame.select(pl.col(c).is_nan().sum() for c in numeric)  # NaNs are separate
 ```
 
 Fix by making the sample explicit at construction:
@@ -58,7 +58,7 @@ charts lose their x-axis. On identical data, renaming `date` → `Date` moved
 Sharpe from 100.33 to 83.36 in testing.
 
 ```python
-pf.data.index.columns        # ['date'] good — ['index'] means the axis was dropped
+pf.data.index.columns  # ['date'] good — ['index'] means the axis was dropped
 ```
 
 The plugin's loader normalises Portfolio inputs to `date` and reports having
@@ -69,7 +69,7 @@ done so. If a portfolio was built by hand, check this first.
 Annualisation of `sharpe`, `sortino` and `volatility` runs off this number.
 
 ```python
-pf.stats.periods_per_year                        # what the library will use
+pf.stats.periods_per_year  # what the library will use
 ```
 
 The digest also reports `periods_per_year_empirical` — observations per calendar
@@ -88,7 +88,7 @@ ratios then describe only the overlap, which may be much shorter than the
 portfolio.
 
 ```python
-data.benchmark.height, data.returns.height       # compare
+data.benchmark.height, data.returns.height  # compare
 ```
 
 `NoBenchmarkError` means a benchmark-dependent statistic was requested on a

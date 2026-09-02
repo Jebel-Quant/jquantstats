@@ -20,10 +20,7 @@ import polars as pl
 from jquantstats._cost_model import CostModel
 from jquantstats.portfolio import Portfolio
 
-signal = prices.with_columns(
-    (pl.col(a).rolling_mean(20) - pl.col(a).rolling_mean(100)).sign() * budget
-    for a in assets
-)
+signal = prices.with_columns((pl.col(a).rolling_mean(20) - pl.col(a).rolling_mean(100)).sign() * budget for a in assets)
 
 pf = Portfolio.from_risk_position(
     prices=prices,

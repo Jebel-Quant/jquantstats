@@ -40,9 +40,10 @@ diverged considerably. This document explains where they differ, what
 
 ```python
 import quantstats as qs
-qs.extend_pandas()                 # monkey-patch helper methods onto pandas
-returns.sharpe()                   # now available on the Series
-qs.reports.html(returns, "SPY")    # full tear sheet vs. a benchmark
+
+qs.extend_pandas()  # monkey-patch helper methods onto pandas
+returns.sharpe()  # now available on the Series
+qs.reports.html(returns, "SPY")  # full tear sheet vs. a benchmark
 ```
 
 This is convenient and discoverable, but it means QuantStats only ever sees

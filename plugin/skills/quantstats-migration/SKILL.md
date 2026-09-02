@@ -24,11 +24,11 @@ not exist. Read the model below first.
 
 ```python
 # QuantStats
-sharpe = qs.stats.sharpe(returns_pd)                  # 1.23
+sharpe = qs.stats.sharpe(returns_pd)  # 1.23
 
 # jquantstats
-data = jqs.Data.from_returns(returns=returns_pl)      # once
-sharpe = data.stats.sharpe()["MyStrategy"]            # {"MyStrategy": 1.23}
+data = jqs.Data.from_returns(returns=returns_pl)  # once
+sharpe = data.stats.sharpe()["MyStrategy"]  # {"MyStrategy": 1.23}
 ```
 
 There are **no module-level analytics functions** in jquantstats. Everything
@@ -72,7 +72,7 @@ series.
 import jquantstats as jqs
 
 data = jqs.Data.from_returns(returns=returns_pl, rf=0.0, benchmark=benchmark_pl)
-data = jqs.Data.from_prices(prices=prices_pl)          # same kwargs
+data = jqs.Data.from_prices(prices=prices_pl)  # same kwargs
 ```
 
 **`Portfolio`** — no QuantStats equivalent. Use it when the user has prices
@@ -81,7 +81,7 @@ tilt/timing attribution.
 
 ```python
 pf = jqs.Portfolio.from_cash_position(prices, cash_position, aum=1_000_000)
-pf = jqs.Portfolio.from_position(prices, position, aum)          # share counts
+pf = jqs.Portfolio.from_position(prices, position, aum)  # share counts
 pf = jqs.Portfolio.from_risk_position(prices, risk_position, aum, vola=32)
 ```
 
@@ -157,9 +157,9 @@ and raise `AttributeError`:
 ### Reports
 
 ```python
-data.reports.metrics(mode="basic")     # pl.DataFrame; mode="full" for the extended set
-data.reports.full(title="...")         # str — self-contained HTML document
-pf.report.to_html(title="...", path=None)   # str, or Path when path is given
+data.reports.metrics(mode="basic")  # pl.DataFrame; mode="full" for the extended set
+data.reports.full(title="...")  # str — self-contained HTML document
+pf.report.to_html(title="...", path=None)  # str, or Path when path is given
 ```
 
 There is no `data.reports.summary()` and no `data.reports.to_html()`. The
@@ -205,16 +205,17 @@ Mind which of these are properties: only `lag`, `turnover_summary`,
 `trading_cost_impact`, `smoothed_holding` and `truncate` take parentheses.
 
 ```python
-pf.lag(1)                       # shift positions — execution-delay study
-pf.plots.lead_lag_ir_plot()     # IR across lags
-pf.tilt, pf.timing, pf.tilt_timing_decomp   # allocation vs timing skill
-pf.turnover, pf.turnover_weekly             # properties — no parentheses
-pf.turnover_summary()                       # a method
-pf.trading_cost_impact(...)     # cost sensitivity sweep
+pf.lag(1)  # shift positions — execution-delay study
+pf.plots.lead_lag_ir_plot()  # IR across lags
+pf.tilt, pf.timing, pf.tilt_timing_decomp  # allocation vs timing skill
+pf.turnover, pf.turnover_weekly  # properties — no parentheses
+pf.turnover_summary()  # a method
+pf.trading_cost_impact(...)  # cost sensitivity sweep
 
 from jquantstats import CostModel
-CostModel.per_unit(0.01)        # currency per unit traded
-CostModel.turnover_bps(5)       # bps of AUM turnover
+
+CostModel.per_unit(0.01)  # currency per unit traded
+CostModel.turnover_bps(5)  # bps of AUM turnover
 # or the shorthand kwargs on any constructor: cost_per_unit=, cost_bps=, annual_fee=
 ```
 
