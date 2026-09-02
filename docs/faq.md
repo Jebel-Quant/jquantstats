@@ -17,7 +17,7 @@ Polars propagates `null` through calculations (pandas silently drops `NaN`),
 so jquantstats refuses null-containing input by default. Pick a strategy:
 
 ```python
-data = Data.from_returns(returns=df, null_strategy="drop")          # drop rows with any null
+data = Data.from_returns(returns=df, null_strategy="drop")  # drop rows with any null
 data = Data.from_returns(returns=df, null_strategy="forward_fill")  # interior forward-fill
 ```
 
@@ -90,9 +90,9 @@ returns, benchmark and risk-free frames need not agree on a label.
 On the resulting object the column is always `date`, whichever route built it:
 
 ```python
-data.index["date"]      # Data.from_returns / from_prices
-pf.data.index["date"]   # a Portfolio's Data bridge
-data.date_col           # ['date'] — the supported way to read the name
+data.index["date"]  # Data.from_returns / from_prices
+pf.data.index["date"]  # a Portfolio's Data bridge
+data.date_col  # ['date'] — the supported way to read the name
 ```
 
 Pass `date_col="…"` to nominate a column explicitly. A date-free

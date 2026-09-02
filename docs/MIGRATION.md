@@ -76,10 +76,13 @@ returns_pl = pl.from_pandas(returns_pd.rename("MyStrategy").reset_index())
 
 # jquantstats — build from scratch
 from datetime import date
-returns_pl = pl.DataFrame({
-    "Date":       [date(2020, 1, 2), date(2020, 1, 3), ...],
-    "MyStrategy": [0.01, -0.005, ...],
-})
+
+returns_pl = pl.DataFrame(
+    {
+        "Date": [date(2020, 1, 2), date(2020, 1, 3), ...],
+        "MyStrategy": [0.01, -0.005, ...],
+    }
+)
 ```
 
 The date column is found by type, not by name: whatever you call it — `Date`,
@@ -93,15 +96,17 @@ non-temporal (e.g. integer) index since there is no temporal column to find.
 ```python
 # QuantStats — benchmark passed to every function call
 import quantstats as qs
+
 qs.stats.information_ratio(returns_pd, benchmark=benchmark_pd)
 
 # jquantstats — benchmark provided once at construction time
 import jquantstats as jqs
+
 data = jqs.Data.from_returns(
     returns=returns_pl,
     benchmark=benchmark_pl,
 )
-data.stats.information_ratio()   # benchmark used automatically
+data.stats.information_ratio()  # benchmark used automatically
 ```
 
 ---
@@ -116,8 +121,8 @@ jquantstats has two entry points depending on what data you have.
 import jquantstats as jqs
 
 data = jqs.Data.from_returns(
-    returns=returns_pl,     # pl.DataFrame with date + return columns
-    benchmark=benchmark_pl, # optional
+    returns=returns_pl,  # pl.DataFrame with date + return columns
+    benchmark=benchmark_pl,  # optional
 )
 
 data.stats.sharpe()
@@ -139,14 +144,14 @@ and cost modelling — none of which are available in QuantStats.
 
 ```python
 pf = jqs.Portfolio.from_cash_position(
-    prices=prices_df,        # pl.DataFrame: date + asset columns
-    cash_position=pos_df,    # pl.DataFrame: date + asset columns (£ amounts)
+    prices=prices_df,  # pl.DataFrame: date + asset columns
+    cash_position=pos_df,  # pl.DataFrame: date + asset columns (£ amounts)
     aum=1_000_000,
 )
 
-pf.stats.sharpe()            # the full stats API, same as Data
-pf.plots.snapshot()          # a portfolio-specific plot set — see note below
-pf.report.to_html()          # note: .report (singular), unlike Data.reports
+pf.stats.sharpe()  # the full stats API, same as Data
+pf.plots.snapshot()  # a portfolio-specific plot set — see note below
+pf.report.to_html()  # note: .report (singular), unlike Data.reports
 
 # Drop down to the returns-series API at any time
 pf.data.stats.calmar()
@@ -342,7 +347,7 @@ qs.reports.full(returns_pd, benchmark=benchmark_pd)
 qs.reports.metrics(returns_pd)
 
 # jquantstats
-data.reports.metrics()                  # pl.DataFrame; mode="full" for the extended set
+data.reports.metrics()  # pl.DataFrame; mode="full" for the extended set
 data.reports.full(title="My Strategy")  # str — self-contained HTML document
 
 # The Portfolio route spells it differently: .report (singular), and the
@@ -362,21 +367,23 @@ keyed by column name.
 
 ```python
 # QuantStats — scalar
-sharpe = qs.stats.sharpe(returns_pd)   # 1.23
+sharpe = qs.stats.sharpe(returns_pd)  # 1.23
 
 # jquantstats — dict
-result = data.stats.sharpe()            # {"MyStrategy": 1.23}
-sharpe = result["MyStrategy"]           # 1.23
+result = data.stats.sharpe()  # {"MyStrategy": 1.23}
+sharpe = result["MyStrategy"]  # 1.23
 ```
 
 Multi-asset results come back in the same call:
 
 ```python
-returns_multi = pl.DataFrame({
-    "Date": dates,
-    "AAPL": aapl_rets,
-    "MSFT": msft_rets,
-})
+returns_multi = pl.DataFrame(
+    {
+        "Date": dates,
+        "AAPL": aapl_rets,
+        "MSFT": msft_rets,
+    }
+)
 data = jqs.Data.from_returns(returns=returns_multi)
 data.stats.sharpe()
 # → {"AAPL": 1.34, "MSFT": 0.91}
@@ -479,34 +486,38 @@ through the `Portfolio` entry point.
 pf = jqs.Portfolio.from_cash_position(prices, positions, aum=1_000_000)
 
 # Execution-delay analysis
-pf_lagged = pf.lag(1)                    # shift positions forward by 1 day
-pf.plots.lead_lag_ir_plot(start=-5, end=5)   # information ratio across a lag range
+pf_lagged = pf.lag(1)  # shift positions forward by 1 day
+pf.plots.lead_lag_ir_plot(start=-5, end=5)  # information ratio across a lag range
 
 # Tilt / timing decomposition
-pf.tilt                                  # constant-weight (allocation skill)
-pf.timing                                # weight deviations (timing skill)
-pf.tilt_timing_decomp                    # side-by-side NAV comparison
+pf.tilt  # constant-weight (allocation skill)
+pf.timing  # weight deviations (timing skill)
+pf.tilt_timing_decomp  # side-by-side NAV comparison
 
 # Turnover analytics
-pf.turnover                              # daily one-way turnover (fraction of AUM)
-pf.turnover_weekly()                     # weekly aggregate
-pf.turnover_summary()                    # pl.DataFrame: metric/value rows for
-                                         # mean_daily_turnover, mean_weekly_turnover,
-                                         # turnover_std
+pf.turnover  # daily one-way turnover (fraction of AUM)
+pf.turnover_weekly()  # weekly aggregate
+pf.turnover_summary()  # pl.DataFrame: metric/value rows for
+# mean_daily_turnover, mean_weekly_turnover,
+# turnover_std
 
 # Cost modelling
 from jquantstats import CostModel
 
 pf_a = jqs.Portfolio.from_cash_position(
-    prices, positions, aum,
-    cost_model=CostModel.per_unit(0.01),    # £0.01 per share traded
+    prices,
+    positions,
+    aum,
+    cost_model=CostModel.per_unit(0.01),  # £0.01 per share traded
 )
 pf_b = jqs.Portfolio.from_cash_position(
-    prices, positions, aum,
-    cost_model=CostModel.turnover_bps(5),   # 5 bps per unit of AUM turnover
+    prices,
+    positions,
+    aum,
+    cost_model=CostModel.turnover_bps(5),  # 5 bps per unit of AUM turnover
 )
 
-pf.trading_cost_impact(max_bps=20)          # sweep cost sensitivity 0 → 20 bps
+pf.trading_cost_impact(max_bps=20)  # sweep cost sensitivity 0 → 20 bps
 ```
 
 ---

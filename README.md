@@ -58,25 +58,29 @@ from jquantstats import Portfolio
 rng = np.random.default_rng(42)
 n = 252  # approximately one trading year
 
-prices = pl.DataFrame({
-    "date": pl.date_range(pl.date(2020, 1, 2), pl.date(2020, 12, 31), interval="1d", eager=True)[:n],
-    "AAPL": (100.0 * np.cumprod(1 + rng.normal(0.0005, 0.015, n))).tolist(),
-    "META": (150.0 * np.cumprod(1 + rng.normal(0.0003, 0.018, n))).tolist(),
-})
+prices = pl.DataFrame(
+    {
+        "date": pl.date_range(pl.date(2020, 1, 2), pl.date(2020, 12, 31), interval="1d", eager=True)[:n],
+        "AAPL": (100.0 * np.cumprod(1 + rng.normal(0.0005, 0.015, n))).tolist(),
+        "META": (150.0 * np.cumprod(1 + rng.normal(0.0003, 0.018, n))).tolist(),
+    }
+)
 
 # Allocate $500k to each asset as constant cash positions
-positions = prices.select("date").with_columns([
-    pl.lit(500_000.0).alias("AAPL"),
-    pl.lit(500_000.0).alias("META"),
-])
+positions = prices.select("date").with_columns(
+    [
+        pl.lit(500_000.0).alias("AAPL"),
+        pl.lit(500_000.0).alias("META"),
+    ]
+)
 
 pf = Portfolio.from_cash_position(prices=prices, cash_position=positions, aum=1_000_000)
 
 # Shift all positions forward by one period — simulate T+1 execution
 pf_lagged = pf.lag(1)
 
-sharpe_t0 = pf.stats.sharpe()          # ideal (no delay)
-sharpe_t1 = pf_lagged.stats.sharpe()   # realistic (T+1 fill)
+sharpe_t0 = pf.stats.sharpe()  # ideal (no delay)
+sharpe_t1 = pf_lagged.stats.sharpe()  # realistic (T+1 fill)
 ```
 
 `lag(n)` returns a new `Portfolio` with positions shifted by `n` periods.
@@ -104,10 +108,10 @@ into two orthogonal sources:
 - **Timing** — the deviation from average weights (pure timing skill)
 
 ```python
-tilt_pf    = pf.tilt    # constant-weight version of the strategy
-timing_pf  = pf.timing  # weight deviations only
+tilt_pf = pf.tilt  # constant-weight version of the strategy
+timing_pf = pf.timing  # weight deviations only
 
-tilt_sharpe   = tilt_pf.stats.sharpe()
+tilt_sharpe = tilt_pf.stats.sharpe()
 timing_sharpe = timing_pf.stats.sharpe()
 
 decomp = pf.tilt_timing_decomp  # DataFrame: portfolio | tilt | timing NAVs side by side
@@ -116,9 +120,9 @@ decomp = pf.tilt_timing_decomp  # DataFrame: portfolio | tilt | timing NAVs side
 ### Turnover Analytics
 
 ```python
-turnover         = pf.turnover           # daily one-way turnover as fraction of AUM
-turnover_weekly  = pf.turnover_weekly    # weekly aggregate (or 5-period rolling sum)
-turnover_summary = pf.turnover_summary() # mean_daily, mean_weekly, turnover_std
+turnover = pf.turnover  # daily one-way turnover as fraction of AUM
+turnover_weekly = pf.turnover_weekly  # weekly aggregate (or 5-period rolling sum)
+turnover_summary = pf.turnover_summary()  # mean_daily, mean_weekly, turnover_std
 ```
 
 ### Cost Modeling
@@ -130,14 +134,18 @@ from jquantstats import Portfolio, CostModel
 
 # Model A: per-unit cost (equity, futures tick-size costs)
 pf_net = Portfolio.from_cash_position(
-    prices=prices, cash_position=positions, aum=1_000_000,
+    prices=prices,
+    cash_position=positions,
+    aum=1_000_000,
     cost_model=CostModel.per_unit(0.01),
 )
-net_cost_nav = pf_net.net_cost_nav      # NAV path after deducting position-delta costs
+net_cost_nav = pf_net.net_cost_nav  # NAV path after deducting position-delta costs
 
 # Model B: turnover-bps cost (macro, fund-of-funds)
 pf_bps = Portfolio.from_cash_position(
-    prices=prices, cash_position=positions, aum=1_000_000,
+    prices=prices,
+    cash_position=positions,
+    aum=1_000_000,
     cost_model=CostModel.turnover_bps(5.0),
 )
 # Sweep Sharpe across 0 → 20 bps in a single call
@@ -148,16 +156,20 @@ impact = pf_bps.trading_cost_impact(max_bps=20)
 
 ```python
 # From unit positions (quantity × price → cash automatically)
-units = prices.select("date").with_columns([
-    pl.lit(1_000.0).alias("AAPL"),
-    pl.lit(500.0).alias("META"),
-])
+units = prices.select("date").with_columns(
+    [
+        pl.lit(1_000.0).alias("AAPL"),
+        pl.lit(500.0).alias("META"),
+    ]
+)
 pf = Portfolio.from_position(prices=prices, position=units, aum=1_000_000)
 
 # From risk positions (de-volatized via EWMA, optional vol cap)
 risk_units = units
 pf = Portfolio.from_risk_position(
-    prices=prices, risk_position=risk_units, aum=1_000_000,
+    prices=prices,
+    risk_position=risk_units,
+    aum=1_000_000,
     vol_cap=0.20,
 )
 
@@ -225,30 +237,34 @@ pip install jquantstats[dev]
 import polars as pl
 from jquantstats import Portfolio
 
-prices = pl.DataFrame({
-    "date": ["2023-01-01", "2023-01-02", "2023-01-03"],
-    "AAPL": [150.0, 152.0, 149.5],
-    "MSFT": [250.0, 253.0, 251.0],
-}).with_columns(pl.col("date").str.to_date())
+prices = pl.DataFrame(
+    {
+        "date": ["2023-01-01", "2023-01-02", "2023-01-03"],
+        "AAPL": [150.0, 152.0, 149.5],
+        "MSFT": [250.0, 253.0, 251.0],
+    }
+).with_columns(pl.col("date").str.to_date())
 
-positions = pl.DataFrame({
-    "date": ["2023-01-01", "2023-01-02", "2023-01-03"],
-    "AAPL": [500.0, 500.0, 600.0],
-    "MSFT": [300.0, 300.0, 300.0],
-}).with_columns(pl.col("date").str.to_date())
+positions = pl.DataFrame(
+    {
+        "date": ["2023-01-01", "2023-01-02", "2023-01-03"],
+        "AAPL": [500.0, 500.0, 600.0],
+        "MSFT": [300.0, 300.0, 300.0],
+    }
+).with_columns(pl.col("date").str.to_date())
 
 pf = Portfolio.from_cash_position(prices=prices, cash_position=positions, aum=1_000_000)
 
 sharpe = pf.stats.sharpe()
-fig = pf.plots.snapshot()   # call fig.show() to display
+fig = pf.plots.snapshot()  # call fig.show() to display
 ```
 
 ### Compare ideal vs. delayed execution
 
 ```python
-pf_t0 = pf                # signal executed immediately
-pf_t1 = pf.lag(1)         # T+1 execution
-pf_t2 = pf.lag(2)         # T+2 execution
+pf_t0 = pf  # signal executed immediately
+pf_t1 = pf.lag(1)  # T+1 execution
+pf_t2 = pf.lag(2)  # T+2 execution
 
 sharpe_t0 = pf_t0.stats.sharpe()
 sharpe_t1 = pf_t1.stats.sharpe()
@@ -265,43 +281,47 @@ fig = pf.plots.lead_lag_ir_plot(start=-5, end=10)
 import polars as pl
 from jquantstats import Data
 
-returns = pl.DataFrame({
-    "Date": ["2023-01-01", "2023-01-02", "2023-01-03", "2023-01-04", "2023-01-05"],
-    "Strategy": [0.01, -0.03, 0.02, -0.01, 0.04],
-}).with_columns(pl.col("Date").str.to_date())
+returns = pl.DataFrame(
+    {
+        "Date": ["2023-01-01", "2023-01-02", "2023-01-03", "2023-01-04", "2023-01-05"],
+        "Strategy": [0.01, -0.03, 0.02, -0.01, 0.04],
+    }
+).with_columns(pl.col("Date").str.to_date())
 
-benchmark = pl.DataFrame({
-    "Date": ["2023-01-01", "2023-01-02", "2023-01-03", "2023-01-04", "2023-01-05"],
-    "Benchmark": [0.005, -0.01, 0.008, -0.005, 0.015],
-}).with_columns(pl.col("Date").str.to_date())
+benchmark = pl.DataFrame(
+    {
+        "Date": ["2023-01-01", "2023-01-02", "2023-01-03", "2023-01-04", "2023-01-05"],
+        "Benchmark": [0.005, -0.01, 0.008, -0.005, 0.015],
+    }
+).with_columns(pl.col("Date").str.to_date())
 
 data = Data.from_returns(returns=returns, benchmark=benchmark)
 
-sharpe   = data.stats.sharpe()        # {'Strategy': 4.24, 'Benchmark': 4.94}
-max_dd   = data.stats.max_drawdown()  # {'Strategy': 0.03, 'Benchmark': 0.01}
-fig      = data.plots.snapshot(title="Strategy vs Benchmark")  # call fig.show() to display
+sharpe = data.stats.sharpe()  # {'Strategy': 4.24, 'Benchmark': 4.94}
+max_dd = data.stats.max_drawdown()  # {'Strategy': 0.03, 'Benchmark': 0.01}
+fig = data.plots.snapshot(title="Strategy vs Benchmark")  # call fig.show() to display
 ```
 
 ### Risk metrics
 
 ```python
-sharpe  = data.stats.sharpe()
+sharpe = data.stats.sharpe()
 sortino = data.stats.sortino()
-max_dd  = data.stats.max_drawdown()
-vol     = data.stats.volatility()
-var     = data.stats.value_at_risk()
-cvar    = data.stats.conditional_value_at_risk()
-calmar  = data.stats.calmar()
-win     = data.stats.win_rate()
+max_dd = data.stats.max_drawdown()
+vol = data.stats.volatility()
+var = data.stats.value_at_risk()
+cvar = data.stats.conditional_value_at_risk()
+calmar = data.stats.calmar()
+win = data.stats.win_rate()
 ```
 
 ### Benchmark comparison
 
 ```python
-ir     = data.stats.information_ratio()
+ir = data.stats.information_ratio()
 greeks = data.stats.greeks()
-alpha  = greeks["Strategy"]["alpha"]
-beta   = greeks["Strategy"]["beta"]
+alpha = greeks["Strategy"]["alpha"]
+beta = greeks["Strategy"]["beta"]
 ```
 
 ### Generate a full HTML report

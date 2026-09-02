@@ -53,11 +53,12 @@ Every snippet starts the same way. Read the recipe, never re-derive it:
 
 ```python
 import os, sys
+
 sys.path.insert(0, os.path.join(os.environ["CLAUDE_PLUGIN_ROOT"], "scripts"))
 from jqs_context import load
 
-pf = load()              # the active context
-pf = load("lag1")        # a named variant
+pf = load()  # the active context
+pf = load("lag1")  # a named variant
 ```
 
 ## Variants
