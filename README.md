@@ -2,7 +2,7 @@
 
 [![PyPI version](https://badge.fury.io/py/jquantstats.svg)](https://pypi.org/project/jquantstats/)
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/jebel-quant/jquantstats/blob/main/LICENSE)
 [![Python versions](https://img.shields.io/badge/Python-3.11%20•%203.12%20•%203.13%20•%203.14-blue?logo=python)](https://www.python.org/)
 [![CI](https://github.com/jebel-quant/jquantstats/actions/workflows/rhiza_ci.yml/badge.svg?event=push)](https://github.com/jebel-quant/jquantstats/actions/workflows/rhiza_ci.yml)
 [![Coverage](https://jebel-quant.github.io/jquantstats/coverage-badge.svg)](https://jebel-quant.github.io/jquantstats/reports/html-coverage/)
