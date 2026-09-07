@@ -81,3 +81,8 @@ revert your change. Everything below is locally owned and edited here:
 - **Tests** live under `tests/`; `test_quantstats.py` validates metrics against the
   `quantstats` reference implementation (a dev-only dependency).
 - Fully type-annotated public API (`py.typed`).
+- **Versioning is dynamic:** there is no `version` in `[project]` — hatch-vcs derives it
+  from the git tag (`[tool.hatch.version] source = "vcs"`), and `jquantstats.__version__`
+  reads it back through `importlib.metadata`. So a release is a tag and nothing else:
+  never hand-edit a version number, and expect a working tree between tags to report the
+  next patch as a dev version (`0.11.1.dev4+g<sha>`).

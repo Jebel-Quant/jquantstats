@@ -1,7 +1,10 @@
 # Main project metadata
 [project]
 name = 'jquantstats'
-version = "0.11.0"
+# Derived from the git tag by hatch-vcs (see [tool.hatch.version]) rather than written
+# here, so the tag is the single source of truth and a release is `git tag` alone -- no
+# bump commit, and no way for a number in this file to disagree with what was tagged.
+dynamic = ["version"]
 description = "Analytics for quants"
 authors = [{name='tschm', email= 'thomas.schmelzer@gmail.com'}]
 readme = "README.md"
@@ -106,8 +109,22 @@ test = [
 
 # Build system configuration
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
+
+# Supplies the `version` that [project] declares dynamic, from `git describe`. Two
+# consequences worth knowing:
+#   * The build needs the tag to be visible. hatch-vcs does not fail without it -- it
+#     falls back to a dev version like 0.11.1.dev3+g<sha> -- so rhiza_release.yml checks
+#     the built distribution's filename against the tag, and its checkout uses
+#     fetch-depth: 0. An sdist carries the resolved number in PKG-INFO, so building from
+#     one needs no git.
+#   * Between tags the local version is the *next* patch as a dev release
+#     (guess-next-dev, the default), which is why nothing pins a fallback-version here:
+#     a wrong-looking version must surface as a release failure, not as a plausible
+#     constant.
+[tool.hatch.version]
+source = "vcs"
 
 # Configuration for wheel build
 [tool.hatch.build.targets.wheel]
@@ -151,10 +168,16 @@ marimo_folder = "book/marimo/notebooks"
 
 # Was RHIZA_CHECKS_VERSION in .rhiza/make.d/quality.mk, consumed as
 # `pytest-rhiza==$(RHIZA_CHECKS_VERSION)`. The CLI default resolves
-# `pytest-rhiza @ git+…@v0.2.0`; this repo ran 0.2.1, so the pin is preserved
-# rather than silently rolled back. (Latest on PyPI is 0.4.0 — upgrading is a
-# deliberate decision, not part of this migration.)
-pytest_rhiza = "pytest-rhiza==0.2.1"
+# `pytest-rhiza @ git+…@v0.2.0`, older than what this repo needs.
+#
+# 0.6.0 is the floor, not a routine refresh: it is the release whose pyproject
+# check learned that `[project].version` may be *derived* from the VCS. Up to and
+# including 0.2.1 the check reads a written number unconditionally, so against the
+# `dynamic = ["version"]` above it fails three ways — `version` missing from the
+# required-[project]-fields list, "" failing the semver regex, and
+# `Version("")` raising InvalidVersion while comparing against the latest tag. All
+# three are artefacts of the checker, not of this repo.
+pytest_rhiza = "pytest-rhiza==0.6.0"
 
 # Replaces `DEPTRY_FOLDERS += api` from the old Makefile. v1.4.0 removed that
 # accumulator and now *derives* the deptry folder set — source_folder plus
@@ -265,21 +288,23 @@ enforce = false
 # configparser (radon, for one) treat it as interpolation syntax and crash outright.
 reason = "Tests are organised by behaviour under tests/test_jquantstats/; per-module coverage is guaranteed by the full line-and-branch pytest coverage gate rather than 1:1 file mirroring."
 
-# Declares every location the release version lives, so `bump-my-version` rewrites
-# them all in one step. Without this, a bump silently touches no files and the
-# release CI fails its pyproject-version-vs-tag check.
+# Kept even though there is no longer a version in this file to rewrite, because its
+# *presence* is what `/rhiza:release` reads to tell "this repo declares where its version
+# lives, and it is the tag" from "this repo declares nothing" -- the second of which makes
+# the command stop. Deliberately carries no `current_version`: bump-my-version then
+# derives the current version from the newest matching tag, which is the same fact
+# hatch-vcs builds from, so the two cannot drift. This is the shape rhiza's `go-core` and
+# `rust-core` bundles ship for exactly the same reason.
+#
+# There is no `[[tool.bumpversion.files]]` entry, and adding one would be the mistake:
+# every location that used to hold the number is now derived from the tag, so a file
+# listed here could only reintroduce the drift this change removed.
 [tool.bumpversion]
-current_version = "0.11.0"
-
-# Anchored to the [project] table on purpose: search/replace applies to every match
-# in the file, so an unanchored `version = "..."` would also rewrite any [tool.*]
-# table that happens to share the current version number.
-[[tool.bumpversion.files]]
-filename = "pyproject.toml"
-regex = true
-search = '(?ms)^\[project\]((?:(?!^\[)[\s\S])*?)^version = "{current_version}"'
-replace = '[project]\1version = "{new_version}"'
-
+allow_dirty = false
+# The release flow commits and tags itself, so that the regenerated changelog lands in
+# the bump commit rather than in a second one after the tag.
+commit = false
+tag = false
 
 # Architectural import contracts (import-linter), run via `make arch` and hooked
 # into `make test`. These encode the layering that src/jquantstats/_protocol.py

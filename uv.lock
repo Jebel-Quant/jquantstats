@@ -629,7 +629,6 @@ wheels = [
 
 [[package]]
 name = "jquantstats"
-version = "0.11.0"
 source = { editable = "." }
 dependencies = [
     { name = "jinja2" },
@@ -685,7 +684,7 @@ requires-dist = [
     { name = "scipy", specifier = ">=1.14.1" },
     { name = "uvicorn", marker = "extra == 'web'", specifier = ">=0.32.0" },
 ]
-provides-extras = ["plot", "mpl", "web"]
+provides-extras = ["mpl", "plot", "web"]
 
 [package.metadata.requires-dev]
 dev = [
