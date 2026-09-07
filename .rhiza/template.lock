@@ -1,9 +1,10 @@
-sha: 2955fe77885ad31532579eea11905f4aefb17260
+sha: 371314b93a460e27d648c87377e8fa252bd92d15
 repo: jebel-quant/rhiza
 host: github
-ref: v1.7.2
+ref: v1.8.0
 include: []
 exclude:
+- docs/index.md
 - .github/workflows/rhiza_weekly.yml
 - .github/workflows/rhiza_scorecard.yml
 templates:
@@ -38,10 +39,9 @@ files:
 - SECURITY.md
 - cliff.toml
 - docs/development/rhiza.md
-- docs/index.md
 - docs/mkdocs-base.yml
 - pytest.ini
 - ruff.toml
 - tests/test_rhiza_packaging.py
-synced_at: '2026-09-02T06:48:30Z'
+synced_at: '2026-09-07T18:05:40Z'
 strategy: merge
