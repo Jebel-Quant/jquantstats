@@ -230,7 +230,10 @@ build step, nothing to ship alongside it:
 
 ```python
 html = data.reports.full(title="Performance Report")
-pathlib.Path("report.html").write_text(html)
+
+out = pathlib.Path("output/report.html")
+out.parent.mkdir(parents=True, exist_ok=True)
+out.write_text(html)
 ```
 
 ### Metrics
