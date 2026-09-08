@@ -194,10 +194,7 @@ fig.show()  # opens in browser / notebook
 ### Report
 
 ```python
-html = pf.report.to_html()
-
-with open("report.html", "w") as f:
-    f.write(html)
+pf.report.to_html(path="output/report.html")  # parent dirs are created for you
 ```
 
 ---

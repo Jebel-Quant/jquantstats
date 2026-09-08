@@ -352,7 +352,7 @@ data.reports.full(title="My Strategy")  # str — self-contained HTML document
 
 # The Portfolio route spells it differently: .report (singular), and the
 # HTML entry point is to_html(), which returns a str or writes to `path`.
-pf.report.to_html(title="My Portfolio", path="report.html")
+pf.report.to_html(title="My Portfolio", path="output/report.html")
 ```
 
 There is no `data.reports.summary()`.  The composite stats table lives on the
