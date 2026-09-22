@@ -32,6 +32,7 @@ from .._spec import (
     Band,
     BarSeries,
     BoxSeries,
+    Chrome,
     ColorScale,
     FigureSpec,
     HeatmapGrid,
@@ -353,6 +354,45 @@ def _colormap(scale: ColorScale) -> Any:
     return LinearSegmentedColormap.from_list(scale, _COLORSCALES[scale])
 
 
+def _heatmap_norm(masked: Any, grid: HeatmapGrid) -> TwoSlopeNorm | None:
+    """Build the diverging normalisation a matrix with a pinned centre needs.
+
+    Args:
+        masked: The matrix's values, with uncovered cells masked out.
+        grid: The matrix being drawn, for its pinned bounds.
+
+    Returns:
+        The normalisation, or None when the grid sets no centre or has no
+        unmasked values to scale.
+
+    """
+    if grid.zmid is None or not masked.count():
+        return None
+    # Pinned bounds win over the data's own range: a correlation runs -1 to
+    # 1 whatever this particular matrix happens to span.
+    low = float(masked.min()) if grid.zmin is None else grid.zmin
+    high = float(masked.max()) if grid.zmax is None else grid.zmax
+    # TwoSlopeNorm needs the centre strictly inside the range; widen a
+    # one-sided or degenerate span so an all-positive year still renders.
+    low = min(low, grid.zmid - 1e-9)
+    high = max(high, grid.zmid + 1e-9)
+    return TwoSlopeNorm(vmin=low, vcenter=grid.zmid, vmax=high)
+
+
+def _draw_cell_labels(ax: Axes, grid: HeatmapGrid) -> None:
+    """Write each cell's label into the middle of its square.
+
+    Args:
+        ax: The axes to draw on.
+        grid: The matrix being drawn, for its per-cell text.
+
+    """
+    for row, labels in enumerate(grid.text):
+        for col, label in enumerate(labels):
+            if label:
+                ax.text(col, row, label, ha="center", va="center", fontsize=8)
+
+
 def _draw_heatmap(fig: Figure, ax: Axes, grid: HeatmapGrid) -> None:
     """Draw a value matrix onto *ax*, with per-cell labels and a colour bar.
 
@@ -368,27 +408,11 @@ def _draw_heatmap(fig: Figure, ax: Axes, grid: HeatmapGrid) -> None:
     values = np.array([[float("nan") if v is None else v for v in row] for row in grid.z], dtype=float)
     masked = np.ma.masked_invalid(values)
 
-    cmap = _colormap(grid.colorscale)
-    norm = None
-    if grid.zmid is not None and masked.count():
-        # Pinned bounds win over the data's own range: a correlation runs -1 to
-        # 1 whatever this particular matrix happens to span.
-        low = float(masked.min()) if grid.zmin is None else grid.zmin
-        high = float(masked.max()) if grid.zmax is None else grid.zmax
-        # TwoSlopeNorm needs the centre strictly inside the range; widen a
-        # one-sided or degenerate span so an all-positive year still renders.
-        low = min(low, grid.zmid - 1e-9)
-        high = max(high, grid.zmid + 1e-9)
-        norm = TwoSlopeNorm(vmin=low, vcenter=grid.zmid, vmax=high)
-
-    image = ax.imshow(masked, cmap=cmap, norm=norm, aspect="auto")
+    image = ax.imshow(masked, cmap=_colormap(grid.colorscale), norm=_heatmap_norm(masked, grid), aspect="auto")
 
     ax.set_xticks(range(len(grid.x_labels)), labels=list(grid.x_labels))
     ax.set_yticks(range(len(grid.y_labels)), labels=list(grid.y_labels))
-    for row, labels in enumerate(grid.text):
-        for col, label in enumerate(labels):
-            if label:
-                ax.text(col, row, label, ha="center", va="center", fontsize=8)
+    _draw_cell_labels(ax, grid)
 
     fig.colorbar(image, ax=ax, label=grid.colorbar_title)
 
@@ -470,14 +494,16 @@ def _make_axes(fig: Figure, spec: FigureSpec) -> Any:
     return fig.subplots(ncols=len(spec.panels), sharey=spec.shared_y, squeeze=False)[0]
 
 
-def _draw_panel(fig: Figure, ax: Axes, panel: Panel, spec: FigureSpec) -> None:
-    """Draw one panel's marks and configure its axes.
+def _draw_marks(fig: Figure, ax: Axes, panel: Panel) -> None:
+    """Draw every mark the panel carries, in back-to-front order.
+
+    Reference lines and bands come last so they sit above the series they
+    annotate.
 
     Args:
         fig: The figure owning *ax*, needed to attach a colour bar.
         ax: The axes to draw on.
-        panel: The panel to draw.
-        spec: The chart being rendered, for its figure-wide chrome.
+        panel: The panel whose marks to draw.
 
     """
     for line in panel.lines:
@@ -494,19 +520,44 @@ def _draw_panel(fig: Figure, ax: Axes, panel: Panel, spec: FigureSpec) -> None:
     for band in panel.bands:
         _draw_band(ax, band)
 
-    ax.set_facecolor("white")
-    # Stated either way rather than leaning on ``rcParams["axes.grid"]``: that
-    # default is global and third-party libraries flip it on import (quantstats
-    # does), which would otherwise put a grid behind a matrix chart depending on
-    # what else the caller happened to import.
-    if spec.chrome == "bare":
+
+def _apply_grid(ax: Axes, chrome: Chrome) -> None:
+    """Apply the grid the chart's chrome calls for.
+
+    Stated either way rather than leaning on ``rcParams["axes.grid"]``: that
+    default is global and third-party libraries flip it on import (quantstats
+    does), which would otherwise put a grid behind a matrix chart depending on
+    what else the caller happened to import.
+
+    Args:
+        ax: The axes to configure.
+        chrome: The chart's figure-wide chrome setting.
+
+    """
+    if chrome == "bare":
         ax.grid(visible=False)
-    elif spec.chrome == "panels":
+    elif chrome == "panels":
         # Horizontal rules help compare box heights across panels; vertical
         # ones would only clutter what is a categorical axis.
         ax.grid(visible=True, axis="y", color=_GRID_COLOR, linewidth=_GRID_WIDTH)
     else:
         ax.grid(visible=True, color=_GRID_COLOR, linewidth=_GRID_WIDTH)
+
+
+def _draw_panel(fig: Figure, ax: Axes, panel: Panel, spec: FigureSpec) -> None:
+    """Draw one panel's marks and configure its axes.
+
+    Args:
+        fig: The figure owning *ax*, needed to attach a colour bar.
+        ax: The axes to draw on.
+        panel: The panel to draw.
+        spec: The chart being rendered, for its figure-wide chrome.
+
+    """
+    _draw_marks(fig, ax, panel)
+
+    ax.set_facecolor("white")
+    _apply_grid(ax, spec.chrome)
 
     if panel.title is not None:
         ax.set_title(panel.title)
