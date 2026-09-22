@@ -5,6 +5,40 @@ when data-validation errors occur within the package.
 
 All exceptions inherit from `JQuantStatsError` so callers can catch the
 entire family with a single ``except JQuantStatsError`` clause if they prefer.
+Most also inherit the builtin the condition would otherwise have raised --
+`MissingDateColumnError` is a `ValueError` too -- so naming a condition here
+never costs a caller the builtin contract.
+
+Argument validation is deliberately *not* in this hierarchy
+-----------------------------------------------------------
+
+A few dozen raises across ``src/`` are plain `TypeError`, `ValueError` or
+`AttributeError` rather than members of the taxonomy above, each carrying a
+``# noqa: TRY003``. That is a standing exemption, not drift, and this paragraph
+is the single place it is recorded.
+
+The split is by *who made the mistake*. The taxonomy describes conditions in
+the caller's **data** -- a frame with no date column, a benchmark that does not
+overlap the returns -- which a caller may reasonably want to catch as a family
+and recover from. The exempt raises describe a broken **call contract**: a
+window that is not a positive integer, a cost that is not finite, an ``n`` that
+is not an ``int``. Those signal a bug at the call site, and folding them into
+`JQuantStatsError` would mean ``except JQuantStatsError`` silently swallowed
+the caller's own programming errors alongside the data conditions it meant to
+handle.
+
+The suppression is needed because TRY003 wants the message moved inside the
+exception class, which for a one-off argument check would mean declaring a
+class per check. The repo already ignores ``EM`` repo-wide for the same reason
+("literal exception messages are fine at our scale", ``ruff.toml``); TRY003 is
+the same trade-off made one call at a time. The suppressions are not annotated
+individually because the longest affected line is already 117 of the 120
+columns ``ruff.toml`` allows, leaving no room for a pointer.
+
+The exemption's scope is enforced rather than merely described:
+``tests/test_jquantstats/test_exception_policy.py`` asserts that every
+``# noqa: TRY003`` in ``src/`` sits on a raise of one of those three builtins,
+so the suppression cannot quietly spread to the taxonomy or to any other rule.
 
 Examples:
     >>> raise MissingDateColumnError("prices")  # doctest: +ELLIPSIS
