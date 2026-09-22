@@ -103,7 +103,7 @@ test = [
 ]
 # There is no `lint` group: nothing resolves one from the project environment. ruff runs
 # through the pre-commit hooks `make fmt` executes via uvx, and import-linter — which
-# enforces the [tool.importlinter] contracts — is injected by `make arch` as
+# enforces the [tool.importlinter] contracts — runs as one of those hooks, as
 # `uv run --with import-linter lint-imports`.
 
 
@@ -306,8 +306,8 @@ allow_dirty = false
 commit = false
 tag = false
 
-# Architectural import contracts (import-linter), run via `make arch` and hooked
-# into `make test`. These encode the layering that src/jquantstats/_protocol.py
+# Architectural import contracts (import-linter), run as a pre-commit hook and so
+# covered by `make fmt`. These encode the layering that src/jquantstats/_protocol.py
 # describes in prose: the analytics subpackages annotate against the structural
 # Protocols and must never reach for the concrete Data / Portfolio classes.
 #
