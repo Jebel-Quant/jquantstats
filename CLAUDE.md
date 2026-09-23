@@ -7,7 +7,7 @@ Guidance for Claude Code sessions working in this repository.
 **jquantstats** — portfolio analytics for quants, built on [Polars](https://pola.rs/)
 (zero pandas at runtime) with interactive [Plotly](https://plotly.com/python/) charts.
 Python `>=3.11`, MIT-licensed, published to PyPI. This is a
-[Rhiza](https://github.com/jebel-quant/rhiza)-managed repository (template `v1.2.0`).
+[Rhiza](https://github.com/jebel-quant/rhiza)-managed repository (template `v1.8.0`).
 
 ## Commands
 
@@ -21,7 +21,7 @@ resolves the environment for you.
 | `make test` | Run pytest with coverage (fails under the coverage threshold) |
 | `make typecheck` | Static type checking |
 | `make docs-coverage` | Docstring coverage report (interrogate) |
-| `make deptry` | Detect unused / missing / misplaced dependencies |
+| `make deps` | Detect unused / missing / misplaced dependencies (deptry) |
 | `make security` | Security scan (bandit / semgrep) |
 | `make book` | Build the MkDocs documentation site |
 | `make serve` | Serve the docs locally |
@@ -29,9 +29,18 @@ resolves the environment for you.
 | `make benchmark` | Run the QuantStats-parity benchmark |
 | `make clean` | Remove build/test artifacts |
 
-Run `make` (or `make help` if available) to list all targets. The Makefile is
-repo-owned (see its header) and can be edited without breaking template sync; it
-includes the template-managed API via `.rhiza/rhiza.mk`.
+`make help` lists every target. Since template v1.4 the gates live in the
+`rhiza-task` CLI rather than in make: the `Makefile` is a **template-owned** shim
+(pinned to `RHIZA_TASK` in its header) whose catch-all rule forwards any target to
+`uvx rhiza-task <task>`. Two consequences:
+
+- **Do not edit the `Makefile`** — it is synced from rhiza's `core` bundle, so the
+  next sync reverts local changes and `make fmt`'s "Check no template-owned file is
+  modified" hook rejects them. Repo-specific targets belong in `local.mk`, which the
+  shim includes and the template deliberately does not ignore.
+- `uvx rhiza-task list` is the authority on which targets exist; because the
+  catch-all resolves *every* name, a typo fails only when the CLI reports an
+  unknown task.
 
 ## Architecture
 
@@ -70,13 +79,13 @@ and pulled in via a sync — do **not** patch them locally, or the next sync wil
 revert your change. Everything below is locally owned and edited here:
 
 - `src/`, `tests/`, `api/`
-- `pyproject.toml`, `README.md`, `CLAUDE.md`, `Makefile`, `mkdocs.yml`
+- `pyproject.toml`, `README.md`, `CLAUDE.md`, `mkdocs.yml`
 - `docs/*.md` project documentation (but **not** `docs/mkdocs-base.yml`)
 
 ## Conventions
 
-- **Coverage threshold:** `COVERAGE_FAIL_UNDER = 100` (`.rhiza/make.d/custom-env.mk`) —
-  the suite must keep 100% line coverage.
+- **Coverage threshold:** `coverage_fail_under = 100` (`[tool.rhiza-task]` in
+  `pyproject.toml`) — the suite must keep 100% line and branch coverage.
 - **Docstrings:** Google style; interrogate is expected to report 100% (`make docs-coverage`).
 - **Tests** live under `tests/`; `test_quantstats.py` validates metrics against the
   `quantstats` reference implementation (a dev-only dependency).
