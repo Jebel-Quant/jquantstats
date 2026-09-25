@@ -69,7 +69,11 @@ dev = [
     "pyarrow>=22.0.0",     # polars' .to_pandas() (used all over tests/test_migration) imports it; polars declares it only under [pyarrow]
     "yfinance==1.7.0",
     "quantstats==0.0.81",  # reference implementation used in test_quantstats.py for metric validation
-    "httpx2>=2.13.1",      # starlette's TestClient needs it present (plain httpx is deprecated there); starlette declares it only under [full]
+    # starlette's TestClient needs an HTTP client present; starlette declares one only under [full].
+    # starlette>=1.2 prefers httpx2 and warns on plain httpx, but the lowest-direct job resolves
+    # fastapi's floor, whose starlette (<1.2) knows only httpx -- so both stay declared.
+    "httpx2>=2.13.1",
+    "httpx>=0.28.1",
     "marimo>=0.23.6",      # book/ notebooks import it and deptry scans MARIMO_FOLDER — DEP001 without this
 ]
 test = [
@@ -249,6 +253,7 @@ hypothesis = "hypothesis"
 narwhals = "narwhals"
 python-multipart = "python_multipart"
 pyarrow = "pyarrow"
+httpx = "httpx"
 httpx2 = "httpx2"
 matplotlib = "matplotlib"
 
