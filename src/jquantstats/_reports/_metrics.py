@@ -7,6 +7,7 @@ calculations (CAGR/compounding since a cutoff) they rely on.
 
 from __future__ import annotations
 
+import calendar
 import datetime
 import math
 from typing import Any, cast
@@ -81,9 +82,6 @@ def _cutoff_months(today: Any, n: int) -> Any:
         A `datetime.date` exactly *n* months before *today*.
 
     """
-    import calendar
-    from datetime import date as _date
-
     y = today.year
     m = today.month
     for _ in range(n):
@@ -92,7 +90,7 @@ def _cutoff_months(today: Any, n: int) -> Any:
             m = 12
             y -= 1
     d = min(today.day, calendar.monthrange(y, m)[1])
-    return _date(y, m, d)
+    return datetime.date(y, m, d)
 
 
 def _add_overview_rows(rows: list[tuple[str, dict[str, Any]]], s: Any, ppy: float) -> None:

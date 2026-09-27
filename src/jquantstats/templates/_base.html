@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block page_title %}JQuantStats Report{% endblock %}</title>
   <style>
-/* ── Reset & Base ─────────────────────────────────── */
+{% block base_css %}/* ── Reset & Base ─────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, sans-serif;
@@ -112,7 +112,7 @@ body {
     margin-top: 3rem;
 }
 
-{% block extra_css %}{% endblock %}
+{% endblock %}{% block extra_css %}{% endblock %}
   </style>
 </head>
 <body>

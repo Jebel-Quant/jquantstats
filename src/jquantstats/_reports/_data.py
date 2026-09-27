@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import warnings
+from datetime import date
 from typing import TYPE_CHECKING, Any
 
 import polars as pl
@@ -11,8 +12,8 @@ if TYPE_CHECKING:
     from jquantstats._protocol import DataLike
 
 from .._plots._backend import plot_backend
+from ._formatting import _env
 from ._html import (
-    _build_full_html,
     _drawdowns_section_html,
     _metrics_table_html,
     _try_plotly_div,
@@ -131,13 +132,14 @@ class Reports:
         plots = getattr(self._data, "plots", None)
         charts_html = _report_charts_html(plots, temporal_index)
 
-        return _build_full_html(
+        return _env.get_template("data_report.html").render(
             title=title,
             period_info=period_info,
             assets_str=", ".join(assets),
             metrics_html=metrics_html,
             drawdowns_html=drawdowns_html,
             charts_html=charts_html,
+            footer_date=str(date.today()),
         )
 
 
