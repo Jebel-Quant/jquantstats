@@ -7,6 +7,7 @@ document.
 
 from __future__ import annotations
 
+from html import escape
 from typing import Any
 
 import polars as pl
@@ -183,7 +184,7 @@ def _metrics_table_html(df: pl.DataFrame) -> str:
     }
 
     n_cols = len(assets) + 1
-    header_cells = "".join(f'<th class="asset-header">{a}</th>' for a in assets)
+    header_cells = "".join(f'<th class="asset-header">{escape(a)}</th>' for a in assets)
     parts: list[str] = []
 
     rendered: set[str] = set()
@@ -285,7 +286,7 @@ def _drawdowns_section_html(data: Any, assets: list[str]) -> str:
     for asset in assets:
         df = dd_dict.get(asset)
         if df is None or len(df) == 0:
-            parts.append(f"<h3>{asset}</h3><p>No drawdown periods found.</p>")
+            parts.append(f"<h3>{escape(asset)}</h3><p>No drawdown periods found.</p>")
             continue
 
         worst5 = df.sort("max_drawdown").head(5)
@@ -300,7 +301,7 @@ def _drawdowns_section_html(data: Any, assets: list[str]) -> str:
             for row in worst5.iter_rows(named=True)
         )
         parts.append(
-            f"<h3>{asset}</h3>"
+            f"<h3>{escape(asset)}</h3>"
             '<table class="stats-table">'
             "<thead><tr>"
             "<th>Start</th><th>Valley</th><th>End</th><th>Max DD</th><th>Duration</th>"
@@ -379,14 +380,14 @@ def _build_full_html(
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{title}</title>
+<title>{escape(title)}</title>
 <style>{_REPORT_CSS}</style>
 </head>
 <body>
 <header>
-  <h1>{title}</h1>
-  <div class="period-info">{period_info}</div>
-  <div class="period-info">Assets: {assets_str}</div>
+  <h1>{escape(title)}</h1>
+  <div class="period-info">{escape(period_info)}</div>
+  <div class="period-info">Assets: {escape(assets_str)}</div>
 </header>
 <main>
   <section id="metrics">
