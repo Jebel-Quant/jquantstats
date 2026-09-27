@@ -3,7 +3,18 @@
 from __future__ import annotations
 
 import math
+from pathlib import Path
 from typing import Any, TypeGuard
+
+import plotly.io as pio
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+
+# templates/ lives one level above this subpackage (at src/jquantstats/templates/)
+_TEMPLATES_DIR = Path(__file__).parent.parent / "templates"
+_env = Environment(
+    loader=FileSystemLoader(_TEMPLATES_DIR),
+    autoescape=select_autoescape(["html"]),
+)
 
 
 def _is_finite(v: Any) -> TypeGuard[int | float]:
@@ -22,8 +33,6 @@ def _fmt(value: Any, fmt: str = ".4f", suffix: str = "") -> str:
 
 def _plotly_div(fig: Any, include_plotlyjs: bool | str = False) -> str:
     """Serialise a Plotly figure to a standalone HTML ``<div>``."""
-    import plotly.io as pio
-
     return str(pio.to_html(fig, full_html=False, include_plotlyjs=include_plotlyjs))
 
 

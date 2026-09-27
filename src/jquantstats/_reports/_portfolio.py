@@ -12,7 +12,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import polars as pl
-from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 if TYPE_CHECKING:
     import plotly.graph_objects as go
@@ -20,14 +19,7 @@ if TYPE_CHECKING:
     from ._protocol import PortfolioLike
 
 from .._plots._backend import plot_backend
-from ._formatting import _fmt, _is_finite, _plotly_div, _table_html
-
-# templates/ lives one level above this subpackage (at src/jquantstats/templates/)
-_TEMPLATES_DIR = Path(__file__).parent.parent / "templates"
-_env = Environment(
-    loader=FileSystemLoader(_TEMPLATES_DIR),
-    autoescape=select_autoescape(["html"]),
-)
+from ._formatting import _env, _fmt, _is_finite, _plotly_div, _table_html
 
 # ── Stats table ───────────────────────────────────────────────────────────────
 
