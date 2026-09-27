@@ -782,3 +782,22 @@ def test_full_report_with_integer_index_degrades_gracefully():
         html = data.reports.full()
     assert "<!DOCTYPE html>" in html
     assert "plotly" in html  # the CDN moved to the first *rendered* chart
+
+
+def test_full_escapes_user_supplied_strings():
+    """A column name or title carrying markup is escaped, never emitted as raw HTML."""
+    from jquantstats import Data
+
+    n = 60
+    returns = pl.DataFrame(
+        {
+            "Date": [date(2024, 1, 1) + timedelta(days=i) for i in range(n)],
+            "<script>x</script>": [0.01 * ((-1) ** i) + 0.001 for i in range(n)],
+        }
+    )
+    html = Data.from_returns(returns=returns).reports.full(title="<b>Report</b>")
+
+    assert "<script>x</script>" not in html
+    assert "&lt;script&gt;x&lt;/script&gt;" in html
+    assert "<b>Report</b>" not in html
+    assert "&lt;b&gt;Report&lt;/b&gt;" in html
