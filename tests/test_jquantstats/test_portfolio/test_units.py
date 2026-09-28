@@ -1,4 +1,4 @@
-"""Tests for the share-count view: units, trades, weights.
+"""Tests for the share-count view: units, trades, weights, investment ratio.
 
 The numbers here are chosen so every expectation is exact in binary floating
 point — prices are powers-of-ten multiples and positions are round — so a
@@ -146,6 +146,58 @@ def test_from_position_round_trips_through_units() -> None:
     positions = pl.DataFrame({"A": pl.Series([10.0, 10.0, 5.0])})
     pf = Portfolio.from_position(prices=prices, position=positions, aum=_AUM)
     assert pf.units["A"].to_list() == [10.0, 10.0, 5.0]
+
+
+def test_investment_ratio_sums_positions_over_aum() -> None:
+    """Investment ratio is the total cash deployed divided by AUM."""
+    pf = Portfolio(
+        prices=pl.DataFrame({"A": pl.Series([100.0, 100.0]), "B": pl.Series([200.0, 200.0])}),
+        cashposition=pl.DataFrame({"A": pl.Series([1000.0, 1000.0]), "B": pl.Series([2000.0, 2000.0])}),
+        aum=_AUM,
+    )
+    assert pf.investment_ratio["investment_ratio"].to_list() == [0.3, 0.3]
+
+
+def test_investment_ratio_fully_invested() -> None:
+    """All AUM deployed yields a ratio of 1.0."""
+    pf = Portfolio(
+        prices=pl.DataFrame({"A": pl.Series([100.0])}),
+        cashposition=pl.DataFrame({"A": pl.Series([_AUM])}),
+        aum=_AUM,
+    )
+    assert pf.investment_ratio["investment_ratio"].to_list() == [1.0]
+
+
+def test_investment_ratio_partially_invested() -> None:
+    """Half the AUM deployed yields a ratio of 0.5."""
+    pf = Portfolio(
+        prices=pl.DataFrame({"A": pl.Series([100.0])}),
+        cashposition=pl.DataFrame({"A": pl.Series([5000.0])}),
+        aum=_AUM,
+    )
+    assert pf.investment_ratio["investment_ratio"].to_list() == [0.5]
+
+
+def test_investment_ratio_keeps_the_date_column(units_portfolio) -> None:
+    """The date axis rides along for investment_ratio."""
+    assert units_portfolio.investment_ratio.columns == ["date", "investment_ratio"]
+
+
+def test_investment_ratio_on_date_free_portfolio(int_portfolio) -> None:
+    """An integer-indexed portfolio yields only the ratio column."""
+    ir = int_portfolio.investment_ratio
+    assert ir.columns == ["investment_ratio"]
+    assert ir.height == int_portfolio.prices.height
+
+
+def test_investment_ratio_empty_portfolio() -> None:
+    """A zero-row portfolio yields a zero-row result."""
+    pf = Portfolio(
+        prices=pl.DataFrame({"A": pl.Series([], dtype=pl.Float64)}),
+        cashposition=pl.DataFrame({"A": pl.Series([], dtype=pl.Float64)}),
+        aum=_AUM,
+    )
+    assert pf.investment_ratio.height == 0
 
 
 def test_multi_asset_units_and_trades(portfolio) -> None:
