@@ -1,4 +1,4 @@
-"""Units, trades and weights mixin for Portfolio.
+"""Units, trades, weights and investment ratio mixin for Portfolio.
 
 `Portfolio` stores *cash* positions, because every analytic downstream of it —
 NAV, returns, turnover, cost — is denominated in currency. The share-count view
@@ -26,7 +26,7 @@ from ._portfolio_base import _PortfolioMembers
 
 
 class PortfolioUnitsMixin(_PortfolioMembers):
-    """Mixin providing the share-count view of a Portfolio: units, trades, weights."""
+    """Mixin providing the share-count view of a Portfolio: units, trades, weights, investment ratio."""
 
     def _numeric_frame(self, values: pl.DataFrame) -> pl.DataFrame:
         """Return *values* carrying the date column, if the portfolio has one.
@@ -175,3 +175,28 @@ class PortfolioUnitsMixin(_PortfolioMembers):
             for asset in self.assets
         )
         return self._numeric_frame(values)
+
+    @property
+    def investment_ratio(self) -> pl.DataFrame:
+        """Fraction of AUM currently deployed across all assets, as a time series.
+
+        Computed as the sum of all cash positions divided by AUM. A fully
+        invested portfolio has a ratio of 1.0; a half-cash portfolio has 0.5.
+
+        Returns:
+            pl.DataFrame: Single ``'investment_ratio'`` column (plus ``'date'``
+            when the portfolio has one).
+
+        Examples:
+            >>> import polars as pl
+            >>> from jquantstats.portfolio import Portfolio
+            >>> prices = pl.DataFrame({"A": [100.0, 100.0]})
+            >>> pos = pl.DataFrame({"A": [500.0, 500.0]})
+            >>> pf = Portfolio(prices=prices, cashposition=pos, aum=1000.0)
+            >>> pf.investment_ratio["investment_ratio"].to_list()
+            [0.5, 0.5]
+        """
+        assets = [c for c in self.cashposition.columns if self.cashposition[c].dtype.is_numeric()]
+        total = pl.sum_horizontal([self.cashposition[c] for c in assets]).alias("investment_ratio")
+        result = pl.select(total / self.aum)
+        return self._numeric_frame(result)
