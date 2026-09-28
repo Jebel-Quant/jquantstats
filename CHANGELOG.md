@@ -5,6 +5,35 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com),
 and entries are generated from [Conventional Commits](https://www.conventionalcommits.org).
 
+## [0.12.0] - 2026-09-28
+
+### New Features
+- Add investment_ratio property to Portfolio (#1001)
+
+### Bug Fixes
+- Escape user-supplied title and asset names in the Data HTML report (#996) (#998)
+
+### Documentation
+- Source the landing page from README (#977)
+- Write example reports under output/ so they stay untracked (#981)
+- Correct CLAUDE.md's account of the rhiza make layer (#986) (#990)
+- Record the builtin-validation exemption and enforce its scope (#989) (#993)
+
+### Maintenance
+- Chore(deps)(deps): bump the python-dependencies group with 2 updates (#975)
+- Update rhiza to v1.7.2 (#976)
+- Update rhiza to v1.8.0 (#978)
+- Derive the version from the git tag (#979)
+- Chore(deps)(deps): bump the python-dependencies group with 2 updates (#980)
+- Chore(deps)(deps): bump the python-dependencies group with 5 updates (#982)
+- Chore(deps)(deps): bump anyio from 4.13.0 to 4.14.2 (#983)
+- Chore(deps)(deps): bump soupsieve from 2.8.4 to 2.9 (#984)
+- Chore(deps)(deps): bump the python-dependencies group with 2 updates (#985)
+- Extract mark, grid, norm and label helpers in the mpl renderer (#988) (#992)
+- Run the src/ docstring examples as part of the suite (#987) (#991)
+- Add httpx2 so starlette's TestClient stops warning (#994) (#995)
+- Render the Data report through the Jinja2 templates (#997) (#999)
+
 ## [0.11.0] - 2026-08-31
 
 ### New Features
