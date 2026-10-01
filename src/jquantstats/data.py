@@ -61,12 +61,26 @@ class Data(_ReshapeMixin):
 
     def __post_init__(self) -> None:
         """Normalise the index column name and validate the Data object."""
-        # Canonicalise here rather than in the constructors alone, so a Data built
-        # by hand (or rebuilt by a reshape) carries the same index column name.
+        self._canonicalise_index()
+        self._validate_index()
+        self._validate_row_counts()
+
+    def _canonicalise_index(self) -> None:
+        """Rename the first temporal index column to ``'date'``.
+
+        Canonicalise here rather than in the constructors alone, so a Data built
+        by hand (or rebuilt by a reshape) carries the same index column name.
+        """
         temporal = [name for name, dtype in self.index.schema.items() if dtype.is_temporal()]
         if temporal and temporal[0] != DATE_COLUMN:
             object.__setattr__(self, "index", self.index.rename({temporal[0]: DATE_COLUMN}))
 
+    def _validate_index(self) -> None:
+        """Require at least two timestamps in monotonically increasing order.
+
+        Raises:
+            ValueError: If the index has fewer than two rows or is not sorted.
+        """
         # You need at least two points
         if self.index.shape[0] < 2:
             raise ValueError("Index must contain at least two timestamps.")  # noqa: TRY003
@@ -76,6 +90,12 @@ class Data(_ReshapeMixin):
         if not datetime_col.is_sorted():
             raise ValueError("Index must be monotonically increasing.")  # noqa: TRY003
 
+    def _validate_row_counts(self) -> None:
+        """Require returns (and benchmark, if any) to have one row per index entry.
+
+        Raises:
+            ValueError: If returns or benchmark row counts differ from the index.
+        """
         # Check row count matches returns
         if self.returns.shape[0] != self.index.shape[0]:
             raise ValueError("Returns and index must have the same number of rows.")  # noqa: TRY003
