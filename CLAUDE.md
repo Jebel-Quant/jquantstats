@@ -7,7 +7,8 @@ Guidance for Claude Code sessions working in this repository.
 **jquantstats** — portfolio analytics for quants, built on [Polars](https://pola.rs/)
 (zero pandas at runtime) with interactive [Plotly](https://plotly.com/python/) charts.
 Python `>=3.11`, MIT-licensed, published to PyPI. This is a
-[Rhiza](https://github.com/jebel-quant/rhiza)-managed repository (template `v1.8.0`).
+[Rhiza](https://github.com/jebel-quant/rhiza)-managed repository; the synced template
+version is the `ref:` in `.rhiza/template.lock`.
 
 ## Commands
 
