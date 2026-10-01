@@ -350,3 +350,21 @@ name = "the Data reshape mixin must not import Data"
 type = "forbidden"
 source_modules = ["jquantstats._data_reshape"]
 forbidden_modules = ["jquantstats.data"]
+
+[[tool.importlinter.contracts]]
+name = "the Portfolio mixins must not import Portfolio or Data at runtime"
+type = "forbidden"
+source_modules = [
+    "jquantstats._portfolio_attribution",
+    "jquantstats._portfolio_base",
+    "jquantstats._portfolio_constructors",
+    "jquantstats._portfolio_cost",
+    "jquantstats._portfolio_nav",
+    "jquantstats._portfolio_transform",
+    "jquantstats._portfolio_turnover",
+    "jquantstats._portfolio_units",
+]
+forbidden_modules = [
+    "jquantstats.data",
+    "jquantstats.portfolio",
+]
