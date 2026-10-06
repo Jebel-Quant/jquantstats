@@ -270,7 +270,10 @@ class _RiskStatsMixin:
         """Compute the probabilistic ratio given an observed unannualized base ratio.
 
         Uses the formula: norm.cdf(base / sigma), where
-        sigma = sqrt((1 + 0.5·base² - skew·base + (kurt-3)/4·base²) / (n-1)).
+        sigma = sqrt((1 - skew·base + (kurt-1)/4·base²) / (n-1)) with *raw*
+        kurtosis (Bailey & Lopez de Prado, 2012). Polars returns excess
+        kurtosis, so the ``(kurt-1)/4`` term is ``(excess+2)/4``; it reduces to
+        Lo's ``(1 + base²/2) / (n-1)`` for normally distributed returns.
 
         Args:
             base (float): Unannualized observed ratio (e.g. Sortino).
@@ -289,7 +292,8 @@ class _RiskStatsMixin:
         kurt_val = series.kurtosis(bias=False)
         if skew_val is None or kurt_val is None or n <= 1:
             return float("nan")  # indeterminate: missing moments or insufficient data
-        variance = (1 + 0.5 * base**2 - float(skew_val) * base + ((float(kurt_val) - 3) / 4) * base**2) / (n - 1)
+        raw_kurt = float(kurt_val) + 3  # polars returns excess kurtosis
+        variance = (1 - float(skew_val) * base + ((raw_kurt - 1) / 4) * base**2) / (n - 1)
         if variance <= 0:
             return float("nan")  # indeterminate: non-positive variance
         return float(norm.cdf(base / np.sqrt(variance)))
