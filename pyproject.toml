@@ -68,7 +68,7 @@ dev = [
     "pandas>=2.2.3",       # required by quantstats (comparison tests only — not a runtime dependency)
     "pyarrow>=22.0.0",     # polars' .to_pandas() (used all over tests/test_migration) imports it; polars declares it only under [pyarrow]
     "yfinance==1.7.0",
-    "quantstats==0.0.81",  # reference implementation used in test_quantstats.py for metric validation
+    "quantstats==0.0.86",  # reference implementation used in test_quantstats.py for metric validation
     # starlette's TestClient needs an HTTP client present; starlette declares one only under [full].
     # starlette>=1.2 prefers httpx2 and warns on plain httpx, but the lowest-direct job resolves
     # fastapi's floor, whose starlette (<1.2) knows only httpx -- so both stay declared.
