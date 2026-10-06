@@ -6,7 +6,6 @@ ratios in `_basic` build on, plus the shared static helpers.
 
 from __future__ import annotations
 
-from collections.abc import Iterable
 from typing import TYPE_CHECKING, cast
 
 import numpy as np
@@ -335,27 +334,40 @@ class _BasicCoreMixin:
 
         return self._gaussian_quantile(alpha, mu, sigma)
 
+    @staticmethod
+    def _gaussian_expected_shortfall(alpha: float, mu: float, sigma: float) -> float:
+        """Closed-form expected shortfall ``E[X | X <= VaR_alpha]`` of ``N(mu, sigma)``.
+
+        This is the estimator that belongs with `value_at_risk`'s
+        variance-covariance method. A degenerate (zero-scale) distribution has
+        no tail beyond its single point, so the shortfall is ``mu`` itself.
+        """
+        if sigma == 0.0:
+            return mu
+        return float(mu - sigma * norm.pdf(norm.ppf(alpha)) / alpha)
+
     @columnwise_stat
-    def _conditional_value_at_risk_impl(self, series: pl.Series, sigma: float = 1.0, alpha: float = 0.05) -> float:
+    def _conditional_value_at_risk_impl(
+        self, series: pl.Series, sigma: float = 1.0, alpha: float = 0.05, method: str = "parametric"
+    ) -> float:
         """Inner per-series implementation of conditional value-at-risk."""
-        mean_val = _mean(series)
-        std_val = cast(float, series.std())
-        mu = mean_val
-        sigma *= std_val if std_val is not None else 0.0
-
-        var = self._gaussian_quantile(alpha, mu, sigma)
-
-        # Compute mean of returns less than or equal to VaR
-        # Cast to Any or pl.Series to suppress Ty error
-        # Cast the mask to pl.Expr to satisfy type checker
-        mask = cast(Iterable[bool], series < var)
-        return _mean(series.filter(mask))
+        series = series.drop_nulls().drop_nans()
+        if series.is_empty():
+            return float("nan")
+        if method == "historical":
+            threshold = cast(float, series.quantile(alpha, interpolation="linear"))
+            return _mean(series.filter(series <= threshold))
+        std_val = cast(float | None, series.std())
+        if std_val is None:
+            return float("nan")  # indeterminate: a single observation has no spread
+        return self._gaussian_expected_shortfall(alpha, _mean(series), sigma * std_val)
 
     def conditional_value_at_risk(
         self,
         sigma: float = 1.0,
         confidence: float | None = None,
         alpha: float | None = None,
+        method: str = "parametric",
     ) -> dict[str, float]:
         """Calculate the conditional value-at-risk (CVaR / Expected Shortfall).
 
@@ -374,14 +386,22 @@ class _BasicCoreMixin:
             alpha (float, optional): Tail probability in the *loss* tail (e.g. 0.05
                 for 95 % confidence). Mutually exclusive with ``confidence``.
                 Both defaulting to ``None`` selects ``alpha = 0.05``.
+            method (str, optional): ``"parametric"`` (default) is the closed-form
+                normal expected shortfall, consistent with `value_at_risk`.
+                ``"historical"`` averages the observations at or below the
+                empirical ``alpha`` quantile, which captures fat tails but needs
+                enough data to be meaningful.
 
         Returns:
             dict[str, float]: The conditional value at risk per asset column.
 
         Raises:
-            ValueError: If both ``confidence`` and ``alpha`` are given.
+            ValueError: If both ``confidence`` and ``alpha`` are given, or
+                ``method`` is not ``"parametric"`` or ``"historical"``.
 
         """
+        if method not in ("parametric", "historical"):
+            raise ValueError(f"method must be 'parametric' or 'historical', got {method!r}")  # noqa: TRY003
         if confidence is not None and alpha is not None:
             raise ValueError(  # noqa: TRY003
                 f"Pass either confidence or alpha, not both "
@@ -392,7 +412,7 @@ class _BasicCoreMixin:
         elif alpha is None:
             alpha = 0.05
 
-        return self._conditional_value_at_risk_impl(sigma=sigma, alpha=alpha)
+        return self._conditional_value_at_risk_impl(sigma=sigma, alpha=alpha, method=method)
 
     @staticmethod
     def _drawdown_with_baseline(series: pl.Series) -> pl.Series:
@@ -461,7 +481,8 @@ class _BasicCoreMixin:
 
         Combines the Ulcer Index with a CVaR-based pitfall measure:
         (sum_returns - rf) / (ulcer_index * pitfall), where
-        pitfall = -CVaR(drawdowns) / std(returns).
+        pitfall = -CVaR(drawdowns) / std(returns), using the parametric
+        (Gaussian) CVaR as QuantStats does.
 
         Args:
             series (pl.Series): The series to calculate serenity index for.
@@ -481,11 +502,7 @@ class _BasicCoreMixin:
 
         # Negate drawdowns to match quantstats sign convention (negative = below peak)
         dd_neg = -self._drawdown_with_baseline(series)
-        mu = _mean(dd_neg)
-        sigma = cast(float, dd_neg.std())
-        var_threshold = self._gaussian_quantile(0.05, mu, sigma)
-        mask = cast(Iterable[bool], dd_neg < var_threshold)
-        cvar_val = _mean(dd_neg.filter(mask))
+        cvar_val = self._gaussian_expected_shortfall(0.05, _mean(dd_neg), cast(float, dd_neg.std()))
 
         pitfall = -cvar_val / std_val
         ui = self._ulcer_index_series(series)

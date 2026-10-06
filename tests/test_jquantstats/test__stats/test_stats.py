@@ -1,6 +1,7 @@
 """Tests for the stats module."""
 
 import warnings
+from datetime import date
 
 import numpy as np
 import polars as pl
@@ -122,13 +123,13 @@ def test_geometric_mean_annualized(stats):
 def test_probabilistic_sortino_ratio(stats):
     """Tests that probabilistic_sortino_ratio matches the expected value."""
     result = stats.probabilistic_sortino_ratio()
-    assert result["META"] == pytest.approx(0.999936222948045)
+    assert result["META"] == pytest.approx(0.9999345247113606)
 
 
 def test_probabilistic_adjusted_sortino_ratio(stats):
     """Tests that probabilistic_adjusted_sortino_ratio matches the expected value."""
     result = stats.probabilistic_adjusted_sortino_ratio()
-    assert result["META"] == pytest.approx(0.9966624180363135)
+    assert result["META"] == pytest.approx(0.9966391879607663)
 
 
 def test_smart_sharpe(stats):
@@ -306,7 +307,7 @@ def test_conditional_value_at_risk(stats):
 
     """
     result = stats.conditional_value_at_risk(alpha=0.05)
-    assert result["META"] == pytest.approx(-0.06084410598898649)
+    assert result["META"] == pytest.approx(-0.05093071677371618)
 
 
 def test_conditional_value_at_risk_alpha_is_honoured(stats):
@@ -355,6 +356,68 @@ def test_conditional_value_at_risk_rejects_unknown_keyword(stats):
     """
     with pytest.raises(TypeError):
         stats.conditional_value_at_risk(confidance=0.99)
+
+
+def test_conditional_value_at_risk_historical(stats):
+    """Tests the historical CVaR averages the empirical tail.
+
+    Args:
+        stats: The stats fixture containing a Stats object.
+
+    Verifies:
+        method="historical" equals the mean of the returns at or below the
+        empirical 5 % quantile, and differs from the parametric default.
+
+    """
+    meta = stats.all["META"].drop_nulls()
+    tail = meta.filter(meta <= meta.quantile(0.05, interpolation="linear"))
+
+    result = stats.conditional_value_at_risk(method="historical")["META"]
+
+    assert result == pytest.approx(tail.mean())
+    assert result != pytest.approx(stats.conditional_value_at_risk()["META"])
+
+
+def test_conditional_value_at_risk_rejects_unknown_method(stats):
+    """Tests that an unrecognised CVaR method is an error.
+
+    Args:
+        stats: The stats fixture containing a Stats object.
+
+    Verifies:
+        A method other than "parametric" or "historical" raises ValueError.
+
+    """
+    with pytest.raises(ValueError, match="method must be"):
+        stats.conditional_value_at_risk(method="monte-carlo")
+
+
+@pytest.mark.parametrize(
+    ("values", "expected"),
+    [
+        ([None, None], float("nan")),  # no observations at all
+        ([None, 0.01], float("nan")),  # a single observation has no spread
+        ([0.01, 0.01], 0.01),  # zero spread: the shortfall is the point itself
+    ],
+)
+def test_conditional_value_at_risk_degenerate_series(values, expected):
+    """Tests the parametric CVaR on series too small or flat to have a tail.
+
+    Args:
+        values: Return values for the single asset column.
+        expected: The CVaR the degenerate input should produce.
+
+    Verifies:
+        Empty and single-observation series give NaN; a constant series gives
+        its own value instead of dividing by a zero standard deviation.
+
+    """
+    from jquantstats import Data
+
+    df = pl.DataFrame({"Date": [date(2020, 1, 1), date(2020, 1, 2)], "ret": pl.Series(values, dtype=pl.Float64)})
+    result = Data.from_returns(returns=df).stats.conditional_value_at_risk()["ret"]
+
+    assert result == pytest.approx(expected, nan_ok=True)
 
 
 def test_win_rate(stats):
@@ -1882,9 +1945,10 @@ def test_probabilistic_ratio_from_base_negative_variance():
     """_probabilistic_ratio_from_base returns nan when computed variance <= 0."""
     from jquantstats._stats._performance import _RiskStatsMixin
 
-    # Series with extreme negative skew; base=-0.5 yields negative variance
-    series = pl.Series([0.001] * 10 + [-100.0])
-    result = _RiskStatsMixin._probabilistic_ratio_from_base(-0.5, series)
+    # The bias-corrected excess kurtosis of a tiny two-point sample is -6, below
+    # the -2 floor of a population, so the kurtosis term turns the variance negative.
+    series = pl.Series([0.0, 0.0, 1.0, 1.0])
+    result = _RiskStatsMixin._probabilistic_ratio_from_base(2.0, series)
     assert np.isnan(result)
 
 

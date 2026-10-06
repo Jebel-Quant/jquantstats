@@ -445,6 +445,12 @@ data.stats.conditional_value_at_risk(alpha=0.05)
 Note the asymmetry with `value_at_risk`, which takes `alpha` only and has no
 `confidence` parameter.
 
+Both libraries default to `method="parametric"`, the closed-form Gaussian
+expected shortfall consistent with `value_at_risk`; `method="historical"`
+averages the returns at or below the empirical quantile instead. This follows
+QuantStats 0.0.83+. Earlier versions of both libraries averaged the empirical
+returns below the *parametric* VaR, mixing two estimators.
+
 ### `information_ratio` — annualisation
 
 Both libraries return a **raw, non-annualised** information ratio by default,
