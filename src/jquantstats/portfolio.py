@@ -11,7 +11,7 @@ The class is composed from focused mixin modules:
 - `PortfolioTurnoverMixin` — turnover analytics
 - `PortfolioCostMixin` — cost analysis
 - `PortfolioTransformMixin` — range/lag/smoothing transforms & correlation
-- `PortfolioConstructorMixin` — `from_risk_position` / `from_position` factories
+- `PortfolioConstructorMixin` — `from_risk_position` / `from_position` / `from_weights` factories
 
 Public API is unchanged:
 
@@ -128,7 +128,7 @@ class Portfolio(
     - `profit` — aggregate daily portfolio profit
     - `nav_accumulated` — cumulative additive NAV
     - `nav_compounded` — compounded NAV
-    - `returns` — daily returns (profit / AUM)
+    - `returns` — daily returns (profit / AUM, or / previous NAV when ``compounding``)
     - `monthly` — monthly compounded returns
     - `highwater` — running high-water mark
     - `drawdown` — drawdown from high-water mark
@@ -154,6 +154,19 @@ class Portfolio(
         prices: Polars DataFrame of prices per asset over time.  Any temporal
             column is present as ``'date'`` — see *Date column* below.
         aum: Assets under management used as base NAV offset.
+        compounding: When False (the default), `returns` divides each period's
+            profit by the constant ``aum`` — the convention for a book traded at
+            a fixed notional.  When True, it divides by the previous period's
+            NAV, the convention for a book whose positions are sized off its
+            own, compounding NAV (see `from_weights`).  Turnover and the
+            investment ratio follow the same denominator.
+        realized_costs: Optional per-asset trading costs actually paid on each
+            row, in currency and aligned with ``prices``.  When present they
+            are deducted from `profits`, so NAV and returns are net of them.
+            `from_weights` fills this from its simulation; transforms that
+            change the positions (`lag`, `smoothed_holding`, `tilt`,
+            `timing`) drop it, because those costs belong to the original
+            trades.
 
     Analytics facades
     -----------------
@@ -234,6 +247,8 @@ class Portfolio(
     cost_per_unit: float = 0.0
     cost_bps: float = 0.0
     annual_fee: float = 0.0
+    compounding: bool = False
+    realized_costs: pl.DataFrame | None = None
 
     # ── Internal cache fields ─────────────────────────────────────────────────
     # All cache fields are initialised to ``None`` in ``__post_init__`` via
@@ -303,6 +318,10 @@ class Portfolio(
         object.__setattr__(self, "cashposition", _normalise_date_column(self.cashposition))
         if self.cashposition.shape[0] != self.prices.shape[0]:
             raise RowCountMismatchError(self.prices.shape[0], self.cashposition.shape[0])
+        if self.realized_costs is not None:
+            object.__setattr__(self, "realized_costs", _normalise_date_column(self.realized_costs))
+            if self.realized_costs.shape[0] != self.prices.shape[0]:
+                raise RowCountMismatchError(self.prices.shape[0], self.realized_costs.shape[0], "realized_costs")
         if self.aum <= 0.0:
             raise NonPositiveAumError(self.aum)
         for slot in _CACHE_SLOTS:
@@ -376,6 +395,8 @@ class Portfolio(
         cost_bps: float = 0.0,
         cost_model: CostModel | None = None,
         annual_fee: float = 0.0,
+        compounding: bool = False,
+        realized_costs: pl.DataFrame | None = None,
     ) -> Self:
         """Create a Portfolio directly from cash positions aligned with prices.
 
@@ -396,6 +417,11 @@ class Portfolio(
             annual_fee: Flat annual management fee as a fraction of AUM
                 (e.g. 0.0085 for 85 bps p.a.).  Defaults to 0.0 (no fee).
                 Used as the default by `deduct_management_fee`.
+            compounding: Measure returns against the previous period's NAV
+                instead of the constant *aum*.  Defaults to False.
+            realized_costs: Optional per-asset trading costs actually paid on
+                each row, in currency, deducted from `profits`.  Defaults to
+                None (no realised costs).
 
         Returns:
             A Portfolio instance with the provided cash positions.
@@ -418,6 +444,8 @@ class Portfolio(
             cost_per_unit=cost_per_unit,
             cost_bps=cost_bps,
             annual_fee=annual_fee,
+            compounding=compounding,
+            realized_costs=realized_costs,
         )
 
     # ── Internal helpers ───────────────────────────────────────────────────────

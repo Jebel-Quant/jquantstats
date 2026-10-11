@@ -22,7 +22,9 @@ class PortfolioTurnoverMixin(_PortfolioMembers):
         """Daily one-way portfolio turnover as a fraction of AUM.
 
         Computes the sum of absolute position changes across all assets for
-        each period, normalised by AUM.  The first row is always zero because
+        each period, normalised by AUM — or, for a ``compounding`` portfolio,
+        by the previous period's NAV, the same capital `returns` uses, so
+        `cost_adjusted_returns` deducts costs on a consistent base.  The first row is always zero because
         there is no prior position to form a difference against.
 
         The result is cached after first access so repeated calls are O(1).
@@ -50,7 +52,8 @@ class PortfolioTurnoverMixin(_PortfolioMembers):
         """
         assets = [c for c in self.cashposition.columns if c != "date" and self.cashposition[c].dtype.is_numeric()]
         daily_abs_chg = (
-            pl.sum_horizontal(pl.col(c).diff().abs().fill_null(0.0).fill_nan(0.0) for c in assets) / self.aum
+            pl.sum_horizontal(pl.col(c).diff().abs().fill_null(0.0).fill_nan(0.0) for c in assets)
+            / pl.lit(self._return_base)
         ).alias("turnover")
         cols: list[str | pl.Expr] = []
         if "date" in self.cashposition.columns:

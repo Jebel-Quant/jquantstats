@@ -35,6 +35,8 @@ class _PortfolioMembers:
         cost_per_unit: float
         cost_bps: float
         annual_fee: float
+        compounding: bool
+        realized_costs: pl.DataFrame | None
 
         # Derived series / accessors defined on sibling mixins or ``Portfolio``.
         @property
@@ -56,6 +58,10 @@ class _PortfolioMembers:
         @property
         def nav_accumulated(self) -> pl.DataFrame:
             """Cumulative additive NAV (defined on `PortfolioNavMixin`)."""
+
+        @property
+        def _return_base(self) -> pl.Series:
+            """Per-row capital that returns are measured against (defined on `PortfolioNavMixin`)."""
 
         @property
         def turnover(self) -> pl.DataFrame:

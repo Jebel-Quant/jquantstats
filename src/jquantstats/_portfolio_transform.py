@@ -37,25 +37,42 @@ class PortfolioTransformMixin(_PortfolioMembers):
             cost_bps: float = 0.0,
             cost_model: CostModel | None = None,
             annual_fee: float = 0.0,
+            compounding: bool = False,
+            realized_costs: pl.DataFrame | None = None,
         ) -> Self:
             """Create a Portfolio directly from cash positions aligned with prices."""
             ...
 
     # ── Shared construction helpers ────────────────────────────────────────────
 
-    def _rebuild(self, cash_position: pl.DataFrame, prices: pl.DataFrame | None = None) -> Self:
+    def _rebuild(
+        self,
+        cash_position: pl.DataFrame,
+        prices: pl.DataFrame | None = None,
+        aum: float | None = None,
+        realized_costs: pl.DataFrame | None = None,
+    ) -> Self:
         """Build a new Portfolio of the same concrete type from derived frames.
 
         Every transform in this mixin ends the same way: hand the derived
         frames back to ``from_cash_position`` while carrying ``aum``, both
-        cost parameters and the management fee across unchanged. Centralising that here keeps a new
-        construction parameter from having to be threaded through each
-        transform individually.
+        cost parameters, the management fee and the ``compounding`` flag
+        across unchanged.  Centralising that here keeps a new construction
+        parameter from having to be threaded through each transform
+        individually.
+
+        Realised costs are *not* carried by default: they were paid on the
+        original trades, and a transform that changes the positions trades
+        differently.  Only `truncate`, which keeps the trades, passes them on.
 
         Args:
             cash_position: The derived cash-position frame.
             prices: The derived price frame; defaults to the current prices,
                 which the lag and smoothing transforms leave untouched.
+            aum: Starting capital of the new portfolio; defaults to the
+                current ``aum``.
+            realized_costs: Realised costs of the new portfolio; defaults to
+                None.
 
         Returns:
             A new Portfolio of the same concrete type.
@@ -63,10 +80,12 @@ class PortfolioTransformMixin(_PortfolioMembers):
         return type(self).from_cash_position(
             prices=self.prices if prices is None else prices,
             cash_position=cash_position,
-            aum=self.aum,
+            aum=self.aum if aum is None else aum,
             cost_per_unit=self.cost_per_unit,
             cost_bps=self.cost_bps,
             annual_fee=self.annual_fee,
+            compounding=self.compounding,
+            realized_costs=realized_costs,
         )
 
     @property
@@ -163,10 +182,9 @@ class PortfolioTransformMixin(_PortfolioMembers):
         """
         mode, lower, upper = resolve_bounds(start, end, temporal="date" in self.prices.columns)
 
+        rows = self.prices.with_row_index("_row")
         if mode == "dates":
-            cond = self._date_range_mask(lower, upper)
-            pr = self.prices.filter(cond)
-            cp = self.cashposition.filter(cond)
+            rows = rows.filter(self._date_range_mask(lower, upper))
         else:
             # "none" resolves to a full-width slice, so it needs no separate branch.
             # The casts record what resolve_bounds guarantees for these modes but
@@ -174,9 +192,26 @@ class PortfolioTransformMixin(_PortfolioMembers):
             offset, length = self._row_slice_bounds(
                 cast("int | None", lower), cast("int | None", upper), self.prices.height
             )
-            pr = self.prices.slice(offset, length)
-            cp = self.cashposition.slice(offset, length)
-        return self._rebuild(prices=pr, cash_position=cp)
+            rows = rows.slice(offset, length)
+        kept = rows["_row"]
+        pr = self.prices[kept]
+        cp = self.cashposition[kept]
+        if kept.is_empty():
+            return self._rebuild(prices=pr, cash_position=cp)
+
+        # A compounding book sized its positions off the NAV it had reached, so
+        # the window starts from that NAV rather than from the original aum.
+        aum = float(self.nav_accumulated["NAV_accumulated"][kept[0]]) if self.compounding else self.aum
+        costs = None
+        if self.realized_costs is not None:
+            # The first kept row's trades happened before the window opens: they
+            # are already inside its starting capital.
+            is_first = pl.int_range(pl.len()) == 0
+            costs = self.realized_costs[kept]
+            costs = costs.with_columns(
+                pl.when(is_first).then(0.0).otherwise(pl.col(c)).alias(c) for c in self.assets if c in costs.columns
+            )
+        return self._rebuild(prices=pr, cash_position=cp, aum=aum, realized_costs=costs)
 
     def lag(self, n: int) -> Self:
         """Return a new Portfolio with cash positions lagged by ``n`` steps.

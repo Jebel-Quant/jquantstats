@@ -49,7 +49,7 @@ Source lives under `src/jquantstats/`. Two public entry points, both exposing th
 same `.stats`, `.plots`, and `.report` accessors:
 
 - **`Portfolio`** (`portfolio.py`) — the primary route. Built from prices + positions
-  (`from_cash_position`, `from_position`, `from_risk_position`); compiles NAV and
+  (`from_cash_position`, `from_position`, `from_risk_position`, `from_weights`); compiles NAV and
   unlocks position-level analysis (execution-delay via `lag(n)`, tilt/timing
   attribution, turnover, cost models) that a return series can't support.
 - **`Data`** (`data.py`) — the returns route (`from_returns`), for arbitrary return streams.
@@ -59,6 +59,9 @@ Internal layering (leading-underscore modules are private):
 - `_portfolio_*.py` — Portfolio internals split by concern: `_base`, `_constructors`,
   `_nav`, `_cost`, `_turnover`, `_transform`, `_attribution`.
 - `_cost_model.py` — the two independent cost models (per-unit, turnover-bps).
+- `_rebalance.py` — the row-by-row simulation behind `from_weights` (units held
+  between sparse rebalancings, costs paid from cash; cross-checked against
+  `qis.backtest_model_portfolio`).
 - `_stats/` — metric mixins (`_basic`, `_basic_core`, `_performance`, `_reporting`,
   `_montecarlo`).
 - `_plots/` — Plotly chart builders (portfolio + data variants).

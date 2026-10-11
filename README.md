@@ -173,6 +173,17 @@ Two independent cost models, never accidentally combined:
 ...     vol_cap=0.20,
 ... )
 
+>>> # From sparse target weights: rebalance every 10 rows, let weights drift
+>>> # in between, pay 5 bps on traded notional, compound off NAV
+>>> rebalance = pl.int_range(pl.len()) % 10 == 0
+>>> weights = prices.select(
+...     "date",
+...     pl.when(rebalance).then(0.5).alias("AAPL"),
+...     pl.when(rebalance).then(0.4).alias("META"),
+... )
+>>> pf_w = Portfolio.from_weights(prices=prices, weights=weights, aum=1_000_000, cost_bps=5.0)
+>>> paid = pf_w.realized_costs  # costs actually paid, already inside NAV and returns
+
 >>> # Smooth noisy positions with a rolling mean
 >>> pf_smooth = pf.smoothed_holding(n=5)
 ```
@@ -393,6 +404,8 @@ with configurable windows.
 - Cost-impact sweep via `trading_cost_impact(max_bps)`
 - Position smoothing via `smoothed_holding(n)`
 - Risk-position entry via `from_risk_position()` with EWMA de-volatization
+- Sparse rebalancing via `from_weights()`: target weights on rebalancing dates,
+  units held (and weights drifting) in between, costs on the traded notional
 
 **Visualizations, two ways** — every chart renders as an interactive Plotly figure
 (zoom, pan, hover tooltips, range selectors) or, with `pip install jquantstats[mpl]`

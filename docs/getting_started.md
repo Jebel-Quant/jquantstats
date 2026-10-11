@@ -163,6 +163,22 @@ those as two additional assets. `as_data` keeps only `returns`.
     )
     ```
 
+=== "Sparse target weights"
+
+    ```python
+    # Target weights only on rebalancing rows (null elsewhere). Units are held
+    # in between, so weights drift with prices; each rebalancing is sized off
+    # the NAV reached and pays cost_bps on its traded notional.
+    pf = Portfolio.from_weights(
+        prices=prices,
+        weights=weights_df,  # fraction of NAV per asset, null = no rebalance
+        aum=1_000_000,
+        cost_bps=5.0,
+        compounding=True,  # False: size off the constant aum instead
+    )
+    pf.realized_costs  # per-asset costs paid, already inside NAV and returns
+    ```
+
 ### Core series
 
 ```python
