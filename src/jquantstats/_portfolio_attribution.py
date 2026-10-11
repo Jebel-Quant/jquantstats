@@ -9,6 +9,9 @@ import polars as pl
 from ._cache import cached_in_slot
 from ._portfolio_base import _PortfolioMembers
 
+if TYPE_CHECKING:
+    from ._cost_model import CostModel
+
 
 class PortfolioAttributionMixin(_PortfolioMembers):
     """Mixin providing tilt/timing attribution properties for Portfolio."""
@@ -24,6 +27,8 @@ class PortfolioAttributionMixin(_PortfolioMembers):
             aum: float,
             cost_per_unit: float = 0.0,
             cost_bps: float = 0.0,
+            cost_model: CostModel | None = None,
+            annual_fee: float = 0.0,
         ) -> Self:
             """Create a Portfolio directly from cash positions aligned with prices."""
             ...
@@ -54,6 +59,7 @@ class PortfolioAttributionMixin(_PortfolioMembers):
             aum=self.aum,
             cost_per_unit=self.cost_per_unit,
             cost_bps=self.cost_bps,
+            annual_fee=self.annual_fee,
         )
 
     @property
@@ -72,6 +78,7 @@ class PortfolioAttributionMixin(_PortfolioMembers):
             aum=self.aum,
             cost_per_unit=self.cost_per_unit,
             cost_bps=self.cost_bps,
+            annual_fee=self.annual_fee,
         )
 
     @property

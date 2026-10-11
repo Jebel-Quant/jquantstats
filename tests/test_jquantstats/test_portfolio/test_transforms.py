@@ -272,3 +272,31 @@ def test_tilt_returns_cached_object_on_second_access(portfolio):
     first = portfolio.tilt
     second = portfolio.tilt
     assert first is second
+
+
+# ─── Construction parameters survive transforms ───────────────────────────────
+
+
+@pytest.mark.parametrize(
+    "transform",
+    [
+        lambda pf: pf.truncate(start=1),
+        lambda pf: pf.lag(1),
+        lambda pf: pf.smoothed_holding(1),
+        lambda pf: pf.tilt,
+        lambda pf: pf.timing,
+    ],
+    ids=["truncate", "lag", "smoothed_holding", "tilt", "timing"],
+)
+def test_transforms_keep_annual_fee_and_costs(transform):
+    """A derived portfolio keeps the management fee and both cost parameters (#1019)."""
+    pf = Portfolio(
+        prices=pl.DataFrame({"A": [100.0, 110.0, 121.0]}),
+        cashposition=pl.DataFrame({"A": [1000.0, 1100.0, 1210.0]}),
+        aum=1e4,
+        cost_per_unit=0.01,
+        cost_bps=5.0,
+        annual_fee=0.01,
+    )
+    derived = transform(pf)
+    assert (derived.annual_fee, derived.cost_per_unit, derived.cost_bps) == (0.01, 0.01, 5.0)
