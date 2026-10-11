@@ -180,8 +180,9 @@ class PortfolioUnitsMixin(_PortfolioMembers):
     def investment_ratio(self) -> pl.DataFrame:
         """Fraction of AUM currently deployed across all assets, as a time series.
 
-        Computed as the sum of all cash positions divided by AUM. A fully
-        invested portfolio has a ratio of 1.0; a half-cash portfolio has 0.5.
+        Computed as the sum of all cash positions divided by AUM — or by the
+        same row's NAV for a ``compounding`` portfolio. A fully invested
+        portfolio has a ratio of 1.0; a half-cash portfolio has 0.5.
 
         Returns:
             pl.DataFrame: Single ``'investment_ratio'`` column (plus ``'date'``
@@ -198,5 +199,6 @@ class PortfolioUnitsMixin(_PortfolioMembers):
         """
         assets = [c for c in self.cashposition.columns if self.cashposition[c].dtype.is_numeric()]
         total = pl.sum_horizontal([self.cashposition[c] for c in assets]).alias("investment_ratio")
-        result = pl.select(total / self.aum)
+        capital = self.nav_accumulated["NAV_accumulated"] if self.compounding else self.aum
+        result = pl.select(total / capital)
         return self._numeric_frame(result)

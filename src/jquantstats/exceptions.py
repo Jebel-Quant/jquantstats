@@ -157,11 +157,13 @@ class NonPositiveAumError(JQuantStatsError, ValueError):
 
 
 class RowCountMismatchError(JQuantStatsError, ValueError):
-    """Raised when ``prices`` and ``cashposition`` have different numbers of rows.
+    """Raised when ``prices`` and a frame aligned with it have different numbers of rows.
 
     Args:
         prices_rows: Number of rows in the prices DataFrame.
-        cashposition_rows: Number of rows in the cashposition DataFrame.
+        cashposition_rows: Number of rows in the frame that should match it.
+        frame_name: Name of that frame in the message; ``"cashposition"`` by
+            default, ``"weights"`` or ``"realized_costs"`` where those are checked.
 
     Examples:
         >>> raise RowCountMismatchError(10, 9)  # doctest: +ELLIPSIS
@@ -170,11 +172,11 @@ class RowCountMismatchError(JQuantStatsError, ValueError):
         jquantstats.exceptions.RowCountMismatchError: ...
     """
 
-    def __init__(self, prices_rows: int, cashposition_rows: int) -> None:
+    def __init__(self, prices_rows: int, cashposition_rows: int, frame_name: str = "cashposition") -> None:
         """Initialize with the row counts of the two mismatched DataFrames."""
         super().__init__(
-            f"cashposition and prices must have the same number of rows, "
-            f"got cashposition={cashposition_rows} and prices={prices_rows}."
+            f"{frame_name} and prices must have the same number of rows, "
+            f"got {frame_name}={cashposition_rows} and prices={prices_rows}."
         )
         self.prices_rows = prices_rows
         self.cashposition_rows = cashposition_rows
@@ -286,6 +288,59 @@ class PositionExprColumnError(JQuantStatsError, ValueError):
         )
         self.param = param
         self.extra = list(extra)
+
+
+class WeightsColumnError(JQuantStatsError, ValueError):
+    """Raised when a target-weights frame names assets that are not in prices.
+
+    `Portfolio.from_weights` aligns weights to prices by column name. A weight
+    column with no matching price column cannot be traded, and dropping it
+    silently would leave its weight in cash without the caller noticing.
+
+    Args:
+        unknown: Weight column names that have no matching price column.
+
+    Examples:
+        >>> raise WeightsColumnError(["C"])  # doctest: +ELLIPSIS
+        Traceback (most recent call last):
+            ...
+        jquantstats.exceptions.WeightsColumnError: ...
+    """
+
+    def __init__(self, unknown: list[str]) -> None:
+        """Initialize with the weight columns that have no price column."""
+        cols = ", ".join(f"'{c}'" for c in unknown)
+        super().__init__(f"weights contain column(s) {cols} that do not exist in prices.")
+        self.unknown = list(unknown)
+
+
+class RebalancePriceError(JQuantStatsError, ValueError):
+    """Raised when a held or targeted asset has no usable price on a rebalancing row.
+
+    A rebalancing trades every asset that is held or targeted at that row's
+    price. Without a finite, positive price the trade cannot be valued, so the
+    simulation stops rather than guess.
+
+    Args:
+        row: 0-based row index of the rebalancing.
+        assets: Assets that are held or targeted but have no usable price.
+
+    Examples:
+        >>> raise RebalancePriceError(3, ["A"])  # doctest: +ELLIPSIS
+        Traceback (most recent call last):
+            ...
+        jquantstats.exceptions.RebalancePriceError: ...
+    """
+
+    def __init__(self, row: int, assets: list[str]) -> None:
+        """Initialize with the rebalancing row and the unpriced assets."""
+        cols = ", ".join(f"'{c}'" for c in assets)
+        super().__init__(
+            f"cannot rebalance at row {row}: asset(s) {cols} are held or targeted "
+            f"but have no finite, positive price on that row."
+        )
+        self.row = row
+        self.assets = list(assets)
 
 
 class NoAssetColumnsError(JQuantStatsError, ValueError):

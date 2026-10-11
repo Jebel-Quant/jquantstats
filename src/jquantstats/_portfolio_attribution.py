@@ -29,6 +29,8 @@ class PortfolioAttributionMixin(_PortfolioMembers):
             cost_bps: float = 0.0,
             cost_model: CostModel | None = None,
             annual_fee: float = 0.0,
+            compounding: bool = False,
+            realized_costs: pl.DataFrame | None = None,
         ) -> Self:
             """Create a Portfolio directly from cash positions aligned with prices."""
             ...
@@ -60,6 +62,7 @@ class PortfolioAttributionMixin(_PortfolioMembers):
             cost_per_unit=self.cost_per_unit,
             cost_bps=self.cost_bps,
             annual_fee=self.annual_fee,
+            compounding=self.compounding,
         )
 
     @property
@@ -79,6 +82,7 @@ class PortfolioAttributionMixin(_PortfolioMembers):
             cost_per_unit=self.cost_per_unit,
             cost_bps=self.cost_bps,
             annual_fee=self.annual_fee,
+            compounding=self.compounding,
         )
 
     @property

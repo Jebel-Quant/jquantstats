@@ -30,7 +30,9 @@ class PortfolioNavMixin(_PortfolioMembers):
 
         Returns:
             pl.DataFrame: Per-asset daily profit series along with any
-            non-numeric columns (e.g., ``'date'``).
+            non-numeric columns (e.g., ``'date'``).  When the portfolio
+            carries ``realized_costs`` they are deducted per asset, so the
+            series is net of the trading costs actually paid.
 
         The result is cached after first access so repeated calls are O(1).
 
@@ -61,6 +63,12 @@ class PortfolioNavMixin(_PortfolioMembers):
         if assets:
             result = result.with_columns(
                 pl.when(pl.col(c).is_finite()).then(pl.col(c)).otherwise(0.0).fill_null(0.0).alias(c) for c in assets
+            )
+
+        if self.realized_costs is not None:
+            costs = self.realized_costs
+            result = result.with_columns(
+                (pl.col(asset) - costs[asset].fill_null(0.0)).alias(asset) for asset in assets if asset in costs.columns
             )
 
         return result
@@ -95,14 +103,30 @@ class PortfolioNavMixin(_PortfolioMembers):
         return self.profit.with_columns((pl.col("profit").cum_sum() + self.aum).alias("NAV_accumulated"))
 
     @property
+    def _return_base(self) -> pl.Series:
+        """Capital each period's profit is measured against.
+
+        The constant ``aum`` for a fixed-notional book; the previous period's
+        accumulated NAV (``aum`` on the first row) when ``compounding`` is set.
+
+        Returns:
+            pl.Series: One denominator per row, aligned with `profit`.
+        """
+        if not self.compounding:
+            return pl.repeat(self.aum, self.prices.height, eager=True, dtype=pl.Float64)
+        return self.nav_accumulated["NAV_accumulated"].shift(1).fill_null(self.aum)
+
+    @property
     @cached_in_slot("_returns_cache")
     def returns(self) -> pl.DataFrame:
-        """Return daily returns as profit scaled by AUM, preserving ``'date'``.
+        """Return daily returns as profit scaled by capital, preserving ``'date'``.
 
-        The returned DataFrame contains the original ``'date'`` column with the
-        ``'profit'`` column scaled by AUM (i.e., per-period returns), and also
-        an additional convenience column named ``'returns'`` with the same
-        values for downstream consumers.
+        The returned DataFrame contains the original ``'date'`` column, the
+        ``'profit'`` and ``'NAV_accumulated'`` columns, and a ``'returns'``
+        column holding profit divided by capital.  Capital is the constant AUM
+        by default, and the previous period's NAV when the portfolio is
+        ``compounding`` — in which case compounding `returns` reproduces
+        ``NAV_accumulated`` exactly.
 
         The result is cached after first access so repeated calls are O(1).
 
@@ -113,7 +137,7 @@ class PortfolioNavMixin(_PortfolioMembers):
             value.
         """
         return self.nav_accumulated.with_columns(
-            (pl.col("profit") / self.aum).alias("returns"),
+            (pl.col("profit") / self._return_base).alias("returns"),
         )
 
     @property

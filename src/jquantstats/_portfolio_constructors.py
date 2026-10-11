@@ -1,20 +1,24 @@
 """Factory classmethods for constructing Portfolio objects.
 
-`PortfolioConstructorMixin` provides the `from_risk_position` and
-`from_position` entry points (plus the shared `_evaluate_position_expr`
-helper). Both funnel through ``cls.from_cash_position`` — defined on the
-`Portfolio` dataclass — so the actual instantiation happens in one place.
+`PortfolioConstructorMixin` provides the `from_risk_position`,
+`from_position` and `from_weights` entry points (plus the shared
+`_evaluate_position_expr` helper). All funnel through
+``cls.from_cash_position`` — defined on the `Portfolio` dataclass — so the
+actual instantiation happens in one place.
 """
 
 from __future__ import annotations
 
+import math
 from typing import TYPE_CHECKING, Self
 
+import numpy as np
 import polars as pl
 
 from ._cost_model import CostModel
 from ._portfolio_base import _PortfolioMembers
-from .exceptions import PositionExprColumnError
+from ._rebalance import simulate_rebalancing
+from .exceptions import NegativeCostBpsError, PositionExprColumnError, RowCountMismatchError, WeightsColumnError
 
 
 def _evaluate_position_expr(prices: pl.DataFrame, expr: pl.Expr, param: str) -> pl.DataFrame:
@@ -41,6 +45,59 @@ def _evaluate_position_expr(prices: pl.DataFrame, expr: pl.Expr, param: str) -> 
     if extra:
         raise PositionExprColumnError(param, extra)
     return evaluated
+
+
+def _validate_cost_bps(cost_bps: float) -> float:
+    """Validate a one-way trading cost in basis points.
+
+    Args:
+        cost_bps: Candidate cost.
+
+    Returns:
+        The cost as a float.
+
+    Raises:
+        TypeError: If *cost_bps* is not a number.
+        ValueError: If *cost_bps* is not finite.
+        NegativeCostBpsError: If *cost_bps* is negative.
+    """
+    if isinstance(cost_bps, bool) or not isinstance(cost_bps, int | float):
+        raise TypeError(f"cost_bps must be a number, got {type(cost_bps).__name__}")  # noqa: TRY003
+    if not math.isfinite(cost_bps):
+        raise ValueError(f"cost_bps must be finite, got {cost_bps}")  # noqa: TRY003
+    if cost_bps < 0:
+        raise NegativeCostBpsError(cost_bps)
+    return float(cost_bps)
+
+
+def _weights_matrix(prices: pl.DataFrame, weights: pl.DataFrame, assets: list[str]) -> np.ndarray:
+    """Align *weights* to the asset columns of *prices* as a ``(t, n)`` array.
+
+    Args:
+        prices: Price levels per asset over time.
+        weights: Target weights, null on rows that do not rebalance.
+        assets: Numeric asset columns of *prices*, in order.
+
+    Returns:
+        Float array with NaN wherever no weight is given, including for an
+        asset that has no column in *weights* at all.
+
+    Raises:
+        RowCountMismatchError: If *weights* and *prices* differ in length.
+        WeightsColumnError: If *weights* has a numeric column that is not an
+            asset of *prices*.
+    """
+    if weights.height != prices.height:
+        raise RowCountMismatchError(prices.height, weights.height, "weights")
+    numeric = [c for c, dtype in weights.schema.items() if dtype.is_numeric()]
+    unknown = [c for c in numeric if c not in assets]
+    if unknown:
+        raise WeightsColumnError(unknown)
+    aligned = pl.select(
+        (weights[a] if a in numeric else pl.repeat(None, prices.height, eager=True)).cast(pl.Float64).alias(a)
+        for a in assets
+    )
+    return aligned.fill_nan(None).to_numpy().astype(float)
 
 
 def _validate_vol_cap(vol_cap: float | None) -> None:
@@ -95,6 +152,8 @@ class PortfolioConstructorMixin(_PortfolioMembers):
             cost_bps: float = 0.0,
             cost_model: CostModel | None = None,
             annual_fee: float = 0.0,
+            compounding: bool = False,
+            realized_costs: pl.DataFrame | None = None,
         ) -> Self:
             """Create a Portfolio directly from cash positions aligned with prices."""
             ...
@@ -254,4 +313,110 @@ class PortfolioConstructorMixin(_PortfolioMembers):
             cost_bps=cost_bps,
             cost_model=cost_model,
             annual_fee=annual_fee,
+        )
+
+    @classmethod
+    def from_weights(
+        cls,
+        prices: pl.DataFrame,
+        weights: pl.DataFrame | pl.Expr,
+        aum: float,
+        cost_bps: float = 0.0,
+        compounding: bool = True,
+        annual_fee: float = 0.0,
+    ) -> Self:
+        """Create a Portfolio that rebalances to target weights on sparse dates.
+
+        *weights* gives the target fraction of NAV per asset, but only on the
+        rows where the portfolio rebalances — every other row is null.  Between
+        two rebalancings the book holds its **units**, so the realised weights
+        drift with prices rather than staying at the targets.  On a rebalancing
+        row the units are reset to ``NAV * w / price``, where NAV is the value
+        the drifted book has reached, and the trade pays ``cost_bps`` on its
+        traded notional out of cash.  Because each rebalancing is sized off a
+        NAV that every earlier cost has already lowered, the book is simulated
+        row by row rather than vectorised.
+
+        Weights are applied at the price of the row they appear on, matching
+        the convention that a position set on row *t* earns the return from
+        *t* to *t + 1*.  Shift the weights first (``weights.shift(n)``) to
+        trade them *n* rows later.  Weights that sum to less than one leave the
+        remainder in cash, which earns nothing; weights above one borrow it.
+
+        The trading costs are realised inside the simulation and stored as
+        ``realized_costs``, so `profits`, NAV and `returns` are already net of
+        them.  The portfolio's own ``cost_bps`` is therefore left at zero:
+        `cost_adjusted_returns` would otherwise charge the same trades twice.
+
+        Args:
+            prices: Price levels per asset over time.  A temporal column is
+                normalised to ``'date'`` at construction, whatever it was named.
+            weights: Target weights per asset, aligned row for row with
+                *prices*, as a DataFrame or as an expression evaluated against
+                *prices*.  A row with at least one non-null weight is a
+                rebalancing; within it, a null weight or a missing asset
+                column means a target of zero.  Non-numeric columns (e.g.
+                ``'date'``) are ignored.
+            aum: Starting capital, held in cash until the first rebalancing.
+            cost_bps: One-way trading cost in basis points of traded notional.
+                Defaults to 0.0 (no cost).
+            compounding: When True (the default) each rebalancing is sized off
+                the current NAV and `returns` are measured against the
+                previous period's NAV.  When False every rebalancing is sized
+                off the constant *aum*, as a fixed-notional book, and
+                `returns` are measured against *aum*.
+            annual_fee: Flat annual management fee as a fraction of AUM, used
+                as the default by `deduct_management_fee`.  Defaults to 0.0.
+
+        Returns:
+            A Portfolio whose cash positions are the simulated units times
+            prices, with ``compounding`` set as requested and the costs paid
+            on every trade in ``realized_costs``.
+
+        Raises:
+            RowCountMismatchError: If *weights* and *prices* differ in length.
+            WeightsColumnError: If *weights* has a numeric column that is not
+                an asset of *prices*.
+            PositionExprColumnError: If *weights* is an expression that creates
+                columns not present in *prices*.
+            RebalancePriceError: If an asset that is held or targeted has no
+                finite, positive price on a rebalancing row.
+            NegativeCostBpsError: If *cost_bps* is negative.
+
+        Examples:
+            >>> import polars as pl
+            >>> from jquantstats.portfolio import Portfolio
+            >>> prices = pl.DataFrame({"A": [100.0, 110.0, 110.0], "B": [100.0, 90.0, 90.0]})
+            >>> weights = pl.DataFrame({"A": [0.5, None, 0.5], "B": [0.5, None, 0.5]})
+            >>> pf = Portfolio.from_weights(prices=prices, weights=weights, aum=1000.0)
+            >>> [round(u, 4) for u in pf.units["A"].to_list()]  # held through row 1, reset on row 2
+            [5.0, 5.0, 4.5455]
+            >>> [round(w, 2) for w in pf.weights["A"].to_list()]  # drifted on row 1
+            [0.5, 0.55, 0.5]
+        """
+        if isinstance(weights, pl.Expr):
+            weights = _evaluate_position_expr(prices, weights, "weights")
+        cost_bps = _validate_cost_bps(cost_bps)
+        assets = [col for col, dtype in prices.schema.items() if dtype.is_numeric()]
+        target = _weights_matrix(prices, weights, assets)
+        price_matrix = prices.select(pl.col(a).cast(pl.Float64) for a in assets).fill_nan(None).to_numpy().astype(float)
+
+        path = simulate_rebalancing(
+            prices=price_matrix,
+            weights=np.nan_to_num(target),
+            is_rebalancing=np.asarray(~np.isnan(target).all(axis=1)),
+            aum=aum,
+            assets=assets,
+            cost_bps=cost_bps,
+            compounding=compounding,
+        )
+        cash_position = prices.with_columns(pl.Series(a, path.units[:, i]) * pl.col(a) for i, a in enumerate(assets))
+        realized_costs = prices.with_columns(pl.Series(a, path.costs[:, i]) for i, a in enumerate(assets))
+        return cls.from_cash_position(
+            prices=prices,
+            cash_position=cash_position,
+            aum=aum,
+            annual_fee=annual_fee,
+            compounding=compounding,
+            realized_costs=realized_costs,
         )
