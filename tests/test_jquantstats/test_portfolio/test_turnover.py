@@ -144,3 +144,42 @@ def test_turnover_returns_cached_object_on_second_access(turnover_portfolio):
     first = turnover_portfolio.turnover
     second = turnover_portfolio.turnover
     assert first is second
+
+
+# ─── Turnover is measured on traded units, not on cash-position drift (#1018) ──
+
+
+def test_buy_and_hold_has_no_turnover():
+    """A constant unit count trades nothing, however far the price moves."""
+    pf = Portfolio(
+        prices=pl.DataFrame({"A": [100.0, 110.0, 121.0]}),
+        cashposition=pl.DataFrame({"A": [1000.0, 1100.0, 1210.0]}),
+        aum=1e4,
+    )
+    assert pf.turnover["turnover"].to_list() == [0.0, 0.0, 0.0]
+
+
+def test_turnover_prices_the_trade_at_the_traded_row():
+    """Turnover equals |trades_currency| over aum after the opening row."""
+    pf = Portfolio(
+        prices=pl.DataFrame({"A": [100.0, 110.0, 121.0], "B": [50.0, 40.0, 40.0]}),
+        cashposition=pl.DataFrame({"A": [1000.0, 1650.0, 1210.0], "B": [500.0, 400.0, 800.0]}),
+        aum=1e4,
+    )
+    expected = pf.trades_currency.select(pl.sum_horizontal(pl.all().abs()) / 1e4)["A"].to_list()
+    assert pf.turnover["turnover"].to_list() == pytest.approx([0.0, *expected[1:]])
+
+
+def test_missing_or_zero_price_is_not_a_trade():
+    """Units are carried across a gap in the prices, so no sale-and-rebuy is reported."""
+    pf = Portfolio(
+        prices=pl.DataFrame({"A": [100.0, None, 0.0, 120.0]}),
+        cashposition=pl.DataFrame({"A": [1000.0, None, 0.0, 1200.0]}),
+        aum=1e4,
+    )
+    assert pf.turnover["turnover"].to_list() == [0.0, 0.0, 0.0, 0.0]
+
+
+def test_turnover_on_an_integer_indexed_portfolio(int_portfolio):
+    """Without a date column the frame holds the turnover column only."""
+    assert int_portfolio.turnover.columns == ["turnover"]

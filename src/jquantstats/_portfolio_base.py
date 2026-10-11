@@ -64,5 +64,9 @@ class _PortfolioMembers:
             """Per-row capital that returns are measured against (defined on `PortfolioNavMixin`)."""
 
         @property
+        def units(self) -> pl.DataFrame:
+            """Units held per asset (defined on `PortfolioUnitsMixin`)."""
+
+        @property
         def turnover(self) -> pl.DataFrame:
             """Turnover frame (defined on `PortfolioTurnoverMixin`)."""
