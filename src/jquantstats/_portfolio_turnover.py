@@ -21,11 +21,19 @@ class PortfolioTurnoverMixin(_PortfolioMembers):
     def turnover(self) -> pl.DataFrame:
         """Daily one-way portfolio turnover as a fraction of AUM.
 
-        Computes the sum of absolute position changes across all assets for
-        each period, normalised by AUM — or, for a ``compounding`` portfolio,
-        by the previous period's NAV, the same capital `returns` uses, so
-        `cost_adjusted_returns` deducts costs on a consistent base.  The first row is always zero because
-        there is no prior position to form a difference against.
+        Computes the traded notional summed across all assets for each period,
+        normalised by AUM — or, for a ``compounding`` portfolio, by the
+        previous period's NAV, the same capital `returns` uses, so
+        `cost_adjusted_returns` deducts costs on a consistent base.  The trade
+        is measured in **units** and priced at the traded row —
+        ``|Δunits| * price`` — rather than as a difference of cash positions:
+        a cash position moves whenever the price moves, so ``|Δcashposition|``
+        would report turnover on a book that trades nothing.
+
+        The first row is always zero because there is no prior position to
+        form a difference against.  A missing or zero price carries the units
+        held across it, so a gap in the data is not mistaken for a sale and a
+        rebuy.
 
         The result is cached after first access so repeated calls are O(1).
 
@@ -45,21 +53,25 @@ class PortfolioTurnoverMixin(_PortfolioMembers):
             >>> from datetime import date
             >>> _d = [date(2020, 1, 1), date(2020, 1, 2), date(2020, 1, 3)]
             >>> prices = pl.DataFrame({"date": _d, "A": [100.0, 110.0, 121.0]})
-            >>> pos = pl.DataFrame({"date": prices["date"], "A": [1000.0, 1200.0, 900.0]})
+            >>> pos = pl.DataFrame({"date": prices["date"], "A": [1000.0, 1650.0, 1210.0]})
             >>> pf = Portfolio(prices=prices, cashposition=pos, aum=1e5)
-            >>> pf.turnover["turnover"].to_list()
-            [0.0, 0.002, 0.003]
+            >>> pf.units["A"].to_list()  # buy 5 units, then sell 5
+            [10.0, 15.0, 10.0]
+            >>> [round(t, 6) for t in pf.turnover["turnover"].to_list()]  # 5 * 110 and 5 * 121, over aum
+            [0.0, 0.0055, 0.00605]
         """
-        assets = [c for c in self.cashposition.columns if c != "date" and self.cashposition[c].dtype.is_numeric()]
-        daily_abs_chg = (
-            pl.sum_horizontal(pl.col(c).diff().abs().fill_null(0.0).fill_nan(0.0) for c in assets)
-            / pl.lit(self._return_base)
-        ).alias("turnover")
-        cols: list[str | pl.Expr] = []
-        if "date" in self.cashposition.columns:
-            cols.append("date")
-        cols.append(daily_abs_chg)
-        return self.cashposition.select(cols)
+        units = self.units
+
+        def _traded_notional(asset: str) -> pl.Series:
+            """``|Δunits| * price`` for *asset*, holding units across a missing price."""
+            held = units[asset].forward_fill().fill_null(0.0)
+            return (held.diff().abs() * self.prices[asset]).fill_null(0.0).fill_nan(0.0)
+
+        traded = pl.select(_traded_notional(asset) for asset in self.assets)
+        daily = traded.select((pl.sum_horizontal(pl.all()) / self._return_base).alias("turnover"))
+        if "date" in self.prices.columns:
+            return daily.insert_column(0, self.prices["date"])
+        return daily
 
     @property
     def turnover_weekly(self) -> pl.DataFrame:

@@ -191,8 +191,8 @@ def test_turnover_and_investment_ratio_use_nav_when_compounding() -> None:
     prices = pl.DataFrame({"A": [100.0, 200.0, 200.0]})
     weights = pl.DataFrame({"A": [0.5, None, 0.25]})
     pf = Portfolio.from_weights(prices, weights, aum=1000.0)
-    # NAV: 1000 → 1500 → 1500. Cash position: 500 → 1000 → 375.
-    assert pf.turnover["turnover"].to_list() == [0.0, 500.0 / 1000.0, 625.0 / 1500.0]
+    # NAV: 1000 → 1500 → 1500. Units: 5 → 5 (drift, no trade) → 1.875, so 3.125 sold at 200.
+    assert pf.turnover["turnover"].to_list() == [0.0, 0.0, 625.0 / 1500.0]
     assert pf.investment_ratio["investment_ratio"].to_list() == [0.5, 1000.0 / 1500.0, 0.25]
 
 
