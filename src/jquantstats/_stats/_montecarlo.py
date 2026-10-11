@@ -34,7 +34,15 @@ class _MonteCarloStatsMixin:
 
     @staticmethod
     def _block_bootstrap_paths(values: np.ndarray, n: int, period: int, block_size: int) -> np.ndarray:
-        """Generate *n* return paths via block bootstrap, returning an ``(n, period)`` array.
+        """Generate *n* return paths via circular block bootstrap, returning an ``(n, period)`` array.
+
+        Block starts are drawn uniformly over all observations and a block that
+        runs past the last observation wraps around to the first (Politis and
+        Romano, 1992). Every observation is therefore drawn with equal
+        probability. A non-circular moving-block bootstrap would draw the first
+        and last observations at ``1 / block_size`` of the rate of interior
+        ones, biasing any statistic of a series whose behaviour changes through
+        the sample.
 
         All *n* paths are sampled simultaneously using fully vectorised numpy
         indexing — no Python-level loop is required.
@@ -54,12 +62,10 @@ class _MonteCarloStatsMixin:
             return np.full((n, period), np.nan, dtype=np.float64)
 
         n_blocks = math.ceil(period / block_size)
-        max_start = max(1, n_obs - block_size + 1)
         # Draw all block starting indices at once: shape (n, n_blocks)
-        starts = np.random.randint(0, max_start, size=(n, n_blocks))
-        # Build full index array: (n, n_blocks, block_size)
-        idx = starts[:, :, np.newaxis] + np.arange(block_size)[np.newaxis, np.newaxis, :]
-        idx = np.clip(idx, 0, n_obs - 1)
+        starts = np.random.randint(0, n_obs, size=(n, n_blocks))
+        # Build full index array: (n, n_blocks, block_size), wrapping past the end
+        idx = (starts[:, :, np.newaxis] + np.arange(block_size)[np.newaxis, np.newaxis, :]) % n_obs
         # Flatten and trim to the requested period length
         return np.asarray(values[idx].reshape(n, -1)[:, :period])
 
