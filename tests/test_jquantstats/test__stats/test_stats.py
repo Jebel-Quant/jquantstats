@@ -1721,6 +1721,30 @@ def test_montecarlo_invalid_params(stats):
         stats.montecarlo_cagr(periods_per_year=0)
 
 
+def test_block_bootstrap_draws_every_observation_equally(stats):
+    """Blocks wrap circularly, so the first and last observations are drawn as often as interior ones.
+
+    A non-circular moving-block bootstrap draws observation ``i`` with weight
+    ``min(i + 1, b, n_obs - i)``: the endpoints at ``1 / b`` of an interior point.
+    Using ``values = arange(n_obs)`` makes every resampled value its own index.
+    """
+    n_obs, block = 20, 5
+    np.random.seed(20261010)
+    paths = stats._block_bootstrap_paths(np.arange(n_obs, dtype=np.float64), n=20_000, period=20, block_size=block)
+    counts = np.bincount(paths.astype(np.int64).ravel(), minlength=n_obs)
+    expected = paths.size / n_obs
+    assert np.all(np.abs(counts / expected - 1.0) < 0.05)
+
+
+def test_block_bootstrap_blocks_wrap_around_the_sample_end(stats):
+    """A block starting near the end continues from the start instead of stopping short of it."""
+    np.random.seed(0)
+    paths = stats._block_bootstrap_paths(np.arange(10, dtype=np.float64), n=2_000, period=4, block_size=4)
+    steps = np.diff(paths, axis=1)
+    assert set(np.unique(steps)) <= {1.0, -9.0}
+    assert (steps == -9.0).any()
+
+
 # ── Edge-case coverage ────────────────────────────────────────────────────────
 
 
