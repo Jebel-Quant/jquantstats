@@ -16,6 +16,9 @@ import polars as pl
 import polars.selectors as cs
 
 from ._portfolio_base import _PortfolioMembers
+
+if TYPE_CHECKING:
+    from ._cost_model import CostModel
 from ._truncate import resolve_bounds
 
 
@@ -32,6 +35,8 @@ class PortfolioTransformMixin(_PortfolioMembers):
             aum: float,
             cost_per_unit: float = 0.0,
             cost_bps: float = 0.0,
+            cost_model: CostModel | None = None,
+            annual_fee: float = 0.0,
         ) -> Self:
             """Create a Portfolio directly from cash positions aligned with prices."""
             ...
@@ -42,8 +47,8 @@ class PortfolioTransformMixin(_PortfolioMembers):
         """Build a new Portfolio of the same concrete type from derived frames.
 
         Every transform in this mixin ends the same way: hand the derived
-        frames back to ``from_cash_position`` while carrying ``aum`` and both
-        cost parameters across unchanged. Centralising that here keeps a new
+        frames back to ``from_cash_position`` while carrying ``aum``, both
+        cost parameters and the management fee across unchanged. Centralising that here keeps a new
         construction parameter from having to be threaded through each
         transform individually.
 
@@ -61,6 +66,7 @@ class PortfolioTransformMixin(_PortfolioMembers):
             aum=self.aum,
             cost_per_unit=self.cost_per_unit,
             cost_bps=self.cost_bps,
+            annual_fee=self.annual_fee,
         )
 
     @property
