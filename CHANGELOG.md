@@ -5,6 +5,29 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com),
 and entries are generated from [Conventional Commits](https://www.conventionalcommits.org).
 
+## [0.13.0] - 2026-10-12
+
+### New Features
+- Add Portfolio.from_weights for sparse rebalancing with price drift (#1017)
+
+### Bug Fixes
+- Use a circular block bootstrap for Monte Carlo paths (#1016)
+- Keep annual_fee when transforming a Portfolio (#1020)
+- Measure turnover on traded units, not cash-position drift (#1021)
+
+### Documentation
+- Write README examples as pycon doctests (#1005)
+- Point CLAUDE.md at template.lock for the template version (#1008) (#1010)
+
+### Maintenance
+- Chore(deps)(deps): bump the python-dependencies group with 3 updates (#1003)
+- Update rhiza to v1.9.0 (#1004)
+- Forbid the Portfolio mixins from importing Portfolio/Data at runtime (#1007) (#1011)
+- Execute the README pycon examples in make test (#1006) (#1013)
+- Split Data.__post_init__ into named validation helpers (#1009) (#1012)
+- Chore(deps)(deps): bump urllib3 from 2.7.0 to 2.8.0 (#1014)
+- Chore(deps)(deps): bump the python-dependencies group with 5 updates (#1015)
+
 ## [0.12.0] - 2026-09-28
 
 ### New Features
