@@ -39,7 +39,7 @@ jobs:
           latexmk -pdf -interaction=nonstopmode jquantstats.tex
 
       - name: Upload PDF artifact
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: jquantstats.pdf
           path: docs/paper/jquantstats.pdf
