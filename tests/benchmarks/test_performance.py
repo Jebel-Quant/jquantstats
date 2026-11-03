@@ -30,7 +30,7 @@ Implementation notes
 
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 
 import numpy as np
 import polars as pl
@@ -55,13 +55,13 @@ N_ROWS = TRADING_DAYS_PER_YEAR * N_YEARS  # 2 520
 def _build_multi_asset_data() -> Data:
     """Build a deterministic 5-asset × 10-year daily returns ``Data`` object."""
     rng = np.random.default_rng(DETERMINISTIC_SEED)
-    start = datetime.date(2015, 1, 2)
-    dates: list[datetime.date] = []
+    start = dt.date(2015, 1, 2)
+    dates: list[dt.date] = []
     d = start
     while len(dates) < N_ROWS:
         if d.weekday() < 5:  # Mon-Fri
             dates.append(d)
-        d += datetime.timedelta(days=1)
+        d += dt.timedelta(days=1)
 
     asset_names = [f"A{i}" for i in range(1, N_ASSETS + 1)]
     returns_data: dict[str, list[float]] = {

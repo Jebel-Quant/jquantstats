@@ -8,7 +8,7 @@ calculations (CAGR/compounding since a cutoff) they rely on.
 from __future__ import annotations
 
 import calendar
-import datetime
+import datetime as dt
 import math
 from typing import Any, cast
 
@@ -90,7 +90,7 @@ def _cutoff_months(today: Any, n: int) -> Any:
             m = 12
             y -= 1
     d = min(today.day, calendar.monthrange(y, m)[1])
-    return datetime.date(y, m, d)
+    return dt.date(y, m, d)
 
 
 def _add_overview_rows(rows: list[tuple[str, dict[str, Any]]], s: Any, ppy: float) -> None:
@@ -177,7 +177,7 @@ def _add_recent_returns_rows(
         s: Stats object used for the all-time CAGR.
 
     """
-    today = cast(datetime.date, all_df[date_col].max())
+    today = cast(dt.date, all_df[date_col].max())
     mtd_start = today.replace(day=1)
     ytd_start = today.replace(month=1, day=1)
 
