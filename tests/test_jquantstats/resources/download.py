@@ -1,11 +1,21 @@
-"""Download some data needed for the tests."""
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#     "pandas",
+#     "yfinance==1.8.0",
+# ]
+# ///
+"""Download some data needed for the tests.
+
+Self-contained (PEP 723): run with ``uv run download.py`` from this directory.
+"""
 
 import pandas as pd
 import yfinance as yf
 
 if __name__ == "__main__":
 
-    def download_returns(ticker, period="max", proxy=None):
+    def download_returns(ticker, period="max"):
         """Download historical returns for a specified ticker or tickers.
 
         This function utilizes
@@ -15,7 +25,6 @@ if __name__ == "__main__":
             ticker: The stock ticker symbol or list of ticker symbols to fetch the data for.
             period: The time period for the data, given either as a string (default is "max")
                 or a pandas DatetimeIndex to fetch data for a specific date range.
-            proxy: Optional proxy settings to be used for the HTTP requests.
 
         Returns:
             pandas.Series or pandas.DataFrame: A Series or DataFrame containing the daily percentage
@@ -23,7 +32,7 @@ if __name__ == "__main__":
             on whether a single ticker or multiple tickers are provided.
 
         """
-        params = {"tickers": ticker, "auto_adjust": True, "multi_level_index": False, "progress": False, "proxy": proxy}
+        params = {"tickers": ticker, "auto_adjust": True, "multi_level_index": False, "progress": False}
         if isinstance(period, pd.DatetimeIndex):
             params["start"] = period[0]
         else:
