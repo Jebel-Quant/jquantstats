@@ -1,51 +1,42 @@
 # /// script
 # requires-python = ">=3.11"
 # dependencies = [
-#     "pandas",
-#     "yfinance==1.8.0",
+#     "polars-yahoo==0.2.0",
 # ]
 # ///
 """Download some data needed for the tests.
 
 Self-contained (PEP 723): run with ``uv run download.py`` from this directory.
+Fetches Yahoo's split- and dividend-adjusted closes with polars-yahoo and writes
+daily percentage returns to ``meta.csv``, ``benchmark.csv`` and ``portfolio.csv``.
 """
 
-import pandas as pd
-import yfinance as yf
+import polars as pl
+import polars_yahoo as yh
+
+
+def download_returns(columns: dict[str, str]) -> pl.DataFrame:
+    """Download the full history of daily returns for some tickers.
+
+    Args:
+        columns: Maps each Yahoo ticker to the name of its column in the result.
+
+    Returns:
+        A frame with a ``Date`` column and one return column per ticker, on the
+        union of the tickers' trading days. The first return of each ticker is null.
+
+    """
+    # An explicit early start rather than period="max": for "max" Yahoo downgrades
+    # daily bars to monthly ones.
+    prices = yh.download(list(columns), start="1900-01-01", raise_errors=True)
+    wide = prices.pivot(on="ticker", index="date", values="adj_close").sort("date")
+    return wide.select(
+        pl.col("date").alias("Date"),
+        *(pl.col(ticker).pct_change().alias(name) for ticker, name in columns.items()),
+    )
+
 
 if __name__ == "__main__":
-
-    def download_returns(ticker, period="max"):
-        """Download historical returns for a specified ticker or tickers.
-
-        This function utilizes
-        yfinance to fetch adjusted closing prices and calculates daily percentage changes.
-
-        Args:
-            ticker: The stock ticker symbol or list of ticker symbols to fetch the data for.
-            period: The time period for the data, given either as a string (default is "max")
-                or a pandas DatetimeIndex to fetch data for a specific date range.
-
-        Returns:
-            pandas.Series or pandas.DataFrame: A Series or DataFrame containing the daily percentage
-            changes of adjusted closing prices of the specified ticker(s). The structure depends
-            on whether a single ticker or multiple tickers are provided.
-
-        """
-        params = {"tickers": ticker, "auto_adjust": True, "multi_level_index": False, "progress": False}
-        if isinstance(period, pd.DatetimeIndex):
-            params["start"] = period[0]
-        else:
-            params["period"] = period
-        dframe = yf.download(**params)["Close"].pct_change()
-        dframe = dframe.tz_localize(None)
-        return dframe
-
-    stock = download_returns("META")
-    stock.to_csv("meta.csv")
-
-    spy = download_returns("SPY")
-    spy.to_csv("benchmark.csv")
-
-    portfolio = download_returns(ticker=["AAPL", "META"])
-    portfolio.to_csv("portfolio.csv")
+    download_returns({"META": "Meta"}).write_csv("meta.csv")
+    download_returns({"SPY": "SPY -- Benchmark"}).write_csv("benchmark.csv")
+    download_returns({"AAPL": "AAPL", "META": "META"}).write_csv("portfolio.csv")
