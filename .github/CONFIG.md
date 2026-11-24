@@ -49,6 +49,26 @@ gh secret set PAT_TOKEN
 A PAT expires; when sync pushes start failing with a `refusing to allow ... workflow` error,
 regenerate the token and update the secret.
 
+## Daily template sync (`rhiza_sync.yml`)
+
+Every day at 06:00 UTC the sync workflow compares `ref` in `.rhiza/template.yml` with
+the template repository's latest release. When the ref is behind, the workflow bumps it,
+syncs the template files with the rhiza-claude scripts that `/rhiza:update` also uses,
+and opens a pull request from `rhiza/sync-<tag>`. The PR stages only paths listed in
+`.rhiza/template.lock`. Merge conflicts resolve to the upstream side. A major bump (for
+example `v1.x` → `v2.0.0`) is never applied automatically; the run warns and you run
+`/rhiza:update` yourself. When the branch for that release already exists, later runs
+skip it, so you get one PR per release.
+
+The workflow reads the `GH_PAT` secret. Give the token the permissions listed above
+(Contents, Workflows and Pull requests: read and write, or classic `repo` + `workflow`).
+Without `GH_PAT` the workflow falls back to `github.token`, which has two limits:
+
+- it cannot push a sync that changes `.github/workflows/*`, and
+- GitHub does not start CI on a pull request opened with it.
+
+To run a check right away: `gh workflow run rhiza_sync.yml`.
+
 ## Release workflow secrets (optional)
 
 The release workflow (`.github/workflows/rhiza_release.yml`) supports additional secrets, all
@@ -98,6 +118,29 @@ This is a GitHub publishing extension, not private dependency-consumption setup 
 GitLab feature. See the
 [publisher contract](https://jebel-quant.github.io/rhiza/reference/ARCHITECTURE/#repository-owned-publishing-action)
 for details.
+
+## Conda-forge recipe generation (not publication)
+
+After a successful public PyPI upload, the release workflow's `conda` job generates a
+conda-forge `meta.yaml` with grayskull for the tagged version, checks it against the
+published sdist (version, source file, SHA256), and uploads it as the `conda-recipe`
+workflow artifact. Set the Actions **variable** `PUBLISH_CONDA` to `false` to skip this.
+Despite its name, the variable controls only *generation*. Rhiza never publishes to
+conda-forge. That happens through a conda-forge feedstock, which its maintainers review
+and merge. The job never blocks the release.
+
+To regenerate the recipe for an existing release without republishing it (the job
+failed, was skipped, or its artifact expired), run the recipe-only workflow. It has
+`contents: read` and nothing else:
+
+```bash
+gh workflow run rhiza_conda_recipe.yml -f tag=v1.2.3
+```
+
+The [conda-forge recipes guide](https://jebel-quant.github.io/rhiza/development/CONDA_FORGE/)
+covers the first submission through `conda-forge/staged-recipes` and later updates through
+the feedstock's autotick bot, including what to review and how to keep feedstock-specific
+changes.
 
 ## Private dependency secrets in other workflows
 
@@ -154,3 +197,22 @@ until the next major release. `book-setup: true` enables setup for the book job 
 emits a warning. The generic action takes precedence; if absent, the old
 `rhiza-book-setup` action runs with its `token` input. `RHIZA_SETUP_CREDENTIALS`
 takes precedence over `BOOK_SETUP_TOKEN`. Only one action runs.
+
+## CI profiles
+
+Select `lean`, `standard` or `comprehensive` with `[tool.rhiza.ci].profile` in the
+consumer's `pyproject.toml`. The default is `comprehensive`. Lean consolidates
+quality checks and runs the primary Python version on ordinary changes; scheduled
+and full manual runs restore the complete compatibility matrix. Standard moves
+lowest-direct dependency testing to those broader runs. Under both Lean and
+Standard, CodeQL and the marimo notebooks skip on pull requests and still run on
+default-branch pushes, their schedule and manual dispatch.
+
+`rulesets/main-branch-protection.json` requires only `ci / CI gate`, the one check
+that reports under every profile. The file changes nothing on GitHub by itself:
+re-apply it to the repository (see the guide) when updating from a release that
+required the five per-job `ci / ...` contexts, or a Lean repository's PRs wait on
+checks that never report.
+
+See the [CI profiles guide](https://github.com/Jebel-Quant/rhiza/blob/main/docs/guides/CI_PROFILES.md)
+for the per-workflow table, scope and migration.
