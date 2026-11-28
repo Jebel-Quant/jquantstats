@@ -786,7 +786,7 @@ dev = [
 test = [
     { name = "hypothesis", specifier = ">=6.150.0" },
     { name = "matplotlib", specifier = ">=3.9" },
-    { name = "pytest", specifier = ">=8.0" },
+    { name = "pytest", specifier = ">=9.1.1" },
     { name = "pytest-timeout", specifier = ">=2.0" },
     { name = "python-dotenv", specifier = ">=1.0" },
     { name = "syrupy", specifier = ">=4.9.1" },

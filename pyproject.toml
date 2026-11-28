@@ -81,7 +81,7 @@ test = [
     # pytest itself is injected by every pytest-backed target, but stays declared so
     # a bare `uv run pytest tests/...` works. Most of its plugins are not: cov, html,
     # mock, xdist, benchmark and pygal all arrive via `--with`.
-    "pytest>=8.0",
+    "pytest>=9.1.1",
     # pytest.ini sets a global `timeout = 60`, and `benchmark`, `hypothesis-test` and
     # `stress` run pytest WITHOUT injecting this plugin — without it they warn
     # "Unknown config option: timeout" and a hanging test hangs forever.
